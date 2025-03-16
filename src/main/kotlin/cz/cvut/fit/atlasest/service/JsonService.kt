@@ -1,9 +1,10 @@
 package cz.cvut.fit.atlasest.service
 
+import java.io.File
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
-import java.io.File
 
 class JsonService {
     private val json = Json { prettyPrint = true }
@@ -24,3 +25,5 @@ fun JsonObject.add(
     map[key] = value
     return JsonObject(map)
 }
+
+fun JsonArray.add(elem: JsonElement): JsonArray = JsonArray(this.toList() + elem)

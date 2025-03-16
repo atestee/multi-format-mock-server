@@ -1,6 +1,8 @@
 val kotlinVersion: String by project
 val logbackVersion: String by project
 val ktorVersion: String by project
+val jacksonVersion: String by project
+val jupiterVersion: String by project
 
 plugins {
     kotlin("jvm") version "2.1.10"
@@ -12,7 +14,7 @@ group = "cz.cvut.fit.atlasest"
 version = "0.0.1"
 
 application {
-    mainClass = "io.ktor.server.netty.EngineMain"
+    mainClass = "cz.cvut.fit.atlasest.application.ApplicationKt"
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
@@ -20,6 +22,7 @@ application {
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
@@ -45,10 +48,9 @@ dependencies {
 
     // Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
-    implementation("com.fasterxml.jackson.module:jackson-module-jsonSchema:2.18.2")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.2")
-    implementation("com.github.erosb:everit-json-schema:1.14.5")
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    implementation("com.fasterxml.jackson.module:jackson-module-jsonSchema:$jacksonVersion")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
 
     // Testing dependencies for Ktor
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
@@ -56,9 +58,18 @@ dependencies {
     // Kotlin test with JUnit5 integration
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlinVersion")
 
-    // JUnit5 dependencies
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.12.0")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.12.0")
+    // JSON Schema
+    implementation("com.github.saasquatch:json-schema-inferrer:0.2.1") // For inferring schema
+    implementation("commons-validator:commons-validator:1.9.0") // For inferring type formats in schema
+    implementation("io.github.optimumcode:json-schema-validator:0.4.0") // For validation using schema
+
+    // OpenAPI and Swagger UI
+    implementation("io.github.smiley4:ktor-openapi:5.0.0") // For generating OpenAPI specification
+    implementation("io.github.smiley4:ktor-swagger-ui:5.0.0") // For serving SwaggerUI
+    implementation("io.swagger.parser.v3:swagger-parser:2.1.25") // For working with OpenAPI schema
+
+    // Command-line args
+    implementation("commons-cli:commons-cli:1.9.0")
 }
 
 tasks.test {
