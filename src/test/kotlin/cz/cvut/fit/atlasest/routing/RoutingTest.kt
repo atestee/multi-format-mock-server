@@ -1,7 +1,9 @@
 package cz.cvut.fit.atlasest.routing
 
-import cz.cvut.fit.atlasest.data.Repository
+import BaseTest
+import cz.cvut.fit.atlasest.service.CollectionService
 import cz.cvut.fit.atlasest.service.JsonService
+import cz.cvut.fit.atlasest.service.generateValidationError
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.post
@@ -12,6 +14,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import kotlin.collections.set
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -20,18 +26,10 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.jupiter.api.AfterEach
 import org.koin.test.inject
-import kotlin.collections.listOf
-import kotlin.collections.map
-import kotlin.collections.mutableMapOf
-import kotlin.collections.set
-import kotlin.collections.toMutableMap
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 class RoutingTest : BaseTest() {
+    private val collectionService by inject<CollectionService>()
     private val jsonService by inject<JsonService>()
-    private val repository by inject<Repository>()
     private var items = jsonService.readJsonFile(appConfig.fileName).jsonObject
 
     @AfterEach
@@ -123,6 +121,7 @@ class RoutingTest : BaseTest() {
                     "genre" to JsonPrimitive("genre1"),
                     "isbn" to JsonPrimitive("12345"),
                     "publishedYear" to JsonPrimitive(2024),
+                    "id" to JsonPrimitive(1),
                 )
 
             val response =
@@ -134,6 +133,35 @@ class RoutingTest : BaseTest() {
             assertEquals(HttpStatusCode.Created, response.status)
             assertEquals("/$collectionName/$id", response.headers[HttpHeaders.Location])
             itemMap["id"] = JsonPrimitive(id)
+            assertEquals(JsonObject(itemMap), Json.parseToJsonElement(response.bodyAsText()).jsonObject["data"])
+        }
+
+    @Test
+    fun `POST collection item - when given valid item with id - should ignore id and insert item`() =
+        testWithApp {
+            val insertedId = 11
+            val wrongId = 1
+            val collectionName = "books"
+
+            val itemMap =
+                mutableMapOf(
+                    "author" to JsonPrimitive("author1"),
+                    "title" to JsonPrimitive("title1"),
+                    "genre" to JsonPrimitive("genre1"),
+                    "isbn" to JsonPrimitive("12345"),
+                    "publishedYear" to JsonPrimitive(2024),
+                    "id" to JsonPrimitive(wrongId),
+                )
+
+            val response =
+                client.post("/$collectionName") {
+                    contentType(ContentType.Application.Json)
+                    setBody(JsonObject(itemMap).toString())
+                }
+
+            assertEquals(HttpStatusCode.Created, response.status)
+            assertEquals("/$collectionName/$insertedId", response.headers[HttpHeaders.Location])
+            itemMap["id"] = JsonPrimitive(insertedId)
             assertEquals(JsonObject(itemMap), Json.parseToJsonElement(response.bodyAsText()).jsonObject["data"])
         }
 
@@ -167,7 +195,7 @@ class RoutingTest : BaseTest() {
         testWithApp {
             val id = 10
             val collectionName = "books"
-            val originalItem = repository.getItemById(collectionName, id.toString())
+            val originalItem = collectionService.getItemById(collectionName, id.toString())
             val updatedItemMap =
                 originalItem.toMutableMap().apply {
                     this["author"] = JsonPrimitive("author2")
@@ -180,8 +208,6 @@ class RoutingTest : BaseTest() {
                 }
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(JsonObject(updatedItemMap), Json.parseToJsonElement(response.bodyAsText()).jsonObject)
-            updatedItemMap["id"] = JsonPrimitive(id)
-            assertEquals(JsonObject(updatedItemMap), Json.parseToJsonElement(response.bodyAsText()).jsonObject)
         }
 
     @Test
@@ -189,7 +215,7 @@ class RoutingTest : BaseTest() {
         testWithApp {
             val id = 10
             val collectionName = "books"
-            val originalItem = repository.getItemById(collectionName, id.toString())
+            val originalItem = collectionService.getItemById(collectionName, id.toString())
             val updatedItem = originalItem.toMutableMap()
             updatedItem.remove("author")
             val response =
@@ -241,13 +267,15 @@ class RoutingTest : BaseTest() {
             val error = responseBody["error"]?.jsonPrimitive?.content
             assertNotNull(error)
             assertEquals(
-                listOf(
-                    generateValidationError("title"),
-                    generateValidationError("author"),
-                    generateValidationError("genre"),
-                    generateValidationError("isbn"),
-                    generateValidationError("publishedYear"),
-                ).toString(),
+                generateValidationError(
+                    listOf(
+                        "genre",
+                        "publishedYear",
+                        "title",
+                        "author",
+                        "isbn",
+                    ),
+                ),
                 error,
             )
         }
@@ -266,5 +294,3 @@ class RoutingTest : BaseTest() {
             assertEquals(HttpStatusCode.OK, response.status)
         }
 }
-
-fun generateValidationError(property: String): String = "#: required key [$property] not found"

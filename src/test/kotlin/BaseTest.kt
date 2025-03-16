@@ -1,13 +1,13 @@
-package cz.cvut.fit.atlasest.routing
-
 import cz.cvut.fit.atlasest.application.AppConfig
 import cz.cvut.fit.atlasest.di.appModule
 import cz.cvut.fit.atlasest.exceptions.configureExceptionHandling
+import cz.cvut.fit.atlasest.routing.configureRouting
 import io.ktor.server.application.host
 import io.ktor.server.application.port
 import io.ktor.server.config.yaml.YamlConfigLoader
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
+import org.junit.jupiter.api.AfterEach
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.test.KoinTest
@@ -17,13 +17,19 @@ open class BaseTest : KoinTest {
 
     init {
         startKoin {
-            modules(appModule(appConfig))
+            modules(appModule(appConfig, null))
         }
+    }
+
+    @AfterEach
+    fun tearDownKoin() {
+        stopKoin()
     }
 
     private fun loadConfig(): AppConfig {
         val config =
-            YamlConfigLoader().load("application-test.yaml") ?: throw NullPointerException("YAML config loading failed")
+            YamlConfigLoader().load("application-test.yaml")
+                ?: throw NullPointerException("YAML config loading failed")
         return AppConfig(
             host = config.host,
             port = config.port,
@@ -40,6 +46,5 @@ open class BaseTest : KoinTest {
                 configureRouting()
             }
             testBlock()
-            stopKoin()
         }
 }

@@ -1,19 +1,24 @@
-package cz.cvut.fit.atlasest.data
+package cz.cvut.fit.atlasest.service
 
 import cz.cvut.fit.atlasest.application.AppConfig
+import cz.cvut.fit.atlasest.data.Collection
+import cz.cvut.fit.atlasest.data.Item
 import cz.cvut.fit.atlasest.exceptions.CorruptedDataException
-import cz.cvut.fit.atlasest.service.JsonService
-import cz.cvut.fit.atlasest.utils.inferJsonSchema
 import io.ktor.server.plugins.NotFoundException
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import io.swagger.v3.oas.models.media.Schema as OASchema
 
-class Repository(
+class CollectionService(
     private val appConfig: AppConfig,
+    private val schemaFilename: String?,
     private val jsonService: JsonService,
+    private val schemaService: SchemaService,
 ) {
     val collections: MutableMap<String, Collection> = mutableMapOf()
 
@@ -30,6 +35,8 @@ class Repository(
                 ).jsonObject
                 .mapValues { it.value.jsonPrimitive.content }
 
+        val schemaString = if (schemaFilename != null) jsonService.readJsonFile(schemaFilename).toString() else null
+
         collectionData.jsonObject.forEach { (collectionName, collection) ->
             if (collection is JsonArray) {
                 val identifier =
@@ -38,7 +45,13 @@ class Repository(
                 val lastId =
                     collection.mapNotNull { it.jsonObject[identifier]?.jsonPrimitive?.int }.maxOrNull()
                         ?: throw CorruptedDataException("Wrong identifier key defined for collection '$collectionName'")
-                val schema = inferJsonSchema(collection.toString(), identifier)
+                val schema =
+                    if (schemaString != null) {
+                        schemaService.getCollectionSchema(collectionName, schemaString)
+                    } else {
+                        schemaService.inferJsonSchema(collection)
+                    }
+
                 collections[collectionName] =
                     Collection(
                         collectionName = collectionName,
@@ -68,6 +81,9 @@ class Repository(
 
     fun getCollection(collectionName: String) = getCollectionData(collectionName).items
 
+    fun getCollectionSchema(collectionName: String) =
+        Json.parseToJsonElement(getCollectionData(collectionName).schema.toString()).jsonObject
+
     fun getItemById(
         collectionName: String,
         id: String,
@@ -83,9 +99,12 @@ class Repository(
         item: JsonObject,
     ): Item {
         val collection = getCollectionData(collectionName)
-        val insertedItem = collection.insertItem(item)
+        val id = collection.nextId
+        val itemWithId = item.add(collection.identifier, JsonPrimitive(id))
+        this.schemaService.validateDataAgainstSchema(itemWithId, collection.schema)
+        collection.insertItem(itemWithId)
         saveData()
-        return insertedItem
+        return Item(id, itemWithId)
     }
 
     fun updateItemInCollection(
@@ -95,6 +114,7 @@ class Repository(
     ): JsonObject {
         val collection = getCollectionData(collectionName)
         val index = collection.getItemIndex(id)
+        this.schemaService.validateDataAgainstSchema(newItem, collection.schema)
         val updatedData = collection.updateItem(id, newItem, index)
         saveData()
         return updatedData
@@ -107,5 +127,10 @@ class Repository(
         val collection = getCollectionData(collectionName)
         collection.deleteItem(id)
         saveData()
+    }
+
+    fun getOpenApiSchema(collectionName: String): OASchema<Any> {
+        val jsonSchema = getCollectionData(collectionName).schema
+        return schemaService.convertJsonSchemaToOpenApi(jsonSchema)
     }
 }

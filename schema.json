@@ -1,0 +1,95 @@
+{
+  "books": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema#",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer"
+      },
+      "title": {
+        "type": "string"
+      },
+      "author": {
+        "type": "string"
+      },
+      "genre": {
+        "type": "string"
+      },
+      "isbn": {
+        "type": "string"
+      },
+      "publishedDate": {
+        "type": "object",
+        "properties": {
+          "abc": {
+            "type": "integer"
+          },
+          "year": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "title",
+      "author",
+      "genre",
+      "isbn",
+      "publishedDate"
+    ]
+  },
+  "loans": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema#",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer"
+      },
+      "bookId": {
+        "type": "integer"
+      },
+      "userId": {
+        "type": "integer"
+      },
+      "loanDate": {
+        "type": "string"
+      },
+      "dueDate": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "bookId",
+      "userId",
+      "loanDate",
+      "dueDate"
+    ]
+  },
+  "users": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema#",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer"
+      },
+      "name": {
+        "type": "string"
+      },
+      "email": {
+        "type": "string",
+        "format": "email"
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "name",
+      "email"
+    ]
+  }
+}
