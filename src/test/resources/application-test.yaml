@@ -9,4 +9,4 @@ ktor:
 
 data:
   fileName: "db-test.json"
-  identifiersFileName: "identifiers.json"
+  identifiersFileName: "identifiers-test.json"

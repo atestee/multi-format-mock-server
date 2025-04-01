@@ -19,7 +19,7 @@ The collections are defined in the `db.json` file.
 
 ## JSON schema
 
-Use JSON schema from file by adding the `-s` flag with the filename as value
+Use JSON schema from file by adding the `-s` flag with the filename as value (currently there is only support for [Draft 2020-12](https://json-schema.org/draft/2020-12#draft-2020-12)).
 
 If no schema file will be provided, the JSON schema will be inferred from the collections.
 

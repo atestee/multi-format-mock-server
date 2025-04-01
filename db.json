@@ -1,208 +1,208 @@
 {
-  "books": [
-    {
-      "id": 1,
-      "title": "The Catcher in the Rye",
-      "author": "J.D. Salinger",
-      "genre": "Fiction",
-      "isbn": "9780316769488",
-      "publishedYear": 1951
-    },
-    {
-      "id": 2,
-      "title": "To Kill a Mockingbird",
-      "author": "Harper Lee",
-      "genre": "Fiction",
-      "isbn": "9780061120084",
-      "publishedYear": 1960
-    },
-    {
-      "id": 3,
-      "title": "1984",
-      "author": "George Orwell",
-      "genre": "Dystopian",
-      "isbn": "9780451524935",
-      "publishedYear": 1949
-    },
-    {
-      "id": 4,
-      "title": "Moby Dick",
-      "author": "Herman Melville",
-      "genre": "Adventure",
-      "isbn": "9781853260087",
-      "publishedYear": 1851
-    },
-    {
-      "id": 5,
-      "title": "Pride and Prejudice",
-      "author": "Jane Austen",
-      "genre": "Romance",
-      "isbn": "9781503290563",
-      "publishedYear": 1813
-    },
-    {
-      "id": 6,
-      "title": "The Great Gatsby",
-      "author": "F. Scott Fitzgerald",
-      "genre": "Fiction",
-      "isbn": "9780743273565",
-      "publishedYear": 1925
-    },
-    {
-      "id": 7,
-      "title": "War and Peace",
-      "author": "Leo Tolstoy",
-      "genre": "Historical",
-      "isbn": "9781420954306",
-      "publishedYear": 1869
-    },
-    {
-      "id": 8,
-      "title": "The Odyssey",
-      "author": "Homer",
-      "genre": "Epic Poetry",
-      "isbn": "9780140268867",
-      "publishedYear": -800
-    },
-    {
-      "id": 9,
-      "title": "Brave New World",
-      "author": "Aldous Huxley",
-      "genre": "Science Fiction",
-      "isbn": "9780060850524",
-      "publishedYear": 1932
-    },
-    {
-      "id": 10,
-      "title": "Catch-22",
-      "author": "Joseph Heller",
-      "genre": "Satire",
-      "isbn": "9781451626683",
-      "publishedYear": 1961
-    }
-  ],
-  "loans": [
-    {
-      "id": 1,
-      "bookId": 1,
-      "userId": 1,
-      "loanDate": "2025-02-10",
-      "dueDate": "2025-02-24"
-    },
-    {
-      "id": 2,
-      "bookId": 2,
-      "userId": 2,
-      "loanDate": "2025-02-12",
-      "dueDate": "2025-02-26"
-    },
-    {
-      "id": 3,
-      "bookId": 3,
-      "userId": 3,
-      "loanDate": "2025-02-15",
-      "dueDate": "2025-03-01"
-    },
-    {
-      "id": 4,
-      "bookId": 4,
-      "userId": 4,
-      "loanDate": "2025-02-18",
-      "dueDate": "2025-03-04"
-    },
-    {
-      "id": 5,
-      "bookId": 5,
-      "userId": 5,
-      "loanDate": "2025-02-20",
-      "dueDate": "2025-03-05"
-    },
-    {
-      "id": 6,
-      "bookId": 6,
-      "userId": 6,
-      "loanDate": "2025-02-10",
-      "dueDate": "2025-02-24"
-    },
-    {
-      "id": 7,
-      "bookId": 7,
-      "userId": 7,
-      "loanDate": "2025-02-14",
-      "dueDate": "2025-02-28"
-    },
-    {
-      "id": 8,
-      "bookId": 8,
-      "userId": 8,
-      "loanDate": "2025-02-16",
-      "dueDate": "2025-03-02"
-    },
-    {
-      "id": 9,
-      "bookId": 9,
-      "userId": 9,
-      "loanDate": "2025-02-18",
-      "dueDate": "2025-03-03"
-    },
-    {
-      "id": 10,
-      "bookId": 10,
-      "userId": 10,
-      "loanDate": "2025-02-20",
-      "dueDate": "2025-03-04"
-    }
-  ],
-  "users": [
-    {
-      "id": 1,
-      "name": "Alice",
-      "email": "alice@example.com"
-    },
-    {
-      "id": 2,
-      "name": "Bob",
-      "email": "bob@example.com"
-    },
-    {
-      "id": 3,
-      "name": "Charlie",
-      "email": "charlie@example.com"
-    },
-    {
-      "id": 4,
-      "name": "David",
-      "email": "david@example.com"
-    },
-    {
-      "id": 5,
-      "name": "Eva",
-      "email": "eva@example.com"
-    },
-    {
-      "id": 6,
-      "name": "Frank",
-      "email": "frank@example.com"
-    },
-    {
-      "id": 7,
-      "name": "Grace",
-      "email": "grace@example.com"
-    },
-    {
-      "id": 8,
-      "name": "Hannah",
-      "email": "hannah@example.com"
-    },
-    {
-      "id": 9,
-      "name": "Isaac",
-      "email": "isaac@example.com"
-    },
-    {
-      "id": 10,
-      "name": "Jack",
-      "email": "jack@example.com"
-    }
-  ]
+    "books": [
+        {
+            "id": 1,
+            "title": "The Catcher in the Rye",
+            "author": "J.D. Salinger",
+            "genre": ["Fiction"],
+            "isbn": "9780316769488",
+            "publishedYear": 1951
+        },
+        {
+            "id": 2,
+            "title": "To Kill a Mockingbird",
+            "author": "Harper Lee",
+            "genre": ["Fiction"],
+            "isbn": "9780061120084",
+            "publishedYear": 1960
+        },
+        {
+            "id": 3,
+            "title": "1984",
+            "author": "George Orwell",
+            "genre": ["Dystopian"],
+            "isbn": "9780451524935",
+            "publishedYear": 1949
+        },
+        {
+            "id": 4,
+            "title": "Moby Dick",
+            "author": "Herman Melville",
+            "genre": ["Adventure"],
+            "isbn": "9781853260087",
+            "publishedYear": 1851
+        },
+        {
+            "id": 5,
+            "title": "Pride and Prejudice",
+            "author": "Jane Austen",
+            "genre": ["Romance"],
+            "isbn": "9781503290563",
+            "publishedYear": 1813
+        },
+        {
+            "id": 6,
+            "title": "The Great Gatsby",
+            "author": "F. Scott Fitzgerald",
+            "genre": ["Fiction"],
+            "isbn": "9780743273565",
+            "publishedYear": 1925
+        },
+        {
+            "id": 7,
+            "title": "War and Peace",
+            "author": "Leo Tolstoy",
+            "genre": ["Historical"],
+            "isbn": "9781420954306",
+            "publishedYear": 1869
+        },
+        {
+            "id": 8,
+            "title": "The Odyssey",
+            "author": "Homer",
+            "genre": ["Epic Poetry"],
+            "isbn": "9780140268867",
+            "publishedYear": -800
+        },
+        {
+            "id": 9,
+            "title": "Brave New World",
+            "author": "Aldous Huxley",
+            "genre": ["Science Fiction"],
+            "isbn": "9780060850524",
+            "publishedYear": 1932
+        },
+        {
+            "id": 10,
+            "title": "Catch-22",
+            "author": "Joseph Heller",
+            "genre": ["Satire"],
+            "isbn": "9781451626683",
+            "publishedYear": 1961
+        }
+    ],
+    "loans": [
+        {
+            "id": 1,
+            "bookId": 1,
+            "userId": 1,
+            "loanDate": "2025-02-10",
+            "dueDate": "2025-02-24"
+        },
+        {
+            "id": 2,
+            "bookId": 2,
+            "userId": 2,
+            "loanDate": "2025-02-12",
+            "dueDate": "2025-02-26"
+        },
+        {
+            "id": 3,
+            "bookId": 3,
+            "userId": 3,
+            "loanDate": "2025-02-15",
+            "dueDate": "2025-03-01"
+        },
+        {
+            "id": 4,
+            "bookId": 4,
+            "userId": 4,
+            "loanDate": "2025-02-18",
+            "dueDate": "2025-03-04"
+        },
+        {
+            "id": 5,
+            "bookId": 5,
+            "userId": 5,
+            "loanDate": "2025-02-20",
+            "dueDate": "2025-03-05"
+        },
+        {
+            "id": 6,
+            "bookId": 6,
+            "userId": 6,
+            "loanDate": "2025-02-10",
+            "dueDate": "2025-02-24"
+        },
+        {
+            "id": 7,
+            "bookId": 7,
+            "userId": 7,
+            "loanDate": "2025-02-14",
+            "dueDate": "2025-02-28"
+        },
+        {
+            "id": 8,
+            "bookId": 8,
+            "userId": 8,
+            "loanDate": "2025-02-16",
+            "dueDate": "2025-03-02"
+        },
+        {
+            "id": 9,
+            "bookId": 9,
+            "userId": 9,
+            "loanDate": "2025-02-18",
+            "dueDate": "2025-03-03"
+        },
+        {
+            "id": 10,
+            "bookId": 10,
+            "userId": 10,
+            "loanDate": "2025-02-20",
+            "dueDate": "2025-03-04"
+        }
+    ],
+    "users": [
+        {
+            "id": 1,
+            "name": "Alice",
+            "email": "alice@example.com"
+        },
+        {
+            "id": 2,
+            "name": "Bob",
+            "email": "bob@example.com"
+        },
+        {
+            "id": 3,
+            "name": "Charlie",
+            "email": "charlie@example.com"
+        },
+        {
+            "id": 4,
+            "name": "David",
+            "email": "david@example.com"
+        },
+        {
+            "id": 5,
+            "name": "Eva",
+            "email": "eva@example.com"
+        },
+        {
+            "id": 6,
+            "name": "Frank",
+            "email": "frank@example.com"
+        },
+        {
+            "id": 7,
+            "name": "Grace",
+            "email": "grace@example.com"
+        },
+        {
+            "id": 8,
+            "name": "Hannah",
+            "email": "hannah@example.com"
+        },
+        {
+            "id": 9,
+            "name": "Isaac",
+            "email": "isaac@example.com"
+        },
+        {
+            "id": 10,
+            "name": "Jack",
+            "email": "jack@example.com"
+        }
+    ]
 }

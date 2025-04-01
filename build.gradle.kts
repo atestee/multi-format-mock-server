@@ -2,12 +2,17 @@ val kotlinVersion: String by project
 val logbackVersion: String by project
 val ktorVersion: String by project
 val jacksonVersion: String by project
-val jupiterVersion: String by project
 
 plugins {
     kotlin("jvm") version "2.1.10"
     id("io.ktor.plugin") version "3.1.0"
     kotlin("plugin.serialization") version "2.1.10"
+    id("jacoco")
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+    reportsDirectory.set(layout.buildDirectory.dir("reportsJaCoCo"))
 }
 
 group = "cz.cvut.fit.atlasest"
@@ -49,8 +54,12 @@ dependencies {
     // Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion")
+    implementation("com.jsoizo:kotlin-csv:1.10.0")
     implementation("com.fasterxml.jackson.module:jackson-module-jsonSchema:$jacksonVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+    implementation("org.json:json:20250107")
+    implementation("com.github.wnameless.json:json-flattener:0.17.2")
 
     // Testing dependencies for Ktor
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
@@ -64,14 +73,27 @@ dependencies {
     implementation("io.github.optimumcode:json-schema-validator:0.4.0") // For validation using schema
 
     // OpenAPI and Swagger UI
-    implementation("io.github.smiley4:ktor-openapi:5.0.0") // For generating OpenAPI specification
-    implementation("io.github.smiley4:ktor-swagger-ui:5.0.0") // For serving SwaggerUI
+    implementation("io.github.smiley4:ktor-openapi:5.0.1") // For generating OpenAPI specification
+    implementation("io.github.smiley4:ktor-swagger-ui:5.0.1") // For serving SwaggerUI
     implementation("io.swagger.parser.v3:swagger-parser:2.1.25") // For working with OpenAPI schema
 
     // Command-line args
     implementation("commons-cli:commons-cli:1.9.0")
+
+    // Mocking in tests
+    testImplementation("io.mockk:mockk:1.13.17")
 }
 
 tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
 }

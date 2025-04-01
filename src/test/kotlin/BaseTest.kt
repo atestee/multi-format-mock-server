@@ -2,6 +2,7 @@ import cz.cvut.fit.atlasest.application.AppConfig
 import cz.cvut.fit.atlasest.di.appModule
 import cz.cvut.fit.atlasest.exceptions.configureExceptionHandling
 import cz.cvut.fit.atlasest.routing.configureRouting
+import cz.cvut.fit.atlasest.service.CollectionService
 import io.ktor.server.application.host
 import io.ktor.server.application.port
 import io.ktor.server.config.yaml.YamlConfigLoader
@@ -11,9 +12,11 @@ import org.junit.jupiter.api.AfterEach
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.test.KoinTest
+import org.koin.test.inject
 
 open class BaseTest : KoinTest {
-    val appConfig: AppConfig = loadConfig()
+    private val appConfig: AppConfig = loadConfig()
+    val collectionService by inject<CollectionService>()
 
     init {
         startKoin {
@@ -22,20 +25,21 @@ open class BaseTest : KoinTest {
     }
 
     @AfterEach
-    fun tearDownKoin() {
+    fun afterEach() {
         stopKoin()
     }
 
     private fun loadConfig(): AppConfig {
         val config =
             YamlConfigLoader().load("application-test.yaml")
-                ?: throw NullPointerException("YAML config loading failed")
+                ?: throw NullPointerException("Test YAML config loading failed")
         return AppConfig(
             host = config.host,
             port = config.port,
             rootPath = config.property("ktor.deployment.rootPath").getString(),
-            fileName = config.property("data.fileName").getString(),
+            collectionsFilename = config.property("data.fileName").getString(),
             identifiersFileName = config.property("data.identifiersFileName").getString(),
+            isTest = true,
         )
     }
 

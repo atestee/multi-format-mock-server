@@ -37,19 +37,16 @@ fun main(args: Array<String>) {
     if (cmd.hasOption("h")) showHelp(options)
 
     val schema = cmd.getOptionValue("s")
-    io.ktor.server.netty.EngineMain.main(
-        if (schema == null) arrayOf() else arrayOf("-P:schema=$schema"),
-    )
+    if (schema != null) {
+        System.setProperty("schema", schema)
+    }
+    io.ktor.server.netty.EngineMain
+        .main(args)
 }
 
 fun Application.module() {
     log.info("Starting Ktor application...")
-    val schemaFile =
-        if (environment.config.keys().contains("schema")) {
-            environment.config.property("schema").getString()
-        } else {
-            null
-        }
+    val schemaFile = System.getProperty("schema")
     configureExceptionHandling()
     configureDI(loadAppConfig(), schemaFile)
     configureRouting()
