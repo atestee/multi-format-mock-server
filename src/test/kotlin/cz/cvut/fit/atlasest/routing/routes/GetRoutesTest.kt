@@ -31,7 +31,7 @@ class GetRoutesTest : BaseTest() {
             val response = client.get("/collections")
             val responseBody = response.bodyAsText()
             assertNotNull(responseBody)
-            assertEquals("collections: [books, loans, users]", responseBody)
+            assertEquals("collections: [books, loans, users, libraries, libraryBooks, libraryRegistrations]", responseBody)
             assertEquals(HttpStatusCode.OK, response.status)
         }
 
@@ -337,6 +337,112 @@ class GetRoutesTest : BaseTest() {
                 }
             assertEquals(HttpStatusCode.BadRequest, response.status)
             assertEquals("Value of '$invalidKey' is not present", response.bodyAsText())
+        }
+
+    @Test
+    fun `GET collection with embedding - when given 2 embed values - should return collection with embedded items from both collections`() =
+        testWithApp {
+            val response =
+                client.get("/books") {
+                    parameter("_embed", "loans")
+                    parameter("_embed", "libraryBooks")
+                }
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = response.bodyAsText().toJsonArray()
+            val loans = responseBody.first().jsonObject["loans"]?.jsonArray
+            val libraryBooks = responseBody.first().jsonObject["libraryBooks"]?.jsonArray
+
+            assertNotNull(loans)
+            assertNotNull(libraryBooks)
+            assertEquals(1, loans.size)
+            assertEquals(2, libraryBooks.size)
+        }
+
+    @Test
+    fun `GET collection with embedding - when given 2 expand values - should return collection with embedded items from both collections`() =
+        testWithApp {
+            val response =
+                client.get("/loans") {
+                    parameter("_expand", "book")
+                    parameter("_expand", "user")
+                }
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = response.bodyAsText().toJsonArray()
+            val users = responseBody.first().jsonObject["user"]
+            val books = responseBody.first().jsonObject["book"]
+
+            assertNotNull(users)
+            assertNotNull(books)
+        }
+
+    @Test
+    fun `GET collection with embedding - when given embed and expand values - should return collection with related items`() =
+        testWithApp {
+            val response =
+                client.get("/users") {
+                    parameter("_embed", "loans")
+                    parameter("_expand", "libraryRegistration")
+                }
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = response.bodyAsText().toJsonArray()
+            val loans = responseBody.first().jsonObject["loans"]
+            val libraryRegistration = responseBody.first().jsonObject["libraryRegistration"]
+
+            assertNotNull(loans)
+            assertNotNull(libraryRegistration)
+        }
+
+    @Test
+    fun `GET collection item with embedding - when given 2 embed values - should return collection item with embedded items`() =
+        testWithApp {
+            val response =
+                client.get("/books/1") {
+                    parameter("_embed", "loans")
+                    parameter("_embed", "libraryBooks")
+                }
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = response.bodyAsText().toJsonObject()
+            val loans = responseBody["loans"]?.jsonArray
+            val libraryBooks = responseBody["libraryBooks"]?.jsonArray
+
+            assertNotNull(loans)
+            assertNotNull(libraryBooks)
+            assertEquals(1, loans.size)
+            assertEquals(2, libraryBooks.size)
+        }
+
+    @Test
+    fun `GET collection item with embedding - when given 2 expand values - should return collection item with expanded items`() =
+        testWithApp {
+            val response =
+                client.get("/loans/1") {
+                    parameter("_expand", "book")
+                    parameter("_expand", "user")
+                }
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = response.bodyAsText().toJsonObject()
+            val book = responseBody["book"]
+            val user = responseBody["user"]
+
+            assertNotNull(book)
+            assertNotNull(user)
+        }
+
+    @Test
+    fun `GET collection item with embedding - when given embed and expand values - should return item with related items`() =
+        testWithApp {
+            val response =
+                client.get("/users/1") {
+                    parameter("_embed", "loans")
+                    parameter("_expand", "libraryRegistration")
+                }
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = response.bodyAsText().toJsonObject()
+            val loans = responseBody["loans"]
+            val libraryRegistration = responseBody["libraryRegistration"]
+
+            assertNotNull(loans)
+            assertNotNull(libraryRegistration)
         }
 
     private fun getTitleListFromXmlCollection(xml: String): List<String> {

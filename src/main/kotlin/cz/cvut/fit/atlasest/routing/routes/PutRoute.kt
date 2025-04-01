@@ -1,5 +1,6 @@
 package cz.cvut.fit.atlasest.routing.routes
 
+import com.cesarferreira.pluralize.singularize
 import cz.cvut.fit.atlasest.routing.ALL_MIME
 import cz.cvut.fit.atlasest.routing.getResourceInJsonFormat
 import cz.cvut.fit.atlasest.routing.returnResourceInAcceptedFormat
@@ -23,14 +24,14 @@ fun Route.putRoute(
         tags(collectionName)
         request {
             pathParameter<String>("id")
-            body(ref(collectionName.removeSuffix("s"))) {
+            body(ref(collectionName.singularize())) {
                 mediaTypes(ContentType.Application.Json, ContentType.Application.Xml)
             }
         }
         response {
             code(HttpStatusCode.Created) {
                 description = "Item was inserted into collection"
-                body(ref(collectionName.removeSuffix("s"))) {
+                body(ref(collectionName.singularize())) {
                     mediaTypes(ContentType.Application.Json, ContentType.Application.Xml, ContentType.Text.CSV)
                 }
                 header<String>("Content-Type") {
@@ -44,7 +45,7 @@ fun Route.putRoute(
             }
             code(HttpStatusCode.OK) {
                 description = "Item with id was updated"
-                body(ref(collectionName.removeSuffix("s"))) {
+                body(ref(collectionName.singularize())) {
                     mediaTypes(ContentType.Application.Json, ContentType.Application.Xml, ContentType.Text.CSV)
                 }
             }

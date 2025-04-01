@@ -82,6 +82,9 @@ dependencies {
 
     // Mocking in tests
     testImplementation("io.mockk:mockk:1.13.17")
+
+    // Singularization and pluralization
+    implementation("com.github.cesarferreira:kotlin-pluralizer:1.0.0")
 }
 
 tasks.test {

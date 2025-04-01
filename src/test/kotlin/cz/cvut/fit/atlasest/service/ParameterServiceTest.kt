@@ -1,19 +1,22 @@
 package cz.cvut.fit.atlasest.service
 
+import BaseTest
 import cz.cvut.fit.atlasest.utils.getFieldValue
 import io.ktor.server.plugins.BadRequestException
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import org.koin.test.inject
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 
-class ParameterServiceTest {
-    private val parameterService = ParameterService()
-    private val documentService = DocumentService(isTest = true)
+class ParameterServiceTest : BaseTest() {
+    private val parameterService by inject<ParameterService>()
+    private val documentService by inject<DocumentService>()
 
     private val books =
         documentService
@@ -389,5 +392,95 @@ class ParameterServiceTest {
                 )
             }
         assertEquals("Sorting parameter $ORDER is without $SORT", exception.message)
+    }
+
+    @Test
+    fun `applyEmbedAndExpand on collection - when given 2 embed values - returns the collection with embedded items from both collections`() {
+        val result =
+            parameterService.applyEmbedAndExpand(
+                mapOf("_embed" to listOf("loans", "libraryBooks")),
+                "books",
+                collectionService,
+            )
+
+        val firstBookLoans = result.first()["loans"]
+        val loan = collectionService.getItemById("loans", "1")
+
+        val firstBooklibraryBooks = result.first()["libraryBooks"]
+        val secondBooklibraryBooks = result[1]["libraryBooks"]
+        val ownership1 = collectionService.getItemById("libraryBooks", "1")
+        val ownership2 = collectionService.getItemById("libraryBooks", "2")
+        val ownership3 = collectionService.getItemById("libraryBooks", "3")
+
+        assertEquals(JsonArray(listOf(loan)), firstBookLoans)
+        assertEquals(JsonArray(listOf(ownership1, ownership2)), firstBooklibraryBooks)
+        assertEquals(JsonArray(listOf(ownership3)), secondBooklibraryBooks)
+    }
+
+    @Test
+    fun `applyEmbedAndExpand on item - when given 2 embed values - returns the item with embedded items from both collections`() {
+        val result =
+            parameterService.applyEmbedAndExpand(
+                mapOf("_embed" to listOf("loans", "libraryBooks")),
+                "books",
+                "1",
+                collectionService,
+            )
+
+        val loan = collectionService.getItemById("loans", "1")
+        val ownership1 = collectionService.getItemById("libraryBooks", "1")
+        val ownership2 = collectionService.getItemById("libraryBooks", "2")
+        assertEquals(JsonArray(listOf(loan)), result["loans"])
+        assertEquals(JsonArray(listOf(ownership1, ownership2)), result["libraryBooks"])
+    }
+
+    @Test
+    fun `applyEmbedAndExpand on collection - when given 2 expand values - returns the collection with items expanded`() {
+        val result =
+            parameterService.applyEmbedAndExpand(
+                mapOf("_expand" to listOf("book", "user")),
+                "loans",
+                collectionService,
+            )
+
+        val book = collectionService.getItemById("books", "1")
+        val user = collectionService.getItemById("users", "1")
+        assertEquals(book, result.first()["book"])
+        assertEquals(user, result.first()["user"])
+    }
+
+    @Test
+    fun `applyEmbedAndExpand on item - when given 2 expand values - returns the item expanded`() {
+        val result =
+            parameterService.applyEmbedAndExpand(
+                mapOf("_expand" to listOf("book", "user")),
+                "loans",
+                "1",
+                collectionService,
+            )
+
+        val book = collectionService.getItemById("books", "1")
+        val user = collectionService.getItemById("users", "1")
+        assertEquals(book, result["book"])
+        assertEquals(user, result["user"])
+    }
+
+    @Test
+    fun `applyEmbedAndExpand on item - when given embed and expand values - returns the item embedded and expanded`() {
+        val result =
+            parameterService.applyEmbedAndExpand(
+                mapOf(
+                    "_expand" to listOf("libraryRegistration"),
+                    "_embed" to listOf("loans"),
+                ),
+                "users",
+                "1",
+                collectionService,
+            )
+
+        val libraryRegistration = collectionService.getItemById("libraryRegistrations", "1")
+        val loan = collectionService.getItemById("loans", "1")
+        assertEquals(libraryRegistration, result["libraryRegistration"])
+        assertEquals(JsonArray(listOf(loan)), result["loans"])
     }
 }

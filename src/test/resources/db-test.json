@@ -187,52 +187,127 @@
     {
       "identifier": 1,
       "name": "Alice",
-      "email": "alice@example.com"
+      "email": "alice@example.com",
+      "libraryRegistrationId": 1
     },
     {
       "identifier": 2,
       "name": "Bob",
-      "email": "bob@example.com"
+      "email": "bob@example.com",
+      "libraryRegistrationId": 2
     },
     {
       "identifier": 3,
       "name": "Charlie",
-      "email": "charlie@example.com"
+      "email": "charlie@example.com",
+      "libraryRegistrationId": 3
     },
     {
       "identifier": 4,
       "name": "David",
-      "email": "david@example.com"
+      "email": "david@example.com",
+      "libraryRegistrationId": 4
     },
     {
       "identifier": 5,
       "name": "Eva",
-      "email": "eva@example.com"
+      "email": "eva@example.com",
+      "libraryRegistrationId": 5
     },
     {
       "identifier": 6,
       "name": "Frank",
-      "email": "frank@example.com"
+      "email": "frank@example.com",
+      "libraryRegistrationId": 6
     },
     {
       "identifier": 7,
       "name": "Grace",
-      "email": "grace@example.com"
+      "email": "grace@example.com",
+      "libraryRegistrationId": 7
     },
     {
       "identifier": 8,
       "name": "Hannah",
-      "email": "hannah@example.com"
+      "email": "hannah@example.com",
+      "libraryRegistrationId": 8
     },
     {
       "identifier": 9,
       "name": "Isaac",
-      "email": "isaac@example.com"
+      "email": "isaac@example.com",
+      "libraryRegistrationId": 9
     },
     {
       "identifier": 10,
       "name": "Jack",
-      "email": "jack@example.com"
+      "email": "jack@example.com",
+      "libraryRegistrationId": 10
+    }
+  ],
+  "libraries": [
+    {
+      "id": 1,
+      "name": "Library 1"
+    }
+  ],
+  "libraryBooks": [
+    {
+      "id": 1,
+      "libraryId": 1,
+      "bookId": 1
+    },
+    {
+      "id": 2,
+      "libraryId": 1,
+      "bookId": 1
+    },
+    {
+      "id": 3,
+      "libraryId": 1,
+      "bookId": 2
+    }
+  ],
+  "libraryRegistrations": [
+    {
+      "id": 1,
+      "libraryId": 1
+    },
+    {
+      "id": 2,
+      "libraryId": 1
+    },
+    {
+      "id": 3,
+      "libraryId": 1
+    },
+    {
+      "id": 4,
+      "libraryId": 1
+    },
+    {
+      "id": 5,
+      "libraryId": 1
+    },
+    {
+      "id": 6,
+      "libraryId": 1
+    },
+    {
+      "id": 7,
+      "libraryId": 1
+    },
+    {
+      "id": 8,
+      "libraryId": 1
+    },
+    {
+      "id": 9,
+      "libraryId": 1
+    },
+    {
+      "id": 10,
+      "libraryId": 1
     }
   ]
 }

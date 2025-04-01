@@ -43,6 +43,16 @@ class CollectionService(
     fun getCollection(collectionName: String) = getCollectionData(collectionName).items
 
     /**
+     * Retrieves identifier the specified collection.
+     *
+     * @param collectionName The name of the collection.
+     *
+     * @return A string representing the collection identifier.
+     * @throws NotFoundException If the collection was not found.
+     */
+    fun getCollectionIdentifier(collectionName: String) = getCollectionData(collectionName).identifier
+
+    /**
      * Retrieves the schema of a specified collection.
      *
      * @param collectionName The name of the collection.
