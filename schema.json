@@ -4,7 +4,7 @@
     "type": "object",
     "properties": {
       "id": {
-        "type": "integer"
+        "type": "number"
       },
       "title": {
         "type": "string"
@@ -13,22 +13,16 @@
         "type": "string"
       },
       "genre": {
-        "type": "string"
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
       },
       "isbn": {
         "type": "string"
       },
-      "publishedDate": {
-        "type": "object",
-        "properties": {
-          "abc": {
-            "type": "integer"
-          },
-          "year": {
-            "type": "integer"
-          }
-        },
-        "additionalProperties": false
+      "publishedYear":  {
+        "type": "integer"
       }
     },
     "additionalProperties": false,
@@ -38,7 +32,7 @@
       "author",
       "genre",
       "isbn",
-      "publishedDate"
+      "publishedYear"
     ]
   },
   "loans": {

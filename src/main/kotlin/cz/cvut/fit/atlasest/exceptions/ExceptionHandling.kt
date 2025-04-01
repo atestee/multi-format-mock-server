@@ -13,22 +13,25 @@ import javax.validation.ValidationException
 fun Application.configureExceptionHandling() {
     install(StatusPages) {
         exception<BadRequestException> { call, cause ->
-            call.respond(HttpStatusCode.BadRequest, mapOf("error" to cause.message))
+            call.respond(HttpStatusCode.BadRequest, cause.message as String)
         }
         exception<NotFoundException> { call, cause ->
-            call.respond(HttpStatusCode.NotFound, mapOf("error" to cause.message))
+            call.respond(HttpStatusCode.NotFound, cause.message as String)
         }
-        exception<CorruptedDataException> { call, cause ->
-            call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Data corruption detected"))
+        exception<InvalidDataException> { call, cause ->
             log.error("Problem with local data", cause)
+            call.respond(HttpStatusCode.InternalServerError, "Data corruption detected")
         }
         exception<Throwable> { call, cause ->
-            call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Something went wrong"))
             log.error("Unhandled error", cause)
+            call.respond(HttpStatusCode.InternalServerError, "Something went wrong")
         }
         exception<ValidationException> { call, cause ->
-            call.respond(HttpStatusCode.BadRequest, mapOf("error" to cause.message))
             log.error("Validation exception", cause)
+            call.respond(HttpStatusCode.BadRequest, cause.message as String)
+        }
+        status(HttpStatusCode.NotFound) { call, _ ->
+            call.respond(HttpStatusCode.NotFound, "404: Not Found")
         }
     }
 }

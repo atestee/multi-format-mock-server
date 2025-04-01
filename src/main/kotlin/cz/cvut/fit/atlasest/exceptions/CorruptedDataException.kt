@@ -1,5 +1,5 @@
 package cz.cvut.fit.atlasest.exceptions
 
-class CorruptedDataException(
+class InvalidDataException(
     message: String,
 ) : RuntimeException(message)

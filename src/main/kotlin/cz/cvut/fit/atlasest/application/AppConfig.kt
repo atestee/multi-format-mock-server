@@ -8,8 +8,9 @@ data class AppConfig(
     val port: Int,
     val host: String,
     val rootPath: String,
-    val fileName: String,
+    val collectionsFilename: String,
     val identifiersFileName: String,
+    val isTest: Boolean,
 )
 
 fun Application.loadAppConfig(): AppConfig {
@@ -18,7 +19,8 @@ fun Application.loadAppConfig(): AppConfig {
         port = config.port,
         host = config.host,
         rootPath = config.property("ktor.deployment.rootPath").getString(),
-        fileName = config.property("data.fileName").getString(),
+        collectionsFilename = config.property("data.fileName").getString(),
         identifiersFileName = config.property("data.identifiersFileName").getString(),
+        isTest = false,
     )
 }
