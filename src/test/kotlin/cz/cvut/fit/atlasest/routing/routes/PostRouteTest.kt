@@ -11,6 +11,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
@@ -21,9 +22,18 @@ class PostRouteTest : BaseTest() {
         mutableMapOf(
             "author" to JsonPrimitive("author1"),
             "title" to JsonPrimitive("title1"),
-            "genre" to JsonPrimitive("genre1"),
+            "genre" to
+                JsonArray(
+                    listOf(JsonPrimitive("genre1")),
+                ),
             "isbn" to JsonPrimitive("12345"),
-            "publishedYear" to JsonPrimitive(2024),
+            "published" to
+                JsonObject(
+                    mapOf(
+                        "place" to JsonPrimitive("place1"),
+                        "year" to JsonPrimitive(2024),
+                    ),
+                ),
         )
 
     @Test
@@ -204,7 +214,7 @@ class PostRouteTest : BaseTest() {
         testWithApp {
             val itemMapWithMissingPublishedYear =
                 itemMap.toMutableMap().apply {
-                    this.remove("publishedYear")
+                    this.remove("published")
                 }
 
             val response =
@@ -215,19 +225,19 @@ class PostRouteTest : BaseTest() {
 
             assertEquals(HttpStatusCode.BadRequest, response.status)
             val responseBody = response.bodyAsText()
-            assertEquals(generateValidationError("publishedYear"), responseBody)
+            assertEquals(generateValidationError("published"), responseBody)
         }
 
     private fun getCsv(id: Int? = null): String =
         if (id is Int) {
             """
-            author;title;genre;isbn;publishedYear;id
-            author1;title1;genre1;12345;2024;$id
+            author;title;genre[0];isbn;published.place;published.year;id
+            author1;title1;genre1;12345;place1;2024;$id
             """.trimIndent()
         } else {
             """
-            author;title;genre;isbn;publishedYear
-            author1;title1;genre1;12345;2024
+            author;title;genre[0];isbn;published.place;published.year
+            author1;title1;genre1;12345;place1;2024
             """.trimIndent()
         }
 
@@ -238,7 +248,10 @@ class PostRouteTest : BaseTest() {
                 <author>author1</author>
                 <isbn>12345</isbn>
                 <genre>genre1</genre>
-                <publishedYear>2024</publishedYear>
+                <published>
+                    <year>2024</year>
+                    <place>place1</place>
+                </published>
                 <id>$id</id>
                 <title>title1</title>
             </item>
@@ -250,7 +263,10 @@ class PostRouteTest : BaseTest() {
                 <title>title1</title>
                 <genre>genre1</genre>
                 <isbn>12345</isbn>
-                <publishedYear>2024</publishedYear>
+                <published>
+                    <place>place1</place>
+                    <year>2024</year>
+                </published>
             </item>
             """.trimIndent()
         }
