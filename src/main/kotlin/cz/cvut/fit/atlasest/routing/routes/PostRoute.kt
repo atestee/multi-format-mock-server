@@ -28,7 +28,7 @@ fun Route.postRoute(
         response {
             code(HttpStatusCode.Created) {
                 body(ref(collectionName.removeSuffix("s")), {
-                    mediaTypes(ContentType.Application.Json, ContentType.Application.Xml)
+                    mediaTypes(ContentType.Application.Json, ContentType.Application.Xml, ContentType.Text.CSV)
                 })
                 header<String>("Content-Type") {
                     description = "The media type of the resource being sent"

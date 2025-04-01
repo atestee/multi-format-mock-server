@@ -6,6 +6,7 @@ import cz.cvut.fit.atlasest.routing.routes.getRoutes
 import cz.cvut.fit.atlasest.routing.routes.postRoute
 import cz.cvut.fit.atlasest.routing.routes.putRoute
 import cz.cvut.fit.atlasest.service.CollectionService
+import cz.cvut.fit.atlasest.service.ParameterService
 import cz.cvut.fit.atlasest.service.SchemaService
 import io.github.smiley4.ktoropenapi.OpenApi
 import io.github.smiley4.ktoropenapi.openApi
@@ -27,6 +28,7 @@ import org.koin.ktor.ext.inject
 fun Application.configureRouting() {
     val collectionService by inject<CollectionService>()
     val schemaService by inject<SchemaService>()
+    val parameterService by inject<ParameterService>()
     val appConfig by inject<AppConfig>()
 
     install(ContentNegotiation) {
@@ -49,7 +51,6 @@ fun Application.configureRouting() {
         rootPath = ""
         schemas {
             collectionService.collections.keys.forEach { collectionName ->
-                schema("error", getErrorSchema())
                 schema(collectionName.removeSuffix("s"), collectionService.getOpenApiSchema(collectionName))
                 schema(
                     collectionName,
@@ -80,30 +81,10 @@ fun Application.configureRouting() {
             call.respondText("collections: ${collectionService.collections.keys}")
         }
         collectionService.collections.keys.forEach { collectionName ->
-            getRoutes(collectionService, collectionName)
+            getRoutes(collectionService, collectionName, parameterService)
             postRoute(collectionService, collectionName, schemaService)
             putRoute(collectionService, collectionName, schemaService)
             deleteRoute(collectionService, collectionName)
         }
     }
-}
-
-fun getErrorSchema(): Schema<Any> {
-    val openApiSchema = Schema<Any>()
-    openApiSchema.addType("object")
-    val properties = mutableMapOf<String, Schema<Any>>()
-    properties["code"] =
-        Schema<Any>().apply {
-            this.addType("string")
-            this.title = "Status code"
-            this.example("400")
-        }
-    properties["message"] =
-        Schema<Any>().apply {
-            this.addType("string")
-            this.title = "Error message"
-            this.example("Bad Request")
-        }
-    openApiSchema.properties = properties
-    return openApiSchema
 }

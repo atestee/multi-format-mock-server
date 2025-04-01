@@ -2,11 +2,17 @@ package cz.cvut.fit.atlasest.routing.routes
 
 import BaseTest
 import com.fasterxml.jackson.databind.JsonNode
+import cz.cvut.fit.atlasest.service.LIMIT
+import cz.cvut.fit.atlasest.service.ORDER
+import cz.cvut.fit.atlasest.service.PAGE
+import cz.cvut.fit.atlasest.service.SORT
+import cz.cvut.fit.atlasest.utils.getFieldValue
 import cz.cvut.fit.atlasest.utils.toJsonArray
 import cz.cvut.fit.atlasest.utils.toJsonObject
 import cz.cvut.fit.atlasest.utils.xmlMapper
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
+import io.ktor.client.request.parameter
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -14,6 +20,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
@@ -46,10 +53,10 @@ class GetRoutesTest : BaseTest() {
                     "Moby Dick",
                     "Pride and Prejudice",
                     "The Great Gatsby",
-                    "War and Peace",
-                    "The Odyssey",
+                    "Sense and Sensibility",
+                    "Les Miserables",
                     "Brave New World",
-                    "Catch-22",
+                    "Frankenstein",
                 )
             assertEquals(expectedTitles, responseTitles)
         }
@@ -72,10 +79,10 @@ class GetRoutesTest : BaseTest() {
                     "Moby Dick",
                     "Pride and Prejudice",
                     "The Great Gatsby",
-                    "War and Peace",
-                    "The Odyssey",
+                    "Sense and Sensibility",
+                    "Les Miserables",
                     "Brave New World",
-                    "Catch-22",
+                    "Frankenstein",
                 )
             assertEquals(expectedTitles, actualTitles)
         }
@@ -98,10 +105,10 @@ class GetRoutesTest : BaseTest() {
                     "Moby Dick",
                     "Pride and Prejudice",
                     "The Great Gatsby",
-                    "War and Peace",
-                    "The Odyssey",
+                    "Sense and Sensibility",
+                    "Les Miserables",
                     "Brave New World",
-                    "Catch-22",
+                    "Frankenstein",
                 )
             assertEquals(expectedTitles, actualTitles)
         }
@@ -170,6 +177,166 @@ class GetRoutesTest : BaseTest() {
             assertEquals(responseBodyObject["identifier"]?.jsonPrimitive?.content, id)
             assertEquals(responseBodyObject["name"]?.jsonPrimitive?.content, "Alice")
             assertEquals(responseBodyObject["email"]?.jsonPrimitive?.content, "alice@example.com")
+        }
+
+    @Test
+    fun `GET collection with filter - when given filter - should return corresponding collection items`() =
+        testWithApp {
+            val response =
+                client.get("/books") {
+                    parameter("genre", "Fiction")
+                    parameter("genre", "Dystopian")
+                }
+            val responseBody = response.bodyAsText().toJsonArray()
+            val titles = responseBody.map { it.jsonObject["title"]?.jsonPrimitive?.content }
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(3, responseBody.size)
+            assertContains(titles, "Brave New World")
+            assertContains(titles, "1984")
+            assertContains(titles, "The Great Gatsby")
+        }
+
+    @Test
+    fun `GET collection with pagination - when given page=2 and limit=4 - should return corresponding collection items`() =
+        testWithApp {
+            val response =
+                client.get("/books") {
+                    parameter("_page", "2")
+                    parameter("_limit", "4")
+                }
+            val responseBody = response.bodyAsText().toJsonArray()
+            val ids = responseBody.map { it.jsonObject["id"]?.jsonPrimitive?.content }
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(4, responseBody.size)
+            assertEquals("5", ids.first())
+            assertEquals("8", ids.last())
+        }
+
+    @Test
+    fun `GET collection with pagination - when given page=null and limit=4 - should throw 400`() =
+        testWithApp {
+            val response =
+                client.get("/books") {
+                    parameter("_limit", "4")
+                }
+            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertEquals("Pagination parameter $LIMIT is without $PAGE", response.bodyAsText())
+        }
+
+    @Test
+    fun `GET collection with sorting - when given sort=published year and order=desc - should return items sorted desc`() =
+        testWithApp {
+            val publishedYearKey = "published.year"
+            val response =
+                client.get("/books") {
+                    parameter("_sort", publishedYearKey)
+                    parameter("_order", "desc")
+                }
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = response.bodyAsText().toJsonArray()
+            val years =
+                responseBody.map {
+                    it.jsonObject
+                        .getFieldValue(publishedYearKey)
+                        ?.jsonPrimitive
+                        ?.content
+                }
+            assertEquals("1960", years.first())
+            assertEquals("1811", years.last())
+        }
+
+    @Test
+    fun `GET collection with sorting - when given sort=published year and order=null - should return items sorted asc`() =
+        testWithApp {
+            val publishedYearKey = "published.year"
+            val response =
+                client.get("/books") {
+                    parameter("_sort", publishedYearKey)
+                }
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = response.bodyAsText().toJsonArray()
+            val years =
+                responseBody.map {
+                    it.jsonObject
+                        .getFieldValue(publishedYearKey)
+                        ?.jsonPrimitive
+                        ?.content
+                }
+            assertEquals("1811", years.first())
+            assertEquals("1960", years.last())
+        }
+
+    @Test
+    fun `GET collection with sorting - when given sort=author and order=desc - should return items sorted desc`() =
+        testWithApp {
+            val authorKey = "author"
+            val response =
+                client.get("/books") {
+                    parameter("_sort", authorKey)
+                    parameter("_order", "desc")
+                }
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = response.bodyAsText().toJsonArray()
+            val authors =
+                responseBody.map {
+                    it.jsonObject[authorKey]
+                        ?.jsonPrimitive
+                        ?.content
+                }
+            assertEquals("Victor Hugo", authors.first())
+            assertEquals("Aldous Huxley", authors.last())
+        }
+
+    @Test
+    fun `GET collection with sorting - when given sort=null and order=null - should return items unsorted`() =
+        testWithApp {
+            val response =
+                client.get("/books")
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = response.bodyAsText().toJsonArray()
+            val ids =
+                responseBody.map {
+                    it.jsonObject["id"]
+                        ?.jsonPrimitive
+                        ?.content
+                }
+            assertEquals("1", ids.first())
+            assertEquals("10", ids.last())
+        }
+
+    @Test
+    fun `GET collection with sorting - when given sort=null and order=asc - should throw 400`() =
+        testWithApp {
+            val response =
+                client.get("/books") {
+                    parameter("_order", "asc")
+                }
+            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertEquals("Sorting parameter $ORDER is without $SORT", response.bodyAsText())
+        }
+
+    @Test
+    fun `GET collection with sorting - when given sort=author order is invalid - should throw 400`() =
+        testWithApp {
+            val response =
+                client.get("/books") {
+                    parameter("_sort", "author")
+                    parameter("_order", "wrong")
+                }
+            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertEquals("Invalid sorting parameter $ORDER (must be 'asc' or 'desc')", response.bodyAsText())
+        }
+
+    @Test
+    fun `GET collection with sorting - when given sorting key is invalid - should throw 400`() =
+        testWithApp {
+            val invalidKey = "wrongKey"
+            val response =
+                client.get("/books") {
+                    parameter("_sort", invalidKey)
+                }
+            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertEquals("Value of '$invalidKey' is not present", response.bodyAsText())
         }
 
     private fun getTitleListFromXmlCollection(xml: String): List<String> {

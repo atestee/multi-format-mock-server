@@ -11,6 +11,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
@@ -23,9 +24,18 @@ class PutRouteTest : BaseTest() {
         mutableMapOf(
             "author" to JsonPrimitive("author1"),
             "title" to JsonPrimitive("title1"),
-            "genre" to JsonPrimitive("genre1"),
+            "genre" to
+                JsonArray(
+                    listOf(JsonPrimitive("genre1")),
+                ),
             "isbn" to JsonPrimitive("12345"),
-            "publishedYear" to JsonPrimitive(2024),
+            "published" to
+                JsonObject(
+                    mapOf(
+                        "place" to JsonPrimitive("place1"),
+                        "year" to JsonPrimitive(2024),
+                    ),
+                ),
         )
 
     private val updatedId = 10
@@ -97,7 +107,7 @@ class PutRouteTest : BaseTest() {
                 generateValidationError(
                     listOf(
                         "genre",
-                        "publishedYear",
+                        "published",
                         "title",
                         "author",
                         "isbn",
@@ -346,22 +356,22 @@ class PutRouteTest : BaseTest() {
     private fun getInsertedCsv(withId: Boolean): String =
         if (withId) {
             """
-            author;title;genre;isbn;publishedYear;id
-            author1;title1;genre1;12345;2024;$insertedId
+            author;title;genre[0];isbn;published.place;published.year;id
+            author1;title1;genre1;12345;place1;2024;$insertedId
             
             """.trimIndent()
         } else {
             """
-            author;title;genre;isbn;publishedYear
-            author1;title1;genre1;12345;2024
+            author;title;genre[0];isbn;published.place;published.year
+            author1;title1;genre1;12345;place1;2024
             
             """.trimIndent()
         }
 
     private fun getUpdatedCsv(): String =
         """
-        id;title;author;genre;isbn;publishedYear
-        $updatedId;Catch-22;author2;Satire;9781451626683;1961
+        id;title;author;genre[0];genre[1];genre[2];isbn;published.place;published.year
+        $updatedId;Frankenstein;author2;Gothic Novel;Horror Fiction;Science Fiction;9780143131847;UK;1818
         
         """.trimIndent()
 
@@ -372,7 +382,10 @@ class PutRouteTest : BaseTest() {
                 <author>author1</author>
                 <isbn>12345</isbn>
                 <genre>genre1</genre>
-                <publishedYear>2024</publishedYear>
+                <published>
+                    <year>2024</year>
+                    <place>place1</place>
+                </published>
                 <id>$insertedId</id>
                 <title>title1</title>
             </item>
@@ -383,7 +396,10 @@ class PutRouteTest : BaseTest() {
                 <author>author1</author>
                 <isbn>12345</isbn>
                 <genre>genre1</genre>
-                <publishedYear>2024</publishedYear>
+                <published>
+                    <year>2024</year>
+                    <place>place1</place>
+                </published>
                 <title>title1</title>
             </item>
             """.trimIndent()
@@ -393,11 +409,16 @@ class PutRouteTest : BaseTest() {
         """
         <item>
             <author>author2</author>
-            <isbn>9781451626683</isbn>
-            <genre>Satire</genre>
+            <isbn>9780143131847</isbn>
+            <genre>Gothic Novel</genre>
+            <genre>Horror Fiction</genre>
+            <genre>Science Fiction</genre>
             <id>$updatedId</id>
-            <publishedYear>1961</publishedYear>
-            <title>Catch-22</title>
+            <published>
+                <year>1818</year>
+                <place>UK</place>
+            </published>
+            <title>Frankenstein</title>
         </item>
         """.trimIndent()
 

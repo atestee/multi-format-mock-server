@@ -30,7 +30,9 @@ fun Route.putRoute(
         response {
             code(HttpStatusCode.Created) {
                 description = "Item was inserted into collection"
-                body(ref(collectionName.removeSuffix("s")))
+                body(ref(collectionName.removeSuffix("s"))) {
+                    mediaTypes(ContentType.Application.Json, ContentType.Application.Xml, ContentType.Text.CSV)
+                }
                 header<String>("Content-Type") {
                     description = "The media type of the resource being sent"
                     required = true
@@ -42,7 +44,9 @@ fun Route.putRoute(
             }
             code(HttpStatusCode.OK) {
                 description = "Item with id was updated"
-                body(ref(collectionName.removeSuffix("s")))
+                body(ref(collectionName.removeSuffix("s"))) {
+                    mediaTypes(ContentType.Application.Json, ContentType.Application.Xml, ContentType.Text.CSV)
+                }
             }
             code(HttpStatusCode.BadRequest) {
                 description = "Bad Request"
