@@ -1,8 +1,11 @@
 package cz.cvut.fit.atlasest.routing.routes
 
+import com.cesarferreira.pluralize.singularize
 import cz.cvut.fit.atlasest.routing.ALL_MIME
 import cz.cvut.fit.atlasest.routing.returnResourceInAcceptedFormat
 import cz.cvut.fit.atlasest.service.CollectionService
+import cz.cvut.fit.atlasest.service.EMBED
+import cz.cvut.fit.atlasest.service.EXPAND
 import cz.cvut.fit.atlasest.service.LIMIT
 import cz.cvut.fit.atlasest.service.ORDER
 import cz.cvut.fit.atlasest.service.PAGE
@@ -47,7 +50,12 @@ fun Route.getRoutes(
     }) {
         val accept = call.request.headers["Accept"] ?: ALL_MIME
         val params = call.request.queryParameters.toMap()
-        val data = collectionService.getCollection(collectionName)
+        val data =
+            if (params[EMBED] is List<String> || params[EXPAND] is List<String>) {
+                parameterService.applyEmbedAndExpand(params, collectionName, collectionService)
+            } else {
+                collectionService.getCollection(collectionName)
+            }
         val filteredData = parameterService.applyFilter(data, params)
         val paginatedData = parameterService.applyPagination(filteredData, params)
         val sortedData = parameterService.applySorting(paginatedData, params)
@@ -62,7 +70,7 @@ fun Route.getRoutes(
         }
         response {
             code(HttpStatusCode.OK) {
-                body(ref(collectionName.removeSuffix("s"))) {
+                body(ref(collectionName.singularize())) {
                     mediaTypes(ContentType.Application.Json, ContentType.Application.Xml, ContentType.Text.CSV)
                 }
             }
@@ -73,7 +81,13 @@ fun Route.getRoutes(
     }) {
         val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest, "Missing ID")
         val accept = call.request.headers["Accept"] ?: ALL_MIME
-        val data = collectionService.getItemById(collectionName, id)
+        val params = call.request.queryParameters.toMap()
+        val data =
+            if (params[EMBED] is List<String> || params[EXPAND] is List<String>) {
+                parameterService.applyEmbedAndExpand(params, collectionName, id, collectionService)
+            } else {
+                collectionService.getItemById(collectionName, id)
+            }
         returnResourceInAcceptedFormat(call, HttpStatusCode.OK, data, accept)
     }
 

@@ -1,5 +1,6 @@
 package cz.cvut.fit.atlasest.routing.routes
 
+import com.cesarferreira.pluralize.singularize
 import cz.cvut.fit.atlasest.routing.ALL_MIME
 import cz.cvut.fit.atlasest.routing.getResourceInJsonFormat
 import cz.cvut.fit.atlasest.routing.returnResourceInAcceptedFormat
@@ -21,13 +22,13 @@ fun Route.postRoute(
     post("/$collectionName", {
         tags(collectionName)
         request {
-            body(ref(collectionName.removeSuffix("s"))) {
+            body(ref(collectionName.singularize())) {
                 mediaTypes(ContentType.Application.Json, ContentType.Application.Xml, ContentType.Text.CSV)
             }
         }
         response {
             code(HttpStatusCode.Created) {
-                body(ref(collectionName.removeSuffix("s")), {
+                body(ref(collectionName.singularize()), {
                     mediaTypes(ContentType.Application.Json, ContentType.Application.Xml, ContentType.Text.CSV)
                 })
                 header<String>("Content-Type") {

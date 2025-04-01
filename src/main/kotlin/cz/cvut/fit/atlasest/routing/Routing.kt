@@ -1,5 +1,6 @@
 package cz.cvut.fit.atlasest.routing
 
+import com.cesarferreira.pluralize.singularize
 import cz.cvut.fit.atlasest.application.AppConfig
 import cz.cvut.fit.atlasest.routing.routes.deleteRoute
 import cz.cvut.fit.atlasest.routing.routes.getRoutes
@@ -51,13 +52,13 @@ fun Application.configureRouting() {
         rootPath = ""
         schemas {
             collectionService.collections.keys.forEach { collectionName ->
-                schema(collectionName.removeSuffix("s"), collectionService.getOpenApiSchema(collectionName))
+                schema(collectionName.singularize(), collectionService.getOpenApiSchema(collectionName))
                 schema(
                     collectionName,
                     ArraySchema().apply {
                         items =
                             Schema<Any>().apply {
-                                `$ref` = "#/components/schemas/${collectionName.removeSuffix("s")}"
+                                `$ref` = "#/components/schemas/${collectionName.singularize()}"
                             }
                         xml =
                             XML().apply {

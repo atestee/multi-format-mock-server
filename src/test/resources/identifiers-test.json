@@ -1,5 +1,8 @@
 {
   "books": "id",
   "loans": "id",
-  "users": "identifier"
+  "users": "identifier",
+  "libraries": "id",
+  "libraryBooks": "id",
+  "libraryRegistrations": "id"
 }
