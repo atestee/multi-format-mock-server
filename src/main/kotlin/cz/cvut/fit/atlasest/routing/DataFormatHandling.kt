@@ -57,7 +57,6 @@ suspend fun returnResourceInAcceptedFormat(
     accept: String,
 ) {
     val acceptNegotiated = negotiateContent(accept)
-
     when (acceptNegotiated) {
         ContentType.Application.Json -> {
             call.response.headers.append("Content-Type", JSON_MIME)

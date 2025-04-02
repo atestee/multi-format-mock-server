@@ -143,21 +143,6 @@
                 "place": "UK",
                 "year": 1818
             }
-        },
-        {
-            "id": 10,
-            "title": "Frankenstein",
-            "author": "author2",
-            "genre": [
-                "Gothic Novel",
-                "Horror Fiction",
-                "Science Fiction"
-            ],
-            "isbn": "9780143131847",
-            "published": {
-                "place": "UK",
-                "year": 1818
-            }
         }
     ],
     "loans": [

@@ -37,6 +37,7 @@ dependencies {
     implementation("io.ktor:ktor-server-config-yaml:$ktorVersion")
     testImplementation("io.ktor:ktor-server-config-yaml:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-server-cors:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
 
     // Koin

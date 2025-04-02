@@ -10,3 +10,6 @@ ktor:
 data:
   fileName: "db.json"
   identifiersFileName: "identifiers.json"
+
+cors:
+  allowed-host: *

@@ -4,7 +4,11 @@ import cz.cvut.fit.atlasest.di.configureDI
 import cz.cvut.fit.atlasest.exceptions.configureExceptionHandling
 import cz.cvut.fit.atlasest.routing.configureRouting
 import cz.cvut.fit.atlasest.utils.log
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
 import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.plugins.cors.routing.CORS
 import org.apache.commons.cli.CommandLine
 import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.HelpFormatter
@@ -50,5 +54,20 @@ fun Application.module() {
     configureExceptionHandling()
     configureDI(loadAppConfig(), schemaFile)
     configureRouting()
+    configureCORS()
     log.info("Application started successfully!")
+}
+
+fun Application.configureCORS() {
+    val config = environment.config
+    val allowedHost = config.property("cors.allowed-host").getString()
+    install(CORS) {
+        allowMethod(HttpMethod.Get)
+        allowMethod(HttpMethod.Post)
+        allowMethod(HttpMethod.Put)
+        allowMethod(HttpMethod.Delete)
+        allowHeader(HttpHeaders.ContentType)
+        allowHeader(HttpHeaders.Accept)
+        allowHost(allowedHost)
+    }
 }
