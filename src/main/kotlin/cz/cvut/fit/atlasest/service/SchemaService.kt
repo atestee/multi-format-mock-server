@@ -1,5 +1,6 @@
 package cz.cvut.fit.atlasest.service
 
+import com.cesarferreira.pluralize.pluralize
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.saasquatch.jsonschemainferrer.AdditionalPropertiesPolicies
@@ -49,7 +50,7 @@ class SchemaService {
             JsonSchemaInferrer
                 .newBuilder()
                 .setSpecVersion(specVersion)
-                .addFormatInferrers(FormatInferrers.email(), FormatInferrers.ip())
+                .addFormatInferrers(FormatInferrers.email(), FormatInferrers.ip(), FormatInferrers.dateTime())
                 .setAdditionalPropertiesPolicy(AdditionalPropertiesPolicies.notAllowed())
                 .setRequiredPolicy(RequiredPolicies.nonNullCommonFields())
                 .addEnumExtractors(
@@ -173,6 +174,65 @@ class SchemaService {
         }
 
         return openApiSchema
+    }
+
+    /**
+     * Retrieves the type and optional format of a property from a nested JSON Schema object.
+     *
+     * This function traverses a JSON Schema based on a dot-delimited key (for example "user.address.street"),
+     * and returns the type and format of the final field, if available, else null.
+     *
+     * @param schemas The JSON schemas of main collection and related collections (indexed by collection name).
+     * @param key A dot-delimited string representing the path to the wanted property.
+     * @param collectionName The name of the main collection.
+     *
+     * @return A Pair with the field's type and optional format, or null if the field doesn't exist
+     *         or the path is invalid.
+     */
+    fun getTypeAndFormatFromJsonSchema(
+        schemas: JsonObject,
+        key: String,
+        collectionName: String,
+    ): Pair<String, String?>? {
+        val pathSegments = key.split(".").map { it.replace("\\[[\\d*]]".toRegex(), "") }
+        val relatedCollectionsNames = schemas.keys.minus(collectionName)
+        var skipFirst = false
+
+        var currentSchema =
+            if (pathSegments.first() in relatedCollectionsNames) {
+                skipFirst = true
+                schemas[pathSegments.first()]?.jsonObject
+            } else if (pathSegments.first().pluralize() in relatedCollectionsNames) {
+                skipFirst = true
+                schemas[pathSegments.first().pluralize()]?.jsonObject
+            } else {
+                schemas[collectionName]?.jsonObject
+            }
+
+        for ((i, segment) in pathSegments.withIndex()) {
+            if (skipFirst && i == 0) continue
+            val properties =
+                currentSchema?.get("properties")?.jsonObject
+                    ?: return null
+
+            val fieldSchema =
+                properties[segment]?.jsonObject
+                    ?: return null
+
+            if (i == pathSegments.lastIndex) {
+                val type = fieldSchema["type"]?.jsonPrimitive?.content ?: return null
+                val format = fieldSchema["format"]?.jsonPrimitive?.content
+                return type to format
+            }
+
+            if (fieldSchema["type"]?.jsonPrimitive?.content == "object") {
+                currentSchema = fieldSchema
+            } else {
+                return null
+            }
+        }
+
+        return null
     }
 
     /**

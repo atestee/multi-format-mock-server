@@ -4,6 +4,7 @@ import BaseTest
 import cz.cvut.fit.atlasest.utils.getFieldValue
 import io.ktor.server.plugins.BadRequestException
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -13,6 +14,7 @@ import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class ParameterServiceTest : BaseTest() {
     private val parameterService by inject<ParameterService>()
@@ -25,9 +27,19 @@ class ParameterServiceTest : BaseTest() {
             .map { it.jsonObject }
             .toMutableList()
 
+    private val schema = documentService.readJsonFile("schema.json")["books"]!!.jsonObject
+
     @Test
     fun `applyFilter - EQ with nested object key`() {
-        val result = parameterService.applyFilter(books, mapOf("published.place" to listOf("USA")))
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("published.place" to listOf("USA")),
+                JsonObject(
+                    mapOf("books" to schema),
+                ),
+            )
 
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
@@ -40,7 +52,15 @@ class ParameterServiceTest : BaseTest() {
 
     @Test
     fun `applyFilter - EQ with author key`() {
-        val result = parameterService.applyFilter(books, mapOf("author" to listOf("Jane Austen")))
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("author" to listOf("Jane Austen")),
+                JsonObject(
+                    mapOf("books" to schema),
+                ),
+            )
 
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
@@ -51,7 +71,15 @@ class ParameterServiceTest : BaseTest() {
 
     @Test
     fun `applyFilter - EQ with array key`() {
-        val result = parameterService.applyFilter(books, mapOf("genre" to listOf("Dystopian")))
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("genre" to listOf("Dystopian")),
+                JsonObject(
+                    mapOf("books" to schema),
+                ),
+            )
 
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
@@ -62,7 +90,15 @@ class ParameterServiceTest : BaseTest() {
 
     @Test
     fun `applyFilter - EQ with array key and value`() {
-        val result = parameterService.applyFilter(books, mapOf("genre" to listOf("Fiction", "Tragedy")))
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("genre" to listOf("Fiction", "Tragedy")),
+                JsonObject(
+                    mapOf("books" to schema),
+                ),
+            )
 
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
@@ -73,7 +109,15 @@ class ParameterServiceTest : BaseTest() {
 
     @Test
     fun `applyFilter - EQ with published year`() {
-        val result = parameterService.applyFilter(books, mapOf("published.year" to listOf("1925")))
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("published.year" to listOf("1925")),
+                JsonObject(
+                    mapOf("books" to schema),
+                ),
+            )
 
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
@@ -83,7 +127,15 @@ class ParameterServiceTest : BaseTest() {
 
     @Test
     fun `applyFilter - EQ with array values matched with index`() {
-        val result = parameterService.applyFilter(books, mapOf("genre[0]" to listOf("Science Fiction")))
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("genre[0]" to listOf("Science Fiction")),
+                JsonObject(
+                    mapOf("books" to schema),
+                ),
+            )
 
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
@@ -93,7 +145,15 @@ class ParameterServiceTest : BaseTest() {
 
     @Test
     fun `applyFilter - NE with nested object`() {
-        val result = parameterService.applyFilter(books, mapOf("published.place_ne" to listOf("USA")))
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("published.place_ne" to listOf("USA")),
+                JsonObject(
+                    mapOf("books" to schema),
+                ),
+            )
 
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
@@ -108,7 +168,15 @@ class ParameterServiceTest : BaseTest() {
 
     @Test
     fun `applyFilter - NE with author property`() {
-        val result = parameterService.applyFilter(books, mapOf("author_ne" to listOf("Jane Austen")))
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("author_ne" to listOf("Jane Austen")),
+                JsonObject(
+                    mapOf("books" to schema),
+                ),
+            )
 
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
@@ -119,7 +187,15 @@ class ParameterServiceTest : BaseTest() {
 
     @Test
     fun `applyFilter - NE with array`() {
-        val result = parameterService.applyFilter(books, mapOf("genre_ne" to listOf("Dystopian")))
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("genre_ne" to listOf("Dystopian")),
+                JsonObject(
+                    mapOf("books" to schema),
+                ),
+            )
 
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
@@ -130,7 +206,15 @@ class ParameterServiceTest : BaseTest() {
 
     @Test
     fun `applyFilter - LT with published year`() {
-        val result = parameterService.applyFilter(books, mapOf("published.year_lt" to listOf("1925")))
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("published.year_lt" to listOf("1925")),
+                JsonObject(
+                    mapOf("books" to schema),
+                ),
+            )
 
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
@@ -144,7 +228,15 @@ class ParameterServiceTest : BaseTest() {
 
     @Test
     fun `applyFilter - LTE with published year`() {
-        val result = parameterService.applyFilter(books, mapOf("published.year_lte" to listOf("1925")))
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("published.year_lte" to listOf("1925")),
+                JsonObject(
+                    mapOf("books" to schema),
+                ),
+            )
 
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
@@ -159,7 +251,15 @@ class ParameterServiceTest : BaseTest() {
 
     @Test
     fun `applyFilter - GT with published year`() {
-        val result = parameterService.applyFilter(books, mapOf("published.year_gt" to listOf("1925")))
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("published.year_gt" to listOf("1925")),
+                JsonObject(
+                    mapOf("books" to schema),
+                ),
+            )
 
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
@@ -172,7 +272,15 @@ class ParameterServiceTest : BaseTest() {
 
     @Test
     fun `applyFilter - GTE with published year`() {
-        val result = parameterService.applyFilter(books, mapOf("published.year_gte" to listOf("1925")))
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("published.year_gte" to listOf("1925")),
+                JsonObject(
+                    mapOf("books" to schema),
+                ),
+            )
 
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
@@ -186,7 +294,15 @@ class ParameterServiceTest : BaseTest() {
 
     @Test
     fun `applyFilter - LIKE with genre array`() {
-        val result = parameterService.applyFilter(books, mapOf("genre_like" to listOf("Fiction")))
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("genre_like" to listOf("Fiction")),
+                JsonObject(
+                    mapOf("books" to schema),
+                ),
+            )
 
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
@@ -202,7 +318,15 @@ class ParameterServiceTest : BaseTest() {
 
     @Test
     fun `applyFilter - LIKE with published year`() {
-        val result = parameterService.applyFilter(books, mapOf("published.year_like" to listOf("19")))
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("published.year_like" to listOf("19")),
+                JsonObject(
+                    mapOf("books" to schema),
+                ),
+            )
 
         val titles = result.map { it.jsonObject["title"]!!.jsonPrimitive.content }
 
@@ -216,7 +340,15 @@ class ParameterServiceTest : BaseTest() {
 
     @Test
     fun `applyFilter - LIKE with array values matched with index`() {
-        val result = parameterService.applyFilter(books, mapOf("genre[0]_like" to listOf("Science")))
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("genre[0]_like" to listOf("Science")),
+                JsonObject(
+                    mapOf("books" to schema),
+                ),
+            )
 
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
@@ -482,5 +614,39 @@ class ParameterServiceTest : BaseTest() {
         val loan = collectionService.getItemById("loans", "1")
         assertEquals(libraryRegistration, result["libraryRegistration"])
         assertEquals(JsonArray(listOf(loan)), result["loans"])
+    }
+
+    @Test
+    fun `applyQuerySearch - when given query string 'brave' - should return 'Brave New World' book object`() {
+        val result =
+            parameterService.applyQuerySearch(
+                books,
+                mapOf(
+                    "_q" to listOf("brave"),
+                ),
+            )
+        assertEquals(1, result.size)
+        val expectedBook = collectionService.getItemById("books", "9")
+        assertEquals(expectedBook, result.first())
+    }
+
+    @Test
+    fun `applyQuerySearch - when given query string 'science' - should return 3 results`() {
+        val result =
+            parameterService.applyQuerySearch(
+                books,
+                mapOf(
+                    "_q" to listOf("science"),
+                ),
+            )
+        assertEquals(3, result.size)
+        val expectedBooks = listOf(3, 9, 10).map { collectionService.getItemById("books", "$it") }
+        expectedBooks.forEach { expected ->
+            assertTrue(
+                result.any { actual ->
+                    expected == actual
+                },
+            )
+        }
     }
 }

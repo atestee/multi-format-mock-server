@@ -10,7 +10,9 @@ import cz.cvut.fit.atlasest.service.LIMIT
 import cz.cvut.fit.atlasest.service.ORDER
 import cz.cvut.fit.atlasest.service.PAGE
 import cz.cvut.fit.atlasest.service.ParameterService
+import cz.cvut.fit.atlasest.service.QUERY
 import cz.cvut.fit.atlasest.service.SORT
+import cz.cvut.fit.atlasest.utils.add
 import io.github.smiley4.ktoropenapi.config.descriptors.ref
 import io.github.smiley4.ktoropenapi.get
 import io.ktor.http.ContentType
@@ -27,14 +29,15 @@ fun Route.getRoutes(
     collectionName: String,
     parameterService: ParameterService,
 ) {
+    val queryParams = listOf(PAGE, LIMIT, SORT, ORDER, EMBED, EXPAND, QUERY)
+
     // GET collection
     get("/$collectionName", {
         tags(collectionName)
         request {
-            queryParameter<String>(PAGE)
-            queryParameter<String>(LIMIT)
-            queryParameter<String>(SORT)
-            queryParameter<String>(ORDER)
+            queryParams.forEach { parameter ->
+                queryParameter<String>(parameter)
+            }
             queryParameter<JsonObject>("filter") {
                 explode = true
                 style = Parameter.StyleEnum.FORM
@@ -50,13 +53,18 @@ fun Route.getRoutes(
     }) {
         val accept = call.request.headers["Accept"] ?: ALL_MIME
         val params = call.request.queryParameters.toMap()
-        val data =
+        var (data, schemas) =
             if (params[EMBED] is List<String> || params[EXPAND] is List<String>) {
-                parameterService.applyEmbedAndExpand(params, collectionName, collectionService)
+                val data = parameterService.applyEmbedAndExpand(params, collectionName, collectionService)
+                val schemas = parameterService.getEmbedAndExpandCollectionSchemas(params, collectionService)
+                data to schemas
             } else {
-                collectionService.getCollection(collectionName)
+                collectionService.getCollection(collectionName) to JsonObject(mapOf())
             }
-        val filteredData = parameterService.applyFilter(data, params)
+        val queriedData = parameterService.applyQuerySearch(data, params)
+        val schema = collectionService.getCollectionSchema(collectionName)
+        schemas = schemas.add(collectionName, schema)
+        val filteredData = parameterService.applyFilter(collectionName, queriedData, params, schemas)
         val paginatedData = parameterService.applyPagination(filteredData, params)
         val sortedData = parameterService.applySorting(paginatedData, params)
         returnResourceInAcceptedFormat(call, HttpStatusCode.OK, JsonArray(sortedData), accept)
@@ -67,6 +75,13 @@ fun Route.getRoutes(
         tags(collectionName)
         request {
             pathParameter<String>("id")
+            queryParams.forEach { parameter ->
+                queryParameter<String>(parameter)
+            }
+            queryParameter<JsonObject>("filter") {
+                explode = true
+                style = Parameter.StyleEnum.FORM
+            }
         }
         response {
             code(HttpStatusCode.OK) {

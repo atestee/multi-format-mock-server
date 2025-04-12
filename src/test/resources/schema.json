@@ -92,13 +92,72 @@
       "email": {
         "type": "string",
         "format": "email"
+      },
+      "libraryRegistrationId": {
+        "type": "integer"
       }
     },
     "additionalProperties": false,
     "required": [
       "identifier",
       "name",
-      "email"
+      "email",
+      "libraryRegistrationId"
+    ]
+  },
+  "libraries": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema#",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer"
+      },
+      "name": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "name"
+    ]
+  },
+  "libraryBooks": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema#",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer"
+      },
+      "libraryId": {
+        "type": "integer"
+      },
+      "bookId": {
+        "type": "integer"
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "libraryId",
+      "bookId"
+    ]
+  },
+  "libraryRegistrations": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema#",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer"
+      },
+      "libraryId": {
+        "type": "integer"
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "libraryId"
     ]
   }
 }
