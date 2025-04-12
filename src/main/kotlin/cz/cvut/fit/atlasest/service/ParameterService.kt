@@ -3,6 +3,7 @@ package cz.cvut.fit.atlasest.service
 import com.cesarferreira.pluralize.pluralize
 import com.cesarferreira.pluralize.singularize
 import cz.cvut.fit.atlasest.utils.add
+import cz.cvut.fit.atlasest.utils.jsonToCsv
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -14,29 +15,40 @@ class ParameterService {
     private val filterService = FilterService()
     private val paginationService = PaginationService()
     private val sortingService = SortingService()
+    private val schemaService = SchemaService()
 
     /**
      * Applies filtering to a collection of JSON objects based on request parameters.
+     * Request parameters are either only the property, like "title" which we want to match with a value.
+     * Or there can be a field and operator divided with an underscore like, "title_ne".
+     * The operators available are: ne, lt, lte, gt, lte, like.
      *
+     * @param collectionName The name of the collection.
      * @param collectionItems The list of JSON objects to be filtered.
      * @param params The request parameters containing filter criteria.
+     * @param schemas The JSON schemas of collection items and related collection items (indexed by collection name).
      *
      * @return A filtered list of JSON objects.
      */
     fun applyFilter(
+        collectionName: String,
         collectionItems: MutableList<JsonObject>,
         params: Map<String, List<String>>,
+        schemas: JsonObject,
     ): MutableList<JsonObject> {
         var items = collectionItems
         val filterParams = getFilterParameters(params)
         filterParams.forEach { (keyOperator, value) ->
-            items = filterService.applyFilter(items, keyOperator, value)
+            items =
+                filterService.applyFilter(items, keyOperator, value, { key ->
+                    schemaService.getTypeAndFormatFromJsonSchema(schemas, key, collectionName)
+                })
         }
         return items
     }
 
     /**
-     * Applies pagination to a collection of JSON objects based on request parameters.
+     * Applies pagination to a collection of JSON objects based on request parameters _page and _limit.
      *
      * @param collectionItems The list of JSON objects to be paginated.
      * @param params The request parameters containing pagination details.
@@ -57,10 +69,10 @@ class ParameterService {
     }
 
     /**
-     * Applies sorting to a collection of JSON objects based on request parameters.
+     * Applies sorting to a collection of JSON objects based on request parameters _sort and _order.
      *
      * @param collectionItems The list of JSON objects to be sorted.
-     * @param params The request parameters containing sorting details.
+     * @param params The request query parameters containing sorting details.
      *
      * @return A sorted list of JSON objects.
      */
@@ -78,6 +90,28 @@ class ParameterService {
     }
 
     /**
+     * Applies query search to a collection of JSON objects based on query parameter _q.
+     *
+     * @param collectionItems The list of queried JSON objects.
+     * @param params The request query parameters containing the query.
+     *
+     * @return The resulting list of JSON objects.
+     */
+    fun applyQuerySearch(
+        collectionItems: MutableList<JsonObject>,
+        params: Map<String, List<String>>,
+    ): MutableList<JsonObject> {
+        val query = params[QUERY]?.first() ?: return collectionItems
+        return collectionItems
+            .filter { item ->
+                jsonToCsv(item)
+                    .lines()[1]
+                    .split(";")
+                    .any { it.lowercase().contains(query.lowercase()) }
+            }.toMutableList()
+    }
+
+    /**
      * Embeds and expands a collection with other collections defined by request parameters to main collection based on foreign keys.
      *
      * @param params The request parameters containing embedding and expanding details.
@@ -91,17 +125,44 @@ class ParameterService {
         collectionName: String,
         collectionService: CollectionService,
     ): MutableList<JsonObject> {
-        val embedKeys = params[EMBED]
-        val expandKeys = params[EXPAND]
+        val embedValues = params[EMBED]
+        val expandValues = params[EXPAND]
         val mainCollection = collectionService.getCollection(collectionName)
         val identifier = collectionService.getCollectionIdentifier(collectionName)
         val embedForeignKey = collectionName.singularize() + "Id"
 
         return mainCollection
             .map { item ->
-                val newItem = embedItem(item, embedKeys, collectionService, identifier, embedForeignKey)
-                expandItem(newItem, expandKeys, collectionService)
+                val newItem = embedItem(item, embedValues, collectionService, identifier, embedForeignKey)
+                expandItem(newItem, expandValues, collectionService)
             }.toMutableList()
+    }
+
+    /**
+     * Retrieves the JSON schemas of collections related to the main collection from embed and expand parameters.
+     *
+     * @param params The request parameters containing embedding and expanding details.
+     * @param collectionService The service used to retrieve collections.
+     *
+     * @return JSON schemas of related collections.
+     */
+    fun getEmbedAndExpandCollectionSchemas(
+        params: Map<String, List<String>>,
+        collectionService: CollectionService,
+    ): JsonObject {
+        val embedValues = params[EMBED]
+        val expandValues = params[EXPAND]
+        var schemas = JsonObject(mapOf())
+        embedValues?.forEach { collectionName ->
+            val schema = collectionService.getCollectionSchema(collectionName)
+            schemas = schemas.add(collectionName, schema)
+        }
+        expandValues?.forEach { collectionNameSingular ->
+            val collectionName = collectionNameSingular.pluralize()
+            val schema = collectionService.getCollectionSchema(collectionName)
+            schemas = schemas.add(collectionName, schema)
+        }
+        return schemas
     }
 
     /**
@@ -203,8 +264,7 @@ class ParameterService {
                     ORDER,
                     EMBED,
                     EXPAND,
-                    QUERY_SHORT,
-                    QUERY_LONG,
+                    QUERY,
                 )
         }
 }

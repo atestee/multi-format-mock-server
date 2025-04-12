@@ -3,7 +3,6 @@ package cz.cvut.fit.atlasest.data
 import cz.cvut.fit.atlasest.exceptions.InvalidDataException
 import cz.cvut.fit.atlasest.utils.add
 import io.ktor.server.plugins.BadRequestException
-import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
@@ -81,7 +80,7 @@ class CollectionTest {
     @Test
     fun `insertItem - identifier type is string - increases nextId and adds item to items`() {
         val itemId = 2
-        val item = generateItem(JsonNull)
+        val item = generateItem(JsonPrimitive(1))
         val insertedItem = generateItem(JsonPrimitive(itemId.toString()))
         val collection = generateCollection(listOf(item)).apply { this.nextId = itemId }
 
@@ -96,7 +95,7 @@ class CollectionTest {
     @Test
     fun `insertItem - identifier type is number - increases nextId and adds item to items`() {
         val itemId = 2
-        val item = generateItem(JsonNull)
+        val item = generateItem(JsonPrimitive(1))
         val insertedItem = generateItem(JsonPrimitive(itemId))
         val collection = generateCollection(listOf(item), "number").apply { this.nextId = itemId }
 
@@ -109,7 +108,7 @@ class CollectionTest {
     }
 
     @Test
-    fun `updateItem - identifier type is string - increases nextId and adds item to items`() {
+    fun `updateItem - identifier type is string - updates the item in colleciton`() {
         val itemId = 2
         val item = generateItem(JsonPrimitive(itemId.toString())).add("key", JsonPrimitive("value"))
         val updatedItem = generateItem(JsonPrimitive(itemId.toString())).add("key", JsonPrimitive("newValue"))
@@ -117,7 +116,7 @@ class CollectionTest {
 
         collection.updateItem(itemId.toString(), updatedItem)
 
-        assertEquals(updatedItem, collection.items[1])
+        assertEquals(updatedItem, collection.items[0])
     }
 
     @Test
@@ -129,7 +128,7 @@ class CollectionTest {
 
         collection.updateItem(itemId.toString(), updatedItem)
 
-        assertEquals(updatedItem, collection.items[1])
+        assertEquals(updatedItem, collection.items[0])
     }
 
     @Test

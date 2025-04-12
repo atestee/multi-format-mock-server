@@ -34,7 +34,7 @@ class Collection(
 
     fun insertItem(item: JsonObject) {
         val newItem =
-            if (this.getIdentifierType() == "number") {
+            if (this.getIdentifierType() in listOf("number", "integer")) {
                 item.add(this.identifier, JsonPrimitive(nextId))
             } else {
                 item.add(this.identifier, JsonPrimitive(nextId.toString()))
@@ -59,7 +59,7 @@ class Collection(
         if (newItem.keys != this.items[index].keys) {
             throw BadRequestException("Item with ${this.identifier} '$id' is incomplete")
         }
-        items.add(newItem)
+        items[index] = newItem
         return newItem
     }
 
