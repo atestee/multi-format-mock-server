@@ -79,10 +79,10 @@ fun csvToJson(csvString: String): JsonObject {
  * @throws BadRequestException if the input is not a JSON object or array.
  * @return The CSV representation of the JSON.
  */
-fun jsonToCsv(json: JsonElement): String =
-    when (json) {
-        is JsonObject -> jsonItemToCsv(json.toString())
-        is JsonArray -> jsonArrayToCsv(json.map { it.jsonObject.toString() })
+fun JsonElement.toCSV(): String =
+    when (this) {
+        is JsonObject -> jsonItemToCsv(this.toString())
+        is JsonArray -> jsonArrayToCsv(this.map { it.jsonObject.toString() })
         else -> throw BadRequestException("Invalid request body. It should be JSON object or array.")
     }
 

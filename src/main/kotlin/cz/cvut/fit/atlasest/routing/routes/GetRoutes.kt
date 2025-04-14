@@ -28,6 +28,7 @@ fun Route.getRoutes(
     collectionService: CollectionService,
     collectionName: String,
     parameterService: ParameterService,
+    host: String,
 ) {
     val queryParams = listOf(PAGE, LIMIT, SORT, ORDER, EMBED, EXPAND, QUERY)
 
@@ -65,8 +66,9 @@ fun Route.getRoutes(
         val schema = collectionService.getCollectionSchema(collectionName)
         schemas = schemas.add(collectionName, schema)
         val filteredData = parameterService.applyFilter(collectionName, queriedData, params, schemas)
-        val paginatedData = parameterService.applyPagination(filteredData, params)
+        val (paginatedData, links) = parameterService.applyPagination(filteredData, params, "$host/$collectionName", data.size)
         val sortedData = parameterService.applySorting(paginatedData, params)
+        if (links is String) call.response.headers.append("Link", links)
         returnResourceInAcceptedFormat(call, HttpStatusCode.OK, JsonArray(sortedData), accept)
     }
 
