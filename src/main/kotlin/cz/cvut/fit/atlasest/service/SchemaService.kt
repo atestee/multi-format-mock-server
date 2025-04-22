@@ -4,7 +4,6 @@ import com.cesarferreira.pluralize.pluralize
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.saasquatch.jsonschemainferrer.AdditionalPropertiesPolicies
-import com.saasquatch.jsonschemainferrer.EnumExtractors
 import com.saasquatch.jsonschemainferrer.FormatInferrers
 import com.saasquatch.jsonschemainferrer.JsonSchemaInferrer
 import com.saasquatch.jsonschemainferrer.RequiredPolicies
@@ -26,8 +25,6 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import java.time.DayOfWeek
-import java.time.Month
 import javax.validation.ValidationException
 
 /**
@@ -53,10 +50,7 @@ class SchemaService {
                 .addFormatInferrers(FormatInferrers.email(), FormatInferrers.ip(), FormatInferrers.dateTime())
                 .setAdditionalPropertiesPolicy(AdditionalPropertiesPolicies.notAllowed())
                 .setRequiredPolicy(RequiredPolicies.nonNullCommonFields())
-                .addEnumExtractors(
-                    EnumExtractors.validEnum(Month::class.java),
-                    EnumExtractors.validEnum(DayOfWeek::class.java),
-                ).build()
+                .build()
 
         val jsonNodeList: List<JsonNode> =
             collection.map { jsonElement ->
@@ -141,7 +135,10 @@ class SchemaService {
      * @return The corresponding OpenAPI schema.
      */
     fun convertJsonSchemaToOpenApi(jsonSchema: JsonElement): Schema<Any> {
-        val openApiSchema = Schema<Any>().apply { specVersion = io.swagger.v3.oas.models.SpecVersion.V31 }
+        val openApiSchema =
+            Schema<Any>().apply {
+                specVersion = io.swagger.v3.oas.models.SpecVersion.V31
+            }
 
         val type = jsonSchema.jsonObject["type"]?.jsonPrimitive?.content
         if (type != null) {

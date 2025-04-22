@@ -52,7 +52,15 @@ fun Application.configureRouting() {
         rootPath = ""
         schemas {
             collectionService.collections.keys.forEach { collectionName ->
-                schema(collectionName.singularize(), collectionService.getOpenApiSchema(collectionName))
+                schema(
+                    collectionName.singularize(),
+                    collectionService.getOpenApiSchema(collectionName).apply {
+                        xml =
+                            XML().apply {
+                                name = "item"
+                            }
+                    },
+                )
                 schema(
                     collectionName,
                     ArraySchema().apply {
@@ -62,7 +70,7 @@ fun Application.configureRouting() {
                             }
                         xml =
                             XML().apply {
-                                name = collectionName
+                                name = "items"
                                 wrapped = true
                             }
                     },

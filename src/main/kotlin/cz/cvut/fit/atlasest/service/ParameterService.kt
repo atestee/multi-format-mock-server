@@ -135,8 +135,12 @@ class ParameterService {
                 item
                     .toCSV()
                     .lines()[1]
-                    .split(";")
-                    .any { it.lowercase().contains(query.lowercase()) }
+                    .split(";".toRegex())
+                    .any { value ->
+                        query.lowercase().split("\\s*;\\s*".toRegex()).any { searchTerm ->
+                            value.lowercase().contains(searchTerm.lowercase())
+                        }
+                    }
             }.toMutableList()
     }
 

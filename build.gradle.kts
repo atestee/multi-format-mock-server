@@ -35,10 +35,9 @@ dependencies {
     implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-server-config-yaml:$ktorVersion")
-    testImplementation("io.ktor:ktor-server-config-yaml:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-server-cors:$ktorVersion")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+    testImplementation("io.ktor:ktor-server-config-yaml:$ktorVersion")
 
     // Koin
     implementation("io.insert-koin:koin-ktor:4.0.2")
@@ -53,20 +52,20 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
 
     // Serialization
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion")
-    implementation("com.jsoizo:kotlin-csv:1.10.0")
     implementation("com.fasterxml.jackson.module:jackson-module-jsonSchema:$jacksonVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+    implementation("com.jsoizo:kotlin-csv:1.10.0")
     implementation("org.json:json:20250107")
     implementation("com.github.wnameless.json:json-flattener:0.17.2")
 
-    // Testing dependencies for Ktor
+    // Testing
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
-
-    // Kotlin test with JUnit5 integration
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlinVersion")
+    testImplementation("io.mockk:mockk:1.13.17")
 
     // JSON Schema
     implementation("com.github.saasquatch:json-schema-inferrer:0.2.1") // For inferring schema
@@ -80,9 +79,6 @@ dependencies {
 
     // Command-line args
     implementation("commons-cli:commons-cli:1.9.0")
-
-    // Mocking in tests
-    testImplementation("io.mockk:mockk:1.13.17")
 
     // Singularization and pluralization
     implementation("com.github.cesarferreira:kotlin-pluralizer:1.0.0")
