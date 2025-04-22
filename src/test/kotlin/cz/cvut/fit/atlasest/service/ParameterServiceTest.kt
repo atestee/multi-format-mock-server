@@ -14,6 +14,7 @@ import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ParameterServiceTest : BaseTest() {
@@ -26,6 +27,9 @@ class ParameterServiceTest : BaseTest() {
             .jsonArray
             .map { it.jsonObject }
             .toMutableList()
+
+    private val baseUrl = "baseUrl"
+    private val totalItems = books.size
 
     private val schema = documentService.readJsonFile("schema.json")["books"]!!.jsonObject
 
@@ -360,45 +364,68 @@ class ParameterServiceTest : BaseTest() {
     fun `applyPagination - when page=2 limit=3 - should return items from id=3 to id=5`() {
         val page = "2"
         val limit = "3"
-        val result =
+        val (items, links) =
             parameterService.applyPagination(
                 collectionItems = books,
                 mapOf(
                     "_page" to listOf(page),
                     "_limit" to listOf(limit),
                 ),
+                baseUrl,
+                totalItems,
             )
 
-        val ids = result.map { it["id"]!!.jsonPrimitive.content }
+        val expectedLinks =
+            """
+            <baseUrl?_page=1&_limit=3>; rel="first", 
+            <baseUrl?_page=1&_limit=3>; rel="prev", 
+            <baseUrl?_page=3&_limit=3>; rel="next", 
+            <baseUrl?_page=4&_limit=3>; rel="last"
+            """.trimIndent().replace("\n", "")
 
-        assertEquals(limit.toInt(), result.size)
+        val ids = items.map { it["id"]!!.jsonPrimitive.content }
+
+        assertEquals(limit.toInt(), items.size)
         assertEquals("4", ids.first())
         assertEquals("6", ids.last())
+        assertEquals(expectedLinks, links)
     }
 
     @Test
     fun `applyPagination - when page=2 limit=null - should return empty list`() {
         val page = "2"
-        val result =
+        val (items, links) =
             parameterService.applyPagination(
                 collectionItems = books,
                 mapOf(
                     "_page" to listOf(page),
                 ),
+                baseUrl,
+                totalItems,
             )
 
-        assertEquals(0, result.size)
+        val expectedLinks =
+            """
+            <baseUrl?_page=1&_limit=10>; rel="first", 
+            <baseUrl?_page=1&_limit=10>; rel="prev"
+            """.trimIndent().replace("\n", "")
+
+        assertEquals(0, items.size)
+        assertEquals(expectedLinks, links)
     }
 
     @Test
     fun `applyPagination - when page=null limit=null - should return all items`() {
-        val result =
+        val (pair, links) =
             parameterService.applyPagination(
                 collectionItems = books,
                 mapOf(),
+                baseUrl,
+                totalItems,
             )
 
-        assertEquals(10, result.size)
+        assertEquals(10, pair.size)
+        assertNull(links)
     }
 
     @Test
@@ -410,6 +437,8 @@ class ParameterServiceTest : BaseTest() {
                     mapOf(
                         "_limit" to listOf("2"),
                     ),
+                    baseUrl,
+                    totalItems,
                 )
             }
         assertEquals("Pagination parameter _limit is without _page", exception.message)

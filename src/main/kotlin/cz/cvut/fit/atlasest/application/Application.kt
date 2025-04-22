@@ -68,6 +68,8 @@ fun Application.configureCORS() {
         allowMethod(HttpMethod.Delete)
         allowHeader(HttpHeaders.ContentType)
         allowHeader(HttpHeaders.Accept)
+        exposeHeader(HttpHeaders.ContentType)
+        exposeHeader(HttpHeaders.Link)
         allowHost(allowedHost)
     }
 }

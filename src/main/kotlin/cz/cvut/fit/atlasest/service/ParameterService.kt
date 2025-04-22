@@ -3,7 +3,8 @@ package cz.cvut.fit.atlasest.service
 import com.cesarferreira.pluralize.pluralize
 import com.cesarferreira.pluralize.singularize
 import cz.cvut.fit.atlasest.utils.add
-import cz.cvut.fit.atlasest.utils.jsonToCsv
+import cz.cvut.fit.atlasest.utils.toCSV
+import io.ktor.server.plugins.BadRequestException
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -52,20 +53,47 @@ class ParameterService {
      *
      * @param collectionItems The list of JSON objects to be paginated.
      * @param params The request parameters containing pagination details.
+     * @param baseUrl The base URL to which pagination parameters will be appended.
+     * @param totalItems The total number of items across all pages.
      *
-     * @return A paginated list of JSON objects.
+     * @return A pair containing the paginated list of JSON objects and an optional string of pagination links (RFC 5988 format).
      */
     fun applyPagination(
         collectionItems: MutableList<JsonObject>,
         params: Map<String, List<String>>,
-    ): MutableList<JsonObject> {
+        baseUrl: String,
+        totalItems: Int,
+    ): Pair<MutableList<JsonObject>, String?> {
         val page = params[PAGE]?.first()?.toIntOrNull()
         val limit = params[LIMIT]?.first()?.toIntOrNull()
-        return paginationService.applyPagination(
-            collectionItems,
-            page,
-            limit,
-        )
+        val paramsString =
+            params
+                .filter { it.key !in listOf(PAGE, LIMIT) }
+                .flatMap { (key, values) ->
+                    values.map { value -> "$key=$value" }
+                }.joinToString("&")
+        if (page == null) {
+            if (limit == null) {
+                return collectionItems to null
+            } else {
+                throw BadRequestException("Pagination parameter $LIMIT is without $PAGE")
+            }
+        }
+        val links =
+            paginationService.createPaginationLinks(
+                baseUrl,
+                page,
+                limit ?: paginationService.defaultLimit,
+                totalItems,
+                paramsString,
+            )
+        val items =
+            paginationService.applyPagination(
+                collectionItems,
+                page,
+                limit,
+            )
+        return items to links
     }
 
     /**
@@ -104,7 +132,8 @@ class ParameterService {
         val query = params[QUERY]?.first() ?: return collectionItems
         return collectionItems
             .filter { item ->
-                jsonToCsv(item)
+                item
+                    .toCSV()
                     .lines()[1]
                     .split(";")
                     .any { it.lowercase().contains(query.lowercase()) }

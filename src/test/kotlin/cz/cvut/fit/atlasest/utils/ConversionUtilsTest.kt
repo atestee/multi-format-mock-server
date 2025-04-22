@@ -72,16 +72,16 @@ class ConversionUtilsTest {
     }
 
     @Test
-    fun `jsonToCsv - when given JSON object with complex structures - should return corresponding CSV string`() {
+    fun `JsonElement toCSV - when given JSON object with complex structures - should return corresponding CSV string`() {
         val json = testData.generateComplexJsonObject()
 
-        val actualCsv = jsonToCsv(json)
+        val actualCsv = json.toCSV()
 
         assertEquals(testData.csvData, actualCsv)
     }
 
     @Test
-    fun `jsonToCsv - when given JSON array with complex structures - should return corresponding CSV string`() {
+    fun `JsonElement toCSV - when given JSON array with complex structures - should return corresponding CSV string`() {
         val json = testData.generateComplexJsonObject()
         val jsonWith2Items = JsonArray(listOf(json, json))
         val csvWith2Rows =
@@ -89,16 +89,16 @@ class ConversionUtilsTest {
                 this.delimiter = ';'
             }.writeAllAsString(listOf(testData.csvHeader, testData.csvRow, testData.csvRow))
 
-        val result = jsonToCsv(jsonWith2Items)
+        val result = jsonWith2Items.toCSV()
 
         assertEquals(csvWith2Rows, result)
     }
 
     @Test
-    fun `jsonToCsv - when given JSON primitive - should throw BadRequestException`() {
+    fun `JsonElement toCSV - when given JSON primitive - should throw BadRequestException`() {
         val exception =
             assertThrows<BadRequestException> {
-                jsonToCsv(JsonPrimitive("string"))
+                JsonPrimitive("string").toCSV()
             }
         assertEquals("Invalid request body. It should be JSON object or array.", exception.message)
     }

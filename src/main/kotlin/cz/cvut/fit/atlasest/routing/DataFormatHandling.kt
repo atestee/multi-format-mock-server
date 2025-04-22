@@ -1,7 +1,7 @@
 package cz.cvut.fit.atlasest.routing
 
 import cz.cvut.fit.atlasest.utils.csvToJson
-import cz.cvut.fit.atlasest.utils.jsonToCsv
+import cz.cvut.fit.atlasest.utils.toCSV
 import cz.cvut.fit.atlasest.utils.toXML
 import cz.cvut.fit.atlasest.utils.xmlToJson
 import io.ktor.http.ContentType
@@ -68,7 +68,7 @@ suspend fun returnResourceInAcceptedFormat(
         }
         ContentType.Text.CSV -> {
             call.response.headers.append("Content-Type", CSV_MIME)
-            call.respond(code, jsonToCsv(resource))
+            call.respond(code, resource.toCSV())
         }
 
         else -> throw BadRequestException(

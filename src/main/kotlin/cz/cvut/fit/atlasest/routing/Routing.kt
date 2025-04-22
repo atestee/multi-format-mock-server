@@ -82,7 +82,7 @@ fun Application.configureRouting() {
             call.respondText("collections: ${collectionService.collections.keys}")
         }
         collectionService.collections.keys.forEach { collectionName ->
-            getRoutes(collectionService, collectionName, parameterService)
+            getRoutes(collectionService, collectionName, parameterService, appConfig.host)
             postRoute(collectionService, collectionName, schemaService)
             putRoute(collectionService, collectionName, schemaService)
             deleteRoute(collectionService, collectionName)

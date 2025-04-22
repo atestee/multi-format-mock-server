@@ -74,8 +74,8 @@ dependencies {
     implementation("io.github.optimumcode:json-schema-validator:0.4.0") // For validation using schema
 
     // OpenAPI and Swagger UI
-    implementation("io.github.smiley4:ktor-openapi:5.0.1") // For generating OpenAPI specification
-    implementation("io.github.smiley4:ktor-swagger-ui:5.0.1") // For serving SwaggerUI
+    implementation("io.github.smiley4:ktor-openapi:5.0.2") // For generating OpenAPI specification
+    implementation("io.github.smiley4:ktor-swagger-ui:5.0.2") // For serving SwaggerUI
     implementation("io.swagger.parser.v3:swagger-parser:2.1.25") // For working with OpenAPI schema
 
     // Command-line args
