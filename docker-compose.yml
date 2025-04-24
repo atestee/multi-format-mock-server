@@ -1,0 +1,11 @@
+services:
+  mock-server-local:
+    image: atlasest/multi-format-mock-server
+    ports:
+      - "8080:8080"
+#    volumes:
+#      - ./db.json:/app/db.json
+#      - ./identifiers.json:/app/identifiers.json
+#      - ./application.yaml:/app/application.yaml:ro
+#      - ./schema.json:/app/schema.json:ro
+#    command: -s schema.json
