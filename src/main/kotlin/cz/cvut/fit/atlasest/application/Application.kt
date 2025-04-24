@@ -18,6 +18,7 @@ fun createOptions(): Options {
     val options = Options()
     options.addOption("s", "schema", true, "JSON Schema")
     options.addOption("h", "help", false, "Show help")
+    options.addOption("c", "config", true, "Config file")
     return options
 }
 
