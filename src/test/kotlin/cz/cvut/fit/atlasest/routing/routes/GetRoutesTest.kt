@@ -25,6 +25,20 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class GetRoutesTest : BaseTest() {
+    val bookList =
+        listOf(
+            "The Catcher in the Rye",
+            "To Kill a Mockingbird",
+            "1984",
+            "Moby Dick",
+            "Pride and Prejudice",
+            "The Great Gatsby",
+            "Sense and Sensibility",
+            "Les Miserables",
+            "Brave New World",
+            "Frankenstein",
+        )
+
     @Test
     fun `GET collections - returns list of collection names`() =
         testWithApp {
@@ -45,19 +59,7 @@ class GetRoutesTest : BaseTest() {
             assertNotNull(responseBody)
             assertEquals(10, responseBodyArray.jsonArray.size)
             val responseTitles = responseBodyArray.map { it.jsonObject["title"]?.jsonPrimitive?.content }
-            val expectedTitles =
-                listOf(
-                    "The Catcher in the Rye",
-                    "To Kill a Mockingbird",
-                    "1984",
-                    "Moby Dick",
-                    "Pride and Prejudice",
-                    "The Great Gatsby",
-                    "Sense and Sensibility",
-                    "Les Miserables",
-                    "Brave New World",
-                    "Frankenstein",
-                )
+            val expectedTitles = bookList
             assertEquals(expectedTitles, responseTitles)
         }
 
@@ -71,19 +73,7 @@ class GetRoutesTest : BaseTest() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
             val actualTitles = getTitleListFromXmlCollection(responseBody)
-            val expectedTitles =
-                listOf(
-                    "The Catcher in the Rye",
-                    "To Kill a Mockingbird",
-                    "1984",
-                    "Moby Dick",
-                    "Pride and Prejudice",
-                    "The Great Gatsby",
-                    "Sense and Sensibility",
-                    "Les Miserables",
-                    "Brave New World",
-                    "Frankenstein",
-                )
+            val expectedTitles = bookList
             assertEquals(expectedTitles, actualTitles)
         }
 
@@ -97,19 +87,7 @@ class GetRoutesTest : BaseTest() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
             val actualTitles = getTitleListFromCsvCollection(responseBody)
-            val expectedTitles =
-                listOf(
-                    "The Catcher in the Rye",
-                    "To Kill a Mockingbird",
-                    "1984",
-                    "Moby Dick",
-                    "Pride and Prejudice",
-                    "The Great Gatsby",
-                    "Sense and Sensibility",
-                    "Les Miserables",
-                    "Brave New World",
-                    "Frankenstein",
-                )
+            val expectedTitles = bookList
             assertEquals(expectedTitles, actualTitles)
         }
 

@@ -4,8 +4,8 @@ import cz.cvut.fit.atlasest.application.AppConfig
 import cz.cvut.fit.atlasest.exceptions.ParsingException
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import io.mockk.just
-import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
 import kotlinx.serialization.json.JsonArray
@@ -14,22 +14,23 @@ import kotlinx.serialization.json.JsonPrimitive
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import javax.validation.ValidationException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@ExtendWith(MockKExtension::class)
 class CollectionServiceTest {
     @MockK
-    var documentService = mockk<DocumentService>()
+    lateinit var documentService: DocumentService
 
     @MockK
-    var appConfig = mockk<AppConfig>()
+    lateinit var appConfig: AppConfig
 
-    @MockK
     var schemaFilename: String? = null
 
     @MockK
-    var schemaService = mockk<SchemaService>()
+    lateinit var schemaService: SchemaService
 
     private val collectionsFilename = "collections.json"
     private val identifiersFilename = "identifiers.json"
