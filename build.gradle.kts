@@ -12,7 +12,7 @@ plugins {
 
 jacoco {
     toolVersion = "0.8.12"
-    reportsDirectory.set(layout.buildDirectory.dir("reportsJaCoCo"))
+    reportsDirectory.set(layout.buildDirectory.dir("reports/jacoco"))
 }
 
 group = "cz.cvut.fit.atlasest"
@@ -93,7 +93,12 @@ tasks.jacocoTestReport {
     dependsOn(tasks.test)
 
     reports {
+        csv.required.set(true)
         xml.required.set(true)
         html.required.set(true)
     }
+}
+
+tasks.check {
+    dependsOn(tasks.jacocoTestReport)
 }

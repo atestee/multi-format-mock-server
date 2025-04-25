@@ -13,8 +13,34 @@ Test:
       - build
       - .gradle
   script:
-    - ./gradlew test
+    - ./gradlew test jacocoTestReport
+    - cat build/reports/jacoco/test/html/index.html | grep -o '<tfoot>.*</tfoot>' | grep -o '[0-9]\{1,3\}%' | head -n 1 | sed 's/%//' > coverage.txt
+    - cat coverage.txt
+  coverage: '/Total.*?([0-9]{1,3})%/'
+  artifacts:
+    paths:
+      - coverage.txt
+    reports:
+      coverage_report:
+        coverage_format: jacoco
+        path: build/reports/jacoco/test/jacocoTestReport.xml
 
+Coverage check:
+  stage: test
+  needs:
+    - job: Test
+      artifacts: true
+  script:
+    - |
+      apt-get update && apt-get install -y bc
+      COVERAGE=$(cat coverage.txt)
+      echo "Extracted coverage: $COVERAGE%"
+      if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+        echo "Code coverage $COVERAGE% is less than 80%"
+        exit 1
+      else
+        echo "Code coverage is acceptable ($COVERAGE%)"
+      fi
 
 Build using Gradle:
   stage: build
