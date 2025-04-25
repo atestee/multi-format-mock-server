@@ -14,8 +14,9 @@ Test:
       - .gradle
   script:
     - ./gradlew test jacocoTestReport
-    - cat build/reports/jacoco/test/html/index.html | grep -o '<tfoot>.*</tfoot>' | grep -o '[0-9]\{1,3\}%' | head -n 1 | sed 's/%//' > coverage.txt
-    - cat coverage.txt
+    - COVERAGE=$(cat build/reports/jacoco/test/html/index.html | grep -o '<tfoot>.*</tfoot>' | grep -o '[0-9]\{1,3\}%' | head -n 1)
+    - echo $COVERAGE | sed 's/%//' > coverage.txt
+    - echo $COVERAGE
   coverage: '/Total.*?([0-9]{1,3})%/'
   artifacts:
     paths:
