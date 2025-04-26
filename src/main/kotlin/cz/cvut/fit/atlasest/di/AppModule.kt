@@ -18,7 +18,7 @@ val appModule = { appConfig: AppConfig, schemaFilename: String? ->
         single { CollectionService(get(), schemaFilename, get(), get()) }
         single { FilterService() }
         single { SortingService() }
-        single { PaginationService() }
+        single { PaginationService(appConfig.defaultLimit) }
         single { ParameterService(get(), get(), get(), get()) }
     }
 }

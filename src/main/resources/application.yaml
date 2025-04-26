@@ -13,3 +13,6 @@ data:
 
 cors:
   allowed-host: *
+
+pagination:
+  defaultLimit: 10

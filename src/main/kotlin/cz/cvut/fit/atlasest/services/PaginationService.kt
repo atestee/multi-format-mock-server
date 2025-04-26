@@ -7,9 +7,9 @@ import kotlin.math.min
 /**
  * A service for handling pagination of JSON object collections.
  */
-class PaginationService {
-    val defaultLimit = 10
-
+class PaginationService(
+    val defaultLimit: Int,
+) {
     /**
      * Applies pagination to a collection of JSON objects based on the provided page and limit parameters.
      *

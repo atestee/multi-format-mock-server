@@ -11,10 +11,10 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 
-val JSON_MIME = "application/json"
-val XML_MIME = "application/xml"
-val CSV_MIME = "text/csv"
-val ALL_MIME = "*/*"
+const val JSON_MIME = "application/json"
+const val XML_MIME = "application/xml"
+const val CSV_MIME = "text/csv"
+const val ALL_MIME = "*/*"
 
 val SUPPORTED_TYPES = listOf(ContentType.Application.Json, ContentType.Application.Xml, ContentType.Text.CSV)
 

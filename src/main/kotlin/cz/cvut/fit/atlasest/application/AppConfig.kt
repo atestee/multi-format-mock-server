@@ -11,6 +11,7 @@ data class AppConfig(
     val collectionsFilename: String,
     val identifiersFileName: String,
     val isTest: Boolean,
+    val defaultLimit: Int,
 )
 
 fun Application.loadAppConfig(): AppConfig {
@@ -22,5 +23,6 @@ fun Application.loadAppConfig(): AppConfig {
         collectionsFilename = config.property("data.fileName").getString(),
         identifiersFileName = config.property("data.identifiersFileName").getString(),
         isTest = false,
+        defaultLimit = config.propertyOrNull("pagination.defaultLimit")?.getString()?.toIntOrNull() ?: 10,
     )
 }
