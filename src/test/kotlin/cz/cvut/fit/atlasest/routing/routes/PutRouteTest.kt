@@ -1,7 +1,7 @@
 package cz.cvut.fit.atlasest.routing.routes
 
 import BaseTest
-import cz.cvut.fit.atlasest.service.generateValidationError
+import cz.cvut.fit.atlasest.services.generateValidationError
 import cz.cvut.fit.atlasest.utils.toJsonObject
 import io.ktor.client.request.accept
 import io.ktor.client.request.put

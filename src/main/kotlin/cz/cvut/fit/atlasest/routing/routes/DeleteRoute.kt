@@ -1,7 +1,7 @@
 package cz.cvut.fit.atlasest.routing.routes
 
 import com.cesarferreira.pluralize.singularize
-import cz.cvut.fit.atlasest.service.CollectionService
+import cz.cvut.fit.atlasest.services.CollectionService
 import cz.cvut.fit.atlasest.utils.getFieldValue
 import io.github.smiley4.ktoropenapi.delete
 import io.ktor.http.HttpStatusCode

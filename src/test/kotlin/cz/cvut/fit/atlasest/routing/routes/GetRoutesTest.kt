@@ -2,10 +2,10 @@ package cz.cvut.fit.atlasest.routing.routes
 
 import BaseTest
 import com.fasterxml.jackson.databind.JsonNode
-import cz.cvut.fit.atlasest.service.LIMIT
-import cz.cvut.fit.atlasest.service.ORDER
-import cz.cvut.fit.atlasest.service.PAGE
-import cz.cvut.fit.atlasest.service.SORT
+import cz.cvut.fit.atlasest.services.LIMIT
+import cz.cvut.fit.atlasest.services.ORDER
+import cz.cvut.fit.atlasest.services.PAGE
+import cz.cvut.fit.atlasest.services.SORT
 import cz.cvut.fit.atlasest.utils.getFieldValue
 import cz.cvut.fit.atlasest.utils.toJsonArray
 import cz.cvut.fit.atlasest.utils.toJsonObject

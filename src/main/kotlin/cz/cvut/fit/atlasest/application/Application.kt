@@ -1,7 +1,7 @@
 package cz.cvut.fit.atlasest.application
 
 import cz.cvut.fit.atlasest.di.configureDI
-import cz.cvut.fit.atlasest.exceptions.configureExceptionHandling
+import cz.cvut.fit.atlasest.exceptionHandling.configureExceptionHandling
 import cz.cvut.fit.atlasest.routing.configureRouting
 import cz.cvut.fit.atlasest.utils.log
 import io.ktor.http.HttpHeaders
@@ -14,32 +14,24 @@ import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.HelpFormatter
 import org.apache.commons.cli.Options
 
-fun createOptions(): Options {
-    val options = Options()
-    options.addOption("s", "schema", true, "JSON Schema")
-    options.addOption("h", "help", false, "Show help")
-    options.addOption("c", "config", true, "Config file")
-    return options
-}
-
-fun parseCommandLineArgs(
-    options: Options,
-    args: Array<String>,
-): CommandLine {
+fun defineCliOptions(args: Array<String>): CommandLine {
+    val options =
+        Options().apply {
+            this.addOption("s", "schema", true, "JSON Schema")
+            this.addOption("h", "help", false, "Show help")
+            this.addOption("c", "config", true, "Config file")
+        }
     val parser = DefaultParser()
-    return parser.parse(options, args)
-}
-
-fun showHelp(options: Options) {
-    val formatter = HelpFormatter()
-    formatter.printHelp("java -jar build/libs/multi-format-mock-server-all.jar", options)
-    return
+    val cmd = parser.parse(options, args)
+    if (cmd.hasOption("h")) {
+        val formatter = HelpFormatter()
+        formatter.printHelp("java -jar build/libs/multi-format-mock-server-all.jar", options)
+    }
+    return cmd
 }
 
 fun main(args: Array<String>) {
-    val options = createOptions()
-    val cmd = parseCommandLineArgs(options, args)
-    if (cmd.hasOption("h")) showHelp(options)
+    val cmd = defineCliOptions(args)
 
     val schema = cmd.getOptionValue("s")
     if (schema != null) {

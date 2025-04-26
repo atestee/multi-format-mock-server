@@ -1,4 +1,4 @@
-package cz.cvut.fit.atlasest.exceptions
+package cz.cvut.fit.atlasest.exceptionHandling
 
 import java.lang.Exception
 

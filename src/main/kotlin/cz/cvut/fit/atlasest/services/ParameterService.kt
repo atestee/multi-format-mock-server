@@ -1,4 +1,4 @@
-package cz.cvut.fit.atlasest.service
+package cz.cvut.fit.atlasest.services
 
 import com.cesarferreira.pluralize.pluralize
 import com.cesarferreira.pluralize.singularize
@@ -12,12 +12,12 @@ import kotlinx.serialization.json.jsonPrimitive
 /**
  * A service for processing request parameters such as filtering, pagination, and sorting.
  */
-class ParameterService {
-    private val filterService = FilterService()
-    private val paginationService = PaginationService()
-    private val sortingService = SortingService()
-    private val schemaService = SchemaService()
-
+class ParameterService(
+    private val schemaService: SchemaService,
+    private val filterService: FilterService,
+    private val paginationService: PaginationService,
+    private val sortingService: SortingService,
+) {
     /**
      * Applies filtering to a collection of JSON objects based on request parameters.
      * Request parameters are either only the property, like "title" which we want to match with a value.

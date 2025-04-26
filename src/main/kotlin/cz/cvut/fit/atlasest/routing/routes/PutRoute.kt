@@ -1,11 +1,11 @@
 package cz.cvut.fit.atlasest.routing.routes
 
 import com.cesarferreira.pluralize.singularize
-import cz.cvut.fit.atlasest.routing.ALL_MIME
-import cz.cvut.fit.atlasest.routing.getResourceInJsonFormat
-import cz.cvut.fit.atlasest.routing.returnResourceInAcceptedFormat
-import cz.cvut.fit.atlasest.service.CollectionService
-import cz.cvut.fit.atlasest.service.SchemaService
+import cz.cvut.fit.atlasest.services.CollectionService
+import cz.cvut.fit.atlasest.services.SchemaService
+import cz.cvut.fit.atlasest.utils.ALL_MIME
+import cz.cvut.fit.atlasest.utils.getResourceInJsonFormat
+import cz.cvut.fit.atlasest.utils.returnResourceInAcceptedFormat
 import io.github.smiley4.ktoropenapi.config.descriptors.ref
 import io.github.smiley4.ktoropenapi.put
 import io.ktor.http.ContentType
@@ -68,9 +68,9 @@ fun Route.putRoute(
             val updatedItem = collectionService.updateItemInCollection(collectionName, id, jsonItem)
             returnResourceInAcceptedFormat(call, HttpStatusCode.OK, updatedItem, accept)
         } else {
-            val insertedItem = collectionService.insertItemToCollection(collectionName, jsonItem)
-            call.response.headers.append("Location", "/$collectionName/${insertedItem.identifier}")
-            returnResourceInAcceptedFormat(call, HttpStatusCode.Created, insertedItem.data, accept)
+            val (identifier, data) = collectionService.insertItemToCollection(collectionName, jsonItem)
+            call.response.headers.append("Location", "/$collectionName/$identifier")
+            returnResourceInAcceptedFormat(call, HttpStatusCode.Created, data, accept)
         }
     }
 }

@@ -1,7 +1,7 @@
-package cz.cvut.fit.atlasest.service
+package cz.cvut.fit.atlasest.services
 
 import cz.cvut.fit.atlasest.application.AppConfig
-import cz.cvut.fit.atlasest.exceptions.ParsingException
+import cz.cvut.fit.atlasest.exceptionHandling.ParsingException
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension

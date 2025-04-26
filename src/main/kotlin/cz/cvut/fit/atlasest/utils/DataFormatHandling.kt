@@ -1,9 +1,5 @@
-package cz.cvut.fit.atlasest.routing
+package cz.cvut.fit.atlasest.utils
 
-import cz.cvut.fit.atlasest.utils.csvToJson
-import cz.cvut.fit.atlasest.utils.toCSV
-import cz.cvut.fit.atlasest.utils.toXML
-import cz.cvut.fit.atlasest.utils.xmlToJson
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.parseAndSortContentTypeHeader

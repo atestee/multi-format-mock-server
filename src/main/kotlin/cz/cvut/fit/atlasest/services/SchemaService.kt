@@ -1,4 +1,4 @@
-package cz.cvut.fit.atlasest.service
+package cz.cvut.fit.atlasest.services
 
 import com.cesarferreira.pluralize.pluralize
 import com.fasterxml.jackson.databind.JsonNode
@@ -8,7 +8,7 @@ import com.saasquatch.jsonschemainferrer.FormatInferrers
 import com.saasquatch.jsonschemainferrer.JsonSchemaInferrer
 import com.saasquatch.jsonschemainferrer.RequiredPolicies
 import com.saasquatch.jsonschemainferrer.SpecVersion
-import cz.cvut.fit.atlasest.exceptions.ParsingException
+import cz.cvut.fit.atlasest.exceptionHandling.ParsingException
 import cz.cvut.fit.atlasest.utils.toJsonElement
 import cz.cvut.fit.atlasest.utils.toJsonObject
 import io.github.optimumcode.json.schema.JsonSchema

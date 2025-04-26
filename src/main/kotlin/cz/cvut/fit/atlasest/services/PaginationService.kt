@@ -1,4 +1,4 @@
-package cz.cvut.fit.atlasest.service
+package cz.cvut.fit.atlasest.services
 
 import io.ktor.server.plugins.BadRequestException
 import kotlinx.serialization.json.JsonObject

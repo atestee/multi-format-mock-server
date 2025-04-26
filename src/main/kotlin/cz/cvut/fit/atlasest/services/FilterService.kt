@@ -1,6 +1,6 @@
-package cz.cvut.fit.atlasest.service
+package cz.cvut.fit.atlasest.services
 
-import cz.cvut.fit.atlasest.exceptions.InvalidDataException
+import cz.cvut.fit.atlasest.exceptionHandling.InvalidDataException
 import cz.cvut.fit.atlasest.utils.getFieldValue
 import io.ktor.server.plugins.BadRequestException
 import kotlinx.serialization.json.JsonArray

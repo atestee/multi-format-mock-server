@@ -1,4 +1,4 @@
-package cz.cvut.fit.atlasest.service
+package cz.cvut.fit.atlasest.services
 
 const val PAGE = "_page"
 const val LIMIT = "_limit"

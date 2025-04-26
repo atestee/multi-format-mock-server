@@ -1,6 +1,6 @@
-package cz.cvut.fit.atlasest.service
+package cz.cvut.fit.atlasest.services
 
-import cz.cvut.fit.atlasest.exceptions.ParsingException
+import cz.cvut.fit.atlasest.exceptionHandling.ParsingException
 import cz.cvut.fit.atlasest.utils.toJsonObject
 import kotlinx.io.files.FileNotFoundException
 import kotlinx.serialization.SerializationException

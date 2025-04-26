@@ -6,9 +6,9 @@ import cz.cvut.fit.atlasest.routing.routes.deleteRoute
 import cz.cvut.fit.atlasest.routing.routes.getRoutes
 import cz.cvut.fit.atlasest.routing.routes.postRoute
 import cz.cvut.fit.atlasest.routing.routes.putRoute
-import cz.cvut.fit.atlasest.service.CollectionService
-import cz.cvut.fit.atlasest.service.ParameterService
-import cz.cvut.fit.atlasest.service.SchemaService
+import cz.cvut.fit.atlasest.services.CollectionService
+import cz.cvut.fit.atlasest.services.ParameterService
+import cz.cvut.fit.atlasest.services.SchemaService
 import io.github.smiley4.ktoropenapi.OpenApi
 import io.github.smiley4.ktoropenapi.openApi
 import io.github.smiley4.ktorswaggerui.swaggerUI

@@ -1,4 +1,4 @@
-package cz.cvut.fit.atlasest.service
+package cz.cvut.fit.atlasest.services
 
 import BaseTest
 import cz.cvut.fit.atlasest.utils.getFieldValue

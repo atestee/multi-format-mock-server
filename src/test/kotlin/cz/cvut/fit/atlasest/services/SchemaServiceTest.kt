@@ -1,7 +1,7 @@
-package cz.cvut.fit.atlasest.service
+package cz.cvut.fit.atlasest.services
 
 import BaseTest
-import cz.cvut.fit.atlasest.exceptions.ParsingException
+import cz.cvut.fit.atlasest.exceptionHandling.ParsingException
 import cz.cvut.fit.atlasest.testData.TestData
 import cz.cvut.fit.atlasest.utils.add
 import cz.cvut.fit.atlasest.utils.toJsonObject

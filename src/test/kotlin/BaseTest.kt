@@ -1,8 +1,8 @@
 import cz.cvut.fit.atlasest.application.AppConfig
 import cz.cvut.fit.atlasest.di.appModule
-import cz.cvut.fit.atlasest.exceptions.configureExceptionHandling
+import cz.cvut.fit.atlasest.exceptionHandling.configureExceptionHandling
 import cz.cvut.fit.atlasest.routing.configureRouting
-import cz.cvut.fit.atlasest.service.CollectionService
+import cz.cvut.fit.atlasest.services.CollectionService
 import io.ktor.server.application.host
 import io.ktor.server.application.port
 import io.ktor.server.config.yaml.YamlConfigLoader

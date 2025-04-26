@@ -1,10 +1,9 @@
-package cz.cvut.fit.atlasest.service
+package cz.cvut.fit.atlasest.services
 
 import cz.cvut.fit.atlasest.application.AppConfig
 import cz.cvut.fit.atlasest.data.Collection
-import cz.cvut.fit.atlasest.data.Item
-import cz.cvut.fit.atlasest.exceptions.InvalidDataException
-import cz.cvut.fit.atlasest.exceptions.ParsingException
+import cz.cvut.fit.atlasest.exceptionHandling.InvalidDataException
+import cz.cvut.fit.atlasest.exceptionHandling.ParsingException
 import cz.cvut.fit.atlasest.utils.add
 import cz.cvut.fit.atlasest.utils.log
 import io.ktor.server.plugins.NotFoundException
@@ -93,7 +92,7 @@ class CollectionService(
      * @param collectionName The name of the collection.
      * @param item The JSON object representing the item to be inserted.
      *
-     * @return The inserted item wrapped in an [Item] instance.
+     * @return The inserted item and its identifier.
      *
      * @throws NotFoundException If the collection was not found.
      * @throws ValidationException If the item does not match the schema.
@@ -101,14 +100,14 @@ class CollectionService(
     fun insertItemToCollection(
         collectionName: String,
         item: JsonObject,
-    ): Item {
+    ): Pair<Int, JsonObject> {
         val collection = getCollectionData(collectionName)
         val id = collection.nextId
         val itemWithId = item.add(collection.identifier, JsonPrimitive(id))
         this.schemaService.validateDataAgainstSchema(itemWithId, collection.schema)
         collection.insertItem(itemWithId)
         saveData()
-        return Item(id, itemWithId)
+        return id to itemWithId
     }
 
     /**
