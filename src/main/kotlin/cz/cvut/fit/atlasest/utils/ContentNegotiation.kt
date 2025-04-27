@@ -52,7 +52,7 @@ suspend fun returnResourceInAcceptedFormat(
     resource: JsonElement,
     accept: String,
 ) {
-    val acceptNegotiated = negotiateContent(accept)
+    val acceptNegotiated = processAcceptHeader(accept)
     when (acceptNegotiated) {
         ContentType.Application.Json -> {
             call.response.headers.append("Content-Type", JSON_MIME)
@@ -73,7 +73,7 @@ suspend fun returnResourceInAcceptedFormat(
     }
 }
 
-internal fun negotiateContent(accept: String): ContentType? {
+internal fun processAcceptHeader(accept: String): ContentType? {
     if (accept.isBlank()) {
         return SUPPORTED_TYPES.first()
     }

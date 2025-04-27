@@ -2,6 +2,8 @@
 
 [![pipeline status](https://gitlab.fit.cvut.cz/atlasest/multi-format-mock-server/badges/main/pipeline.svg)](https://gitlab.fit.cvut.cz/atlasest/multi-format-mock-server/-/commits/main)
 
+[![coverage report](https://gitlab.fit.cvut.cz/atlasest/multi-format-mock-server/badges/main/coverage.svg)](https://gitlab.fit.cvut.cz/atlasest/multi-format-mock-server/-/commits/main)
+
 ## Building & Running
 
 To build or run the project, use one of the following tasks:

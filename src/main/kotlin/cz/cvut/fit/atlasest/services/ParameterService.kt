@@ -10,7 +10,8 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 /**
- * A service for processing request parameters such as filtering, pagination, and sorting.
+ * A service for applying data processing operations based request parameters such as filtering, pagination, sorting, query search,
+ * embedding and expanding.
  */
 class ParameterService(
     private val schemaService: SchemaService,

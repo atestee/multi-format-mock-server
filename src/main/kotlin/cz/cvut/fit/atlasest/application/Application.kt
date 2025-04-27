@@ -3,7 +3,6 @@ package cz.cvut.fit.atlasest.application
 import cz.cvut.fit.atlasest.di.configureDI
 import cz.cvut.fit.atlasest.exceptionHandling.configureExceptionHandling
 import cz.cvut.fit.atlasest.routing.configureRouting
-import cz.cvut.fit.atlasest.utils.log
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.server.application.Application
@@ -19,7 +18,6 @@ fun defineCliOptions(args: Array<String>): CommandLine {
         Options().apply {
             this.addOption("s", "schema", true, "JSON Schema")
             this.addOption("h", "help", false, "Show help")
-            this.addOption("c", "config", true, "Config file")
         }
     val parser = DefaultParser()
     val cmd = parser.parse(options, args)
@@ -32,7 +30,6 @@ fun defineCliOptions(args: Array<String>): CommandLine {
 
 fun main(args: Array<String>) {
     val cmd = defineCliOptions(args)
-
     val schema = cmd.getOptionValue("s")
     if (schema != null) {
         System.setProperty("schema", schema)
@@ -42,13 +39,11 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
-    log.info("Starting Ktor application...")
-    val schemaFile = System.getProperty("schema")
+    val schemaFilename = System.getProperty("schema")
+    configureDI(loadAppConfig(schemaFilename))
     configureExceptionHandling()
-    configureDI(loadAppConfig(), schemaFile)
     configureRouting()
     configureCORS()
-    log.info("Application started successfully!")
 }
 
 fun Application.configureCORS() {

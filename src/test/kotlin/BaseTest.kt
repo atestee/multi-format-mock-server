@@ -20,7 +20,7 @@ open class BaseTest : KoinTest {
 
     init {
         startKoin {
-            modules(appModule(appConfig, null))
+            modules(appModule(appConfig))
         }
     }
 
@@ -37,9 +37,11 @@ open class BaseTest : KoinTest {
             host = config.host,
             port = config.port,
             rootPath = config.property("ktor.deployment.rootPath").getString(),
-            collectionsFilename = config.property("data.fileName").getString(),
+            collectionsFilename = config.property("data.collectionsFileName").getString(),
             identifiersFileName = config.property("data.identifiersFileName").getString(),
+            schemaFilename = null,
             isTest = true,
+            defaultLimit = 10,
         )
     }
 

@@ -40,6 +40,7 @@ class CollectionServiceTest {
     fun init() {
         every { appConfig.collectionsFilename } returns collectionsFilename
         every { appConfig.identifiersFileName } returns identifiersFilename
+        every { appConfig.schemaFilename } returns schemaFilename
     }
 
     @Test
@@ -62,7 +63,6 @@ class CollectionServiceTest {
                 CollectionService(
                     documentService = documentService,
                     appConfig = appConfig,
-                    schemaFilename = schemaFilename,
                     schemaService = schemaService,
                 )
             }
@@ -93,7 +93,6 @@ class CollectionServiceTest {
                 CollectionService(
                     documentService = documentService,
                     appConfig = appConfig,
-                    schemaFilename = schemaFilename,
                     schemaService = schemaService,
                 )
             }
@@ -121,7 +120,6 @@ class CollectionServiceTest {
                 CollectionService(
                     documentService = documentService,
                     appConfig = appConfig,
-                    schemaFilename = schemaFilename,
                     schemaService = schemaService,
                 )
             }
@@ -158,7 +156,6 @@ class CollectionServiceTest {
                 CollectionService(
                     documentService = documentService,
                     appConfig = appConfig,
-                    schemaFilename = schemaFilename,
                     schemaService = schemaService,
                 )
             }
@@ -195,7 +192,6 @@ class CollectionServiceTest {
                 CollectionService(
                     documentService = documentService,
                     appConfig = appConfig,
-                    schemaFilename = schemaFilename,
                     schemaService = schemaService,
                 )
             }
@@ -235,7 +231,6 @@ class CollectionServiceTest {
                 CollectionService(
                     documentService = documentService,
                     appConfig = appConfig,
-                    schemaFilename = schemaFilename,
                     schemaService = schemaService,
                 )
             }
@@ -275,7 +270,6 @@ class CollectionServiceTest {
                 CollectionService(
                     documentService = documentService,
                     appConfig = appConfig,
-                    schemaFilename = schemaFilename,
                     schemaService = schemaService,
                 )
             }
@@ -317,7 +311,6 @@ class CollectionServiceTest {
         CollectionService(
             documentService = documentService,
             appConfig = appConfig,
-            schemaFilename = schemaFilename,
             schemaService = schemaService,
         )
 
@@ -355,11 +348,11 @@ class CollectionServiceTest {
                     "properties" to JsonPrimitive(1),
                 ),
             )
+        every { appConfig.schemaFilename } returns schemaFilename2
 
         CollectionService(
             documentService = documentService,
             appConfig = appConfig,
-            schemaFilename = schemaFilename2,
             schemaService = schemaService,
         )
 
@@ -394,13 +387,13 @@ class CollectionServiceTest {
         every { documentService.readJsonFile(schemaFilename2) } returns schemaCollection
         every { schemaService.getCollectionSchema(collectionName, schemaCollection) } returns schema
         every { schemaService.validateDataAgainstSchema(item, schema) } throws ValidationException("error")
+        every { appConfig.schemaFilename } returns schemaFilename2
 
         val exception =
             assertThrows<ValidationException> {
                 CollectionService(
                     documentService = documentService,
                     appConfig = appConfig,
-                    schemaFilename = schemaFilename2,
                     schemaService = schemaService,
                 )
             }
@@ -438,12 +431,12 @@ class CollectionServiceTest {
         every { documentService.readJsonFile(schemaFilename2) } returns schemaCollection
         every { schemaService.getCollectionSchema(collectionName, schemaCollection) } returns schema
         every { schemaService.validateDataAgainstSchema(item, schema) } just runs
+        every { appConfig.schemaFilename } returns schemaFilename2
 
         assertDoesNotThrow {
             CollectionService(
                 documentService = documentService,
                 appConfig = appConfig,
-                schemaFilename = schemaFilename2,
                 schemaService = schemaService,
             )
         }

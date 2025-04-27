@@ -1,5 +1,5 @@
 services:
-  mock-server-local:
+  mock-server:
     image: atlasest/multi-format-mock-server
     ports:
       - "8080:8080"

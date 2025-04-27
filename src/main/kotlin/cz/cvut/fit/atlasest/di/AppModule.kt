@@ -10,12 +10,12 @@ import cz.cvut.fit.atlasest.services.SchemaService
 import cz.cvut.fit.atlasest.services.SortingService
 import org.koin.dsl.module
 
-val appModule = { appConfig: AppConfig, schemaFilename: String? ->
+val appModule = { appConfig: AppConfig ->
     module {
         single { appConfig }
         single { DocumentService(appConfig.isTest) }
         single { SchemaService() }
-        single { CollectionService(get(), schemaFilename, get(), get()) }
+        single { CollectionService(get(), get(), get()) }
         single { FilterService() }
         single { SortingService() }
         single { PaginationService(appConfig.defaultLimit) }

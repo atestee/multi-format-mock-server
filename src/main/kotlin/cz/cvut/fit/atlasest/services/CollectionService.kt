@@ -21,7 +21,6 @@ import io.swagger.v3.oas.models.media.Schema as Schema
  */
 class CollectionService(
     private val appConfig: AppConfig,
-    private val schemaFilename: String?,
     private val documentService: DocumentService,
     private val schemaService: SchemaService,
 ) {
@@ -173,7 +172,7 @@ class CollectionService(
         val identifiersData = documentService.readJsonFile(appConfig.identifiersFileName)
 
         val identifiers = getIdentifiers(identifiersData)
-        val schemaCollection = if (schemaFilename != null) documentService.readJsonFile(schemaFilename) else null
+        val schemaCollection = if (appConfig.schemaFilename != null) documentService.readJsonFile(appConfig.schemaFilename) else null
 
         collectionData.forEach { (collectionName, collection) ->
             if (collection !is JsonArray) {
@@ -192,7 +191,7 @@ class CollectionService(
                 val lastId = getMaxIdentifier(collectionList, identifier, collectionName)
                 val schema =
                     if (schemaCollection != null) {
-                        log.info("Trying to retrieve schema from given file $schemaFilename for collection '$collectionName'")
+                        log.info("Trying to retrieve schema from given file ${appConfig.schemaFilename} for collection '$collectionName'")
                         val schemaForCollection = schemaService.getCollectionSchema(collectionName, schemaCollection)
                         if (schemaForCollection is JsonObject) {
                             log.info("Schema for collection $collectionName exists")
