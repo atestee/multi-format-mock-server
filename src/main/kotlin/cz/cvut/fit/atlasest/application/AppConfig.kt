@@ -11,20 +11,22 @@ data class AppConfig(
     val collectionsFilename: String,
     val identifiersFileName: String,
     val schemaFilename: String?,
-    val isTest: Boolean,
     val defaultLimit: Int,
+    val isTest: Boolean,
 )
 
-fun Application.loadAppConfig(schemaFilename: String?): AppConfig {
+fun Application.loadAppConfig(): AppConfig {
+    val schemaFilename = System.getProperty("schema")
+    val paginationLimit = System.getProperty("paginationLimit")
     val config = environment.config
     return AppConfig(
         port = config.port,
         host = config.host,
         rootPath = config.property("ktor.deployment.rootPath").getString(),
-        collectionsFilename = config.property("data.collectionsFileName").getString(),
-        identifiersFileName = config.property("data.identifiersFileName").getString(),
+        collectionsFilename = config.property("data.collectionsFilename").getString(),
+        identifiersFileName = config.property("data.identifiersFilename").getString(),
         schemaFilename = schemaFilename,
         isTest = false,
-        defaultLimit = config.propertyOrNull("pagination.defaultLimit")?.getString()?.toIntOrNull() ?: 10,
+        defaultLimit = paginationLimit?.toIntOrNull() ?: 10,
     )
 }

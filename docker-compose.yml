@@ -8,4 +8,6 @@ services:
 #      - ./identifiers.json:/app/identifiers.json
 #      - ./application.yaml:/app/application.yaml:ro
 #      - ./schema.json:/app/schema.json:ro
-#    command: -s schema.json
+#    command:
+#      -s schema.json
+#      -l 10
