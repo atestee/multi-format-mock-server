@@ -91,7 +91,7 @@ fun Application.configureRouting() {
             call.respondText("collections: $collectionNames")
         }
         collectionNames.forEach { collectionName ->
-            getRoutes(collectionService, collectionName, parameterService, appConfig.host)
+            getRoutes(collectionService, collectionName, parameterService)
             postRoute(collectionService, collectionName, schemaService)
             putRoute(collectionService, collectionName, schemaService)
             deleteRoute(collectionService, collectionName)

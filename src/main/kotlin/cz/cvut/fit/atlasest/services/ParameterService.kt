@@ -2,6 +2,7 @@ package cz.cvut.fit.atlasest.services
 
 import com.cesarferreira.pluralize.pluralize
 import com.cesarferreira.pluralize.singularize
+import cz.cvut.fit.atlasest.application.AppConfig
 import cz.cvut.fit.atlasest.utils.add
 import cz.cvut.fit.atlasest.utils.toCSV
 import io.ktor.server.plugins.BadRequestException
@@ -14,11 +15,58 @@ import kotlinx.serialization.json.jsonPrimitive
  * embedding and expanding.
  */
 class ParameterService(
+    private val collectionService: CollectionService,
     private val schemaService: SchemaService,
+    private val appConfig: AppConfig,
     private val filterService: FilterService,
     private val paginationService: PaginationService,
     private val sortingService: SortingService,
 ) {
+    fun getCollectionItemWithParams(
+        collectionName: String,
+        params: Map<String, List<String>>,
+    ): Pair<MutableList<JsonObject>, String?> {
+        var (data, schemas) =
+            if (params[EMBED] is List<String> || params[EXPAND] is List<String>) {
+                val data = applyEmbedAndExpand(params, collectionName)
+                val schemas = getEmbedAndExpandCollectionSchemas(params)
+                data to schemas
+            } else {
+                collectionService.getCollectionItems(collectionName) to JsonObject(mapOf())
+            }
+        val queriedData = applyQuerySearch(data, params)
+        val schema = collectionService.getCollectionSchema(collectionName)
+        schemas = schemas.add(collectionName, schema)
+        val filteredData = applyFilter(collectionName, queriedData, params, schemas)
+        val (paginatedData, links) = applyPagination(filteredData, params, "${appConfig.host}/$collectionName", filteredData.size)
+        val sortedData = applySorting(paginatedData, params)
+        return sortedData to links
+    }
+
+    /**
+     * Embeds and expands an item with other collections defined by request parameters to main collection based on foreign keys.
+     *
+     * @param params The request parameters containing embedding and expanding details.
+     * @param collectionName The name of the main collection.
+     * @param id The identifier value of the item.
+     *
+     * @return Collection data including embedded items.
+     */
+    fun applyEmbedAndExpand(
+        params: Map<String, List<String>>,
+        collectionName: String,
+        id: String,
+    ): JsonObject {
+        val embedKeys = params[EMBED]
+        val expandKeys = params[EXPAND]
+        var item = collectionService.getItemById(collectionName, id)
+        val identifier = collectionService.getCollectionIdentifier(collectionName)
+        val embedForeignKey = collectionName.singularize() + "Id"
+        item = embedItem(item, embedKeys, identifier, embedForeignKey)
+        item = expandItem(item, expandKeys)
+        return item
+    }
+
     /**
      * Applies filtering to a collection of JSON objects based on request parameters.
      * Request parameters are either only the property, like "title" which we want to match with a value.
@@ -32,7 +80,7 @@ class ParameterService(
      *
      * @return A filtered list of JSON objects.
      */
-    fun applyFilter(
+    internal fun applyFilter(
         collectionName: String,
         collectionItems: MutableList<JsonObject>,
         params: Map<String, List<String>>,
@@ -59,7 +107,7 @@ class ParameterService(
      *
      * @return A pair containing the paginated list of JSON objects and an optional string of pagination links (RFC 5988 format).
      */
-    fun applyPagination(
+    internal fun applyPagination(
         collectionItems: MutableList<JsonObject>,
         params: Map<String, List<String>>,
         baseUrl: String,
@@ -105,7 +153,7 @@ class ParameterService(
      *
      * @return A sorted list of JSON objects.
      */
-    fun applySorting(
+    internal fun applySorting(
         collectionItems: MutableList<JsonObject>,
         params: Map<String, List<String>>,
     ): MutableList<JsonObject> {
@@ -126,7 +174,7 @@ class ParameterService(
      *
      * @return The resulting list of JSON objects.
      */
-    fun applyQuerySearch(
+    internal fun applyQuerySearch(
         collectionItems: MutableList<JsonObject>,
         params: Map<String, List<String>>,
     ): MutableList<JsonObject> {
@@ -150,14 +198,12 @@ class ParameterService(
      *
      * @param params The request parameters containing embedding and expanding details.
      * @param collectionName The name of the main collection.
-     * @param collectionService The service used to retrieve collections.
      *
      * @return Collection data including embedded items.
      */
-    fun applyEmbedAndExpand(
+    internal fun applyEmbedAndExpand(
         params: Map<String, List<String>>,
         collectionName: String,
-        collectionService: CollectionService,
     ): MutableList<JsonObject> {
         val embedValues = params[EMBED]
         val expandValues = params[EXPAND]
@@ -167,8 +213,8 @@ class ParameterService(
 
         return mainCollection
             .map { item ->
-                val newItem = embedItem(item, embedValues, collectionService, identifier, embedForeignKey)
-                expandItem(newItem, expandValues, collectionService)
+                val newItem = embedItem(item, embedValues, identifier, embedForeignKey)
+                expandItem(newItem, expandValues)
             }.toMutableList()
     }
 
@@ -176,14 +222,10 @@ class ParameterService(
      * Retrieves the JSON schemas of collections related to the main collection from embed and expand parameters.
      *
      * @param params The request parameters containing embedding and expanding details.
-     * @param collectionService The service used to retrieve collections.
      *
      * @return JSON schemas of related collections.
      */
-    fun getEmbedAndExpandCollectionSchemas(
-        params: Map<String, List<String>>,
-        collectionService: CollectionService,
-    ): JsonObject {
+    private fun getEmbedAndExpandCollectionSchemas(params: Map<String, List<String>>): JsonObject {
         val embedValues = params[EMBED]
         val expandValues = params[EXPAND]
         var schemas = JsonObject(mapOf())
@@ -200,37 +242,10 @@ class ParameterService(
     }
 
     /**
-     * Embeds and expands an item with other collections defined by request parameters to main collection based on foreign keys.
-     *
-     * @param params The request parameters containing embedding and expanding details.
-     * @param collectionName The name of the main collection.
-     * @param id The identifier value of the item.
-     * @param collectionService The service used to retrieve collections.
-     *
-     * @return Collection data including embedded items.
-     */
-    fun applyEmbedAndExpand(
-        params: Map<String, List<String>>,
-        collectionName: String,
-        id: String,
-        collectionService: CollectionService,
-    ): JsonObject {
-        val embedKeys = params[EMBED]
-        val expandKeys = params[EXPAND]
-        var item = collectionService.getItemById(collectionName, id)
-        val identifier = collectionService.getCollectionIdentifier(collectionName)
-        val embedForeignKey = collectionName.singularize() + "Id"
-        item = embedItem(item, embedKeys, collectionService, identifier, embedForeignKey)
-        item = expandItem(item, expandKeys, collectionService)
-        return item
-    }
-
-    /**
      * Embeds related items that reference the main item (using a foreign key in related items) into the main item.
      *
      * @param item The main item to embed data from related collections into.
      * @param embedKeys A list of collection names to embed into the JSON object.
-     * @param collectionService The service used to retrieve collections.
      * @param identifier The identifier key for the main collection.
      * @param foreignKey The key in the related collection that links back to the main item.
      *
@@ -239,7 +254,6 @@ class ParameterService(
     private fun embedItem(
         item: JsonObject,
         embedKeys: List<String>?,
-        collectionService: CollectionService,
         identifier: String,
         foreignKey: String,
     ): JsonObject {
@@ -261,14 +275,12 @@ class ParameterService(
      *
      * @param item The main item to embed data from related collections into.
      * @param expandKeys A list of collection names (singularized) to expand the JSON object with.
-     * @param collectionService The service used to retrieve collections.
      *
      * @return The main item
      */
     private fun expandItem(
         item: JsonObject,
         expandKeys: List<String>?,
-        collectionService: CollectionService,
     ): JsonObject {
         var newItem = item
         expandKeys?.forEach { expandKey ->

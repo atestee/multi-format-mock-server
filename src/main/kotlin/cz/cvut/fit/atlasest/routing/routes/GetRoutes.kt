@@ -11,7 +11,6 @@ import cz.cvut.fit.atlasest.services.ParameterService
 import cz.cvut.fit.atlasest.services.QUERY
 import cz.cvut.fit.atlasest.services.SORT
 import cz.cvut.fit.atlasest.utils.ALL_MIME
-import cz.cvut.fit.atlasest.utils.add
 import cz.cvut.fit.atlasest.utils.returnResourceInAcceptedFormat
 import io.github.smiley4.ktoropenapi.config.descriptors.ref
 import io.github.smiley4.ktoropenapi.get
@@ -28,7 +27,6 @@ fun Route.getRoutes(
     collectionService: CollectionService,
     collectionName: String,
     parameterService: ParameterService,
-    host: String,
 ) {
     val queryParams = listOf(PAGE, LIMIT, SORT, ORDER, EMBED, EXPAND, QUERY)
 
@@ -54,22 +52,14 @@ fun Route.getRoutes(
     }) {
         val accept = call.request.headers["Accept"] ?: ALL_MIME
         val params = call.request.queryParameters.toMap()
-        var (data, schemas) =
-            if (params[EMBED] is List<String> || params[EXPAND] is List<String>) {
-                val data = parameterService.applyEmbedAndExpand(params, collectionName, collectionService)
-                val schemas = parameterService.getEmbedAndExpandCollectionSchemas(params, collectionService)
-                data to schemas
-            } else {
-                collectionService.getCollectionItems(collectionName) to JsonObject(mapOf())
-            }
-        val queriedData = parameterService.applyQuerySearch(data, params)
-        val schema = collectionService.getCollectionSchema(collectionName)
-        schemas = schemas.add(collectionName, schema)
-        val filteredData = parameterService.applyFilter(collectionName, queriedData, params, schemas)
-        val (paginatedData, links) = parameterService.applyPagination(filteredData, params, "$host/$collectionName", filteredData.size)
-        val sortedData = parameterService.applySorting(paginatedData, params)
-        if (links is String) call.response.headers.append("Link", links)
-        returnResourceInAcceptedFormat(call, HttpStatusCode.OK, JsonArray(sortedData), accept)
+        if (params.isEmpty()) {
+            val data = collectionService.getCollectionItems(collectionName)
+            returnResourceInAcceptedFormat(call, HttpStatusCode.OK, JsonArray(data), accept)
+        } else {
+            val (data, links) = parameterService.getCollectionItemWithParams(collectionName, params)
+            if (links is String) call.response.headers.append("Link", links)
+            returnResourceInAcceptedFormat(call, HttpStatusCode.OK, JsonArray(data), accept)
+        }
     }
 
     // GET collections item
@@ -101,7 +91,7 @@ fun Route.getRoutes(
         val params = call.request.queryParameters.toMap()
         val data =
             if (params[EMBED] is List<String> || params[EXPAND] is List<String>) {
-                parameterService.applyEmbedAndExpand(params, collectionName, id, collectionService)
+                parameterService.applyEmbedAndExpand(params, collectionName, id)
             } else {
                 collectionService.getItemById(collectionName, id)
             }

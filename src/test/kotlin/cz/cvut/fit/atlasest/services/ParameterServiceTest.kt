@@ -562,7 +562,6 @@ class ParameterServiceTest : BaseTest() {
             parameterService.applyEmbedAndExpand(
                 mapOf("_embed" to listOf("loans", "libraryBooks")),
                 "books",
-                collectionService,
             )
 
         val firstBookLoans = result.first()["loans"]
@@ -586,7 +585,6 @@ class ParameterServiceTest : BaseTest() {
                 mapOf("_embed" to listOf("loans", "libraryBooks")),
                 "books",
                 "1",
-                collectionService,
             )
 
         val loan = collectionService.getItemById("loans", "1")
@@ -602,7 +600,6 @@ class ParameterServiceTest : BaseTest() {
             parameterService.applyEmbedAndExpand(
                 mapOf("_expand" to listOf("book", "user")),
                 "loans",
-                collectionService,
             )
 
         val book = collectionService.getItemById("books", "1")
@@ -618,7 +615,6 @@ class ParameterServiceTest : BaseTest() {
                 mapOf("_expand" to listOf("book", "user")),
                 "loans",
                 "1",
-                collectionService,
             )
 
         val book = collectionService.getItemById("books", "1")
@@ -637,7 +633,6 @@ class ParameterServiceTest : BaseTest() {
                 ),
                 "users",
                 "1",
-                collectionService,
             )
 
         val libraryRegistration = collectionService.getItemById("libraryRegistrations", "1")

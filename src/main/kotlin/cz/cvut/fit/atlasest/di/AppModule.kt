@@ -17,10 +17,10 @@ val appModule = { appConfig: AppConfig ->
         single { FileHandler(appConfig.isTest) }
         single { SchemaService() }
         single { CollectionService(get(), get()) }
-        single { Repository(get(), get(), get()) }
+        single { ParameterService(get(), get(), get(), get(), get(), get()) }
         single { FilterService() }
         single { SortingService() }
         single { PaginationService(appConfig.defaultLimit) }
-        single { ParameterService(get(), get(), get(), get()) }
+        single { Repository(get(), get(), get()) }
     }
 }
