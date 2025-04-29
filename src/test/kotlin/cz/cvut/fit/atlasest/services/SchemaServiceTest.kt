@@ -204,7 +204,7 @@ class SchemaServiceTest : BaseTest() {
     }
 
     @Test
-    fun `validateDataAgainstSchema - given valid data - should not throw exception`() =
+    fun `validateItemAgainstSchema - given valid data - should not throw exception`() =
         testWithApp {
             val item1 =
                 generateJsonObject(1, "title1", genre = "genre1").add(
@@ -223,11 +223,11 @@ class SchemaServiceTest : BaseTest() {
                     generateJsonObject(year = 2022, month = 12),
                 )
 
-            assertDoesNotThrow { schemaService.validateDataAgainstSchema(insertedItem, schema) }
+            assertDoesNotThrow { schemaService.validateItemAgainstSchema(insertedItem, schema) }
         }
 
     @Test
-    fun `validateDataAgainstSchema - when author and year is missing - should throw exception with invalid fields`() =
+    fun `validateItemAgainstSchema - when author and year is missing - should throw exception with invalid fields`() =
         testWithApp {
             val item1 =
                 generateJsonObject(1, "title1", genre = "genre1").add(
@@ -248,7 +248,7 @@ class SchemaServiceTest : BaseTest() {
 
             val exception =
                 assertFailsWith<ValidationException> {
-                    schemaService.validateDataAgainstSchema(
+                    schemaService.validateItemAgainstSchema(
                         insertedItem,
                         schema,
                     )

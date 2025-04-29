@@ -32,7 +32,7 @@ class Collection(
             getItemIdValue(it) == id
         }
 
-    fun insertItem(item: JsonObject) {
+    fun insertItem(item: JsonObject): Int {
         val newItem =
             if (this.getIdentifierType() in listOf("number", "integer")) {
                 item.add(this.identifier, JsonPrimitive(nextId))
@@ -40,7 +40,7 @@ class Collection(
                 item.add(this.identifier, JsonPrimitive(nextId.toString()))
             }
         this.items.add(newItem)
-        this.nextId++
+        return this.nextId++
     }
 
     fun updateItem(

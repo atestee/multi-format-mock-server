@@ -16,10 +16,10 @@ class DeleteRouteTest : BaseTest() {
             val response = client.delete("/books/1")
             assertEquals(HttpStatusCode.OK, response.status)
 
-            val books = collectionService.getCollection("books")
+            val books = collectionService.getCollectionItems("books")
             assertTrue(books.none { it.getFieldValue("id")?.jsonPrimitive?.content == "1" })
 
-            val loans = collectionService.getCollection("loans")
+            val loans = collectionService.getCollectionItems("loans")
             assertTrue(loans.none { it.getFieldValue("bookId")?.jsonPrimitive?.content == "1" })
         }
 

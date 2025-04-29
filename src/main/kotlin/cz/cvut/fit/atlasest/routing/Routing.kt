@@ -51,7 +51,7 @@ fun Application.configureRouting() {
         }
         rootPath = ""
         schemas {
-            collectionService.collections.keys.forEach { collectionName ->
+            collectionService.getCollectionNames().forEach { collectionName ->
                 schema(
                     collectionName.singularize(),
                     collectionService.getOpenApiSchema(collectionName).apply {
@@ -86,10 +86,11 @@ fun Application.configureRouting() {
         route("swagger-ui") {
             swaggerUI("${appConfig.rootPath}/openapi.json")
         }
+        val collectionNames = collectionService.getCollectionNames()
         get("/collections") {
-            call.respondText("collections: ${collectionService.collections.keys}")
+            call.respondText("collections: $collectionNames")
         }
-        collectionService.collections.keys.forEach { collectionName ->
+        collectionNames.forEach { collectionName ->
             getRoutes(collectionService, collectionName, parameterService, appConfig.host)
             postRoute(collectionService, collectionName, schemaService)
             putRoute(collectionService, collectionName, schemaService)

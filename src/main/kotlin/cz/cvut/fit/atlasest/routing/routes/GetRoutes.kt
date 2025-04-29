@@ -60,7 +60,7 @@ fun Route.getRoutes(
                 val schemas = parameterService.getEmbedAndExpandCollectionSchemas(params, collectionService)
                 data to schemas
             } else {
-                collectionService.getCollection(collectionName) to JsonObject(mapOf())
+                collectionService.getCollectionItems(collectionName) to JsonObject(mapOf())
             }
         val queriedData = parameterService.applyQuerySearch(data, params)
         val schema = collectionService.getCollectionSchema(collectionName)

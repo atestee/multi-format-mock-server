@@ -1,6 +1,7 @@
 package cz.cvut.fit.atlasest.services
 
 import BaseTest
+import cz.cvut.fit.atlasest.data.FileHandler
 import cz.cvut.fit.atlasest.utils.getFieldValue
 import io.ktor.server.plugins.BadRequestException
 import kotlinx.serialization.json.JsonArray
@@ -19,10 +20,10 @@ import kotlin.test.assertTrue
 
 class ParameterServiceTest : BaseTest() {
     private val parameterService by inject<ParameterService>()
-    private val documentService by inject<DocumentService>()
+    private val fileHandler by inject<FileHandler>()
 
     private val books =
-        documentService
+        fileHandler
             .readJsonFile("db-test.json")["books"]!!
             .jsonArray
             .map { it.jsonObject }
@@ -31,7 +32,7 @@ class ParameterServiceTest : BaseTest() {
     private val baseUrl = "baseUrl"
     private val totalItems = books.size
 
-    private val schema = documentService.readJsonFile("schema.json")["books"]!!.jsonObject
+    private val schema = fileHandler.readJsonFile("schema.json")["books"]!!.jsonObject
 
     @Test
     fun `applyFilter - EQ with nested object key`() {

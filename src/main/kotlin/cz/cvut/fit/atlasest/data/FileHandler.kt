@@ -1,4 +1,4 @@
-package cz.cvut.fit.atlasest.services
+package cz.cvut.fit.atlasest.data
 
 import cz.cvut.fit.atlasest.exceptionHandling.ParsingException
 import cz.cvut.fit.atlasest.utils.toJsonObject
@@ -11,7 +11,7 @@ import java.io.File
 /**
  * A service for reading and writing JSON documents.
  */
-class DocumentService(
+class FileHandler(
     private val isTest: Boolean,
 ) {
     private val json = Json { prettyPrint = true }

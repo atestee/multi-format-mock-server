@@ -161,7 +161,7 @@ class ParameterService(
     ): MutableList<JsonObject> {
         val embedValues = params[EMBED]
         val expandValues = params[EXPAND]
-        val mainCollection = collectionService.getCollection(collectionName)
+        val mainCollection = collectionService.getCollectionItems(collectionName)
         val identifier = collectionService.getCollectionIdentifier(collectionName)
         val embedForeignKey = collectionName.singularize() + "Id"
 
@@ -246,7 +246,7 @@ class ParameterService(
         val idValue = item[identifier]
         var newItem = item
         embedKeys?.forEach { embeddedCollectionName ->
-            val embeddedCollection = collectionService.getCollection(embeddedCollectionName)
+            val embeddedCollection = collectionService.getCollectionItems(embeddedCollectionName)
             val embeddedItems =
                 embeddedCollection.filter { embeddedItem ->
                     idValue == embeddedItem[foreignKey]

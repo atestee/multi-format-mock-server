@@ -9,6 +9,7 @@ import com.saasquatch.jsonschemainferrer.JsonSchemaInferrer
 import com.saasquatch.jsonschemainferrer.RequiredPolicies
 import com.saasquatch.jsonschemainferrer.SpecVersion
 import cz.cvut.fit.atlasest.exceptionHandling.ParsingException
+import cz.cvut.fit.atlasest.utils.log
 import cz.cvut.fit.atlasest.utils.toJsonElement
 import cz.cvut.fit.atlasest.utils.toJsonObject
 import io.github.optimumcode.json.schema.JsonSchema
@@ -88,7 +89,7 @@ class SchemaService {
      * @param jsonSchema The JSON schema describing the expected structure.
      * @throws ValidationException If validation errors occur.
      */
-    fun validateDataAgainstSchema(
+    fun validateItemAgainstSchema(
         jsonObject: JsonObject,
         jsonSchema: JsonObject,
     ) {
@@ -103,6 +104,36 @@ class SchemaService {
             } else {
                 throw ValidationException(errors.map { "#${it.objectPath}: ${it.message}" }.toString())
             }
+        }
+    }
+
+    /**
+     * Validates collection items against a given JSON schema.
+     *
+     * @param collection The JSON array representing the collection.
+     * @param collectionName The name of the collection.
+     * @param identifier The collection identifier key.
+     * @param schema The JSON schema used for validation.
+     */
+    fun validateCollectionAgainstSchema(
+        collection: List<JsonObject>,
+        collectionName: String,
+        identifier: String,
+        schema: JsonObject,
+    ) {
+        val errors: MutableList<String> = mutableListOf()
+        collection.forEach { item ->
+            try {
+                this.validateItemAgainstSchema(item, schema)
+            } catch (e: ValidationException) {
+                log.error(
+                    "Validation failed for collection '$collectionName' at item with $identifier ${item.jsonObject[identifier]}: ${e.message}",
+                )
+                errors.add(e.message.toString())
+            }
+        }
+        if (errors.isNotEmpty()) {
+            throw ValidationException(errors.joinToString("\n"))
         }
     }
 

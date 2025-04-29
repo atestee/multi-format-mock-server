@@ -1,7 +1,8 @@
-package cz.cvut.fit.atlasest.services
+package cz.cvut.fit.atlasest.data
 
 import cz.cvut.fit.atlasest.application.AppConfig
 import cz.cvut.fit.atlasest.exceptionHandling.ParsingException
+import cz.cvut.fit.atlasest.services.SchemaService
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -20,9 +21,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @ExtendWith(MockKExtension::class)
-class CollectionServiceTest {
+class RepositoryTest {
     @MockK
-    lateinit var documentService: DocumentService
+    lateinit var fileHandler: FileHandler
 
     @MockK
     lateinit var appConfig: AppConfig
@@ -45,13 +46,13 @@ class CollectionServiceTest {
 
     @Test
     fun `init - identifier is not a JSON primitive`() {
-        every { documentService.readJsonFile(collectionsFilename) } returns
+        every { fileHandler.readJsonFile(collectionsFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to JsonArray(listOf()),
                 ),
             )
-        every { documentService.readJsonFile(identifiersFilename) } returns
+        every { fileHandler.readJsonFile(identifiersFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to JsonObject(mapOf()),
@@ -60,8 +61,8 @@ class CollectionServiceTest {
 
         val exception =
             assertThrows<ParsingException> {
-                CollectionService(
-                    documentService = documentService,
+                Repository(
+                    fileHandler = fileHandler,
                     appConfig = appConfig,
                     schemaService = schemaService,
                 )
@@ -75,13 +76,13 @@ class CollectionServiceTest {
 
     @Test
     fun `init - collection is not a JSON array`() {
-        every { documentService.readJsonFile(collectionsFilename) } returns
+        every { fileHandler.readJsonFile(collectionsFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to JsonPrimitive("not a JSON array"),
                 ),
             )
-        every { documentService.readJsonFile(identifiersFilename) } returns
+        every { fileHandler.readJsonFile(identifiersFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to JsonPrimitive("id"),
@@ -90,8 +91,8 @@ class CollectionServiceTest {
 
         val exception =
             assertThrows<ParsingException> {
-                CollectionService(
-                    documentService = documentService,
+                Repository(
+                    fileHandler = fileHandler,
                     appConfig = appConfig,
                     schemaService = schemaService,
                 )
@@ -102,13 +103,13 @@ class CollectionServiceTest {
 
     @Test
     fun `init - no identifier found for collection`() {
-        every { documentService.readJsonFile(collectionsFilename) } returns
+        every { fileHandler.readJsonFile(collectionsFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to JsonArray(listOf(JsonObject(mapOf()))),
                 ),
             )
-        every { documentService.readJsonFile(identifiersFilename) } returns
+        every { fileHandler.readJsonFile(identifiersFilename) } returns
             JsonObject(
                 mapOf(
                     "differentCollection" to JsonPrimitive("id"),
@@ -117,8 +118,8 @@ class CollectionServiceTest {
 
         val exception =
             assertThrows<ParsingException> {
-                CollectionService(
-                    documentService = documentService,
+                Repository(
+                    fileHandler = fileHandler,
                     appConfig = appConfig,
                     schemaService = schemaService,
                 )
@@ -129,7 +130,7 @@ class CollectionServiceTest {
 
     @Test
     fun `init - collection item does not have identifier value`() {
-        every { documentService.readJsonFile(collectionsFilename) } returns
+        every { fileHandler.readJsonFile(collectionsFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to
@@ -144,7 +145,7 @@ class CollectionServiceTest {
                         ),
                 ),
             )
-        every { documentService.readJsonFile(identifiersFilename) } returns
+        every { fileHandler.readJsonFile(identifiersFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to JsonPrimitive("id"),
@@ -153,8 +154,8 @@ class CollectionServiceTest {
 
         val exception =
             assertThrows<ParsingException> {
-                CollectionService(
-                    documentService = documentService,
+                Repository(
+                    fileHandler = fileHandler,
                     appConfig = appConfig,
                     schemaService = schemaService,
                 )
@@ -165,7 +166,7 @@ class CollectionServiceTest {
 
     @Test
     fun `init - collection item identifier value is not a JSON primitive`() {
-        every { documentService.readJsonFile(collectionsFilename) } returns
+        every { fileHandler.readJsonFile(collectionsFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to
@@ -180,7 +181,7 @@ class CollectionServiceTest {
                         ),
                 ),
             )
-        every { documentService.readJsonFile(identifiersFilename) } returns
+        every { fileHandler.readJsonFile(identifiersFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to JsonPrimitive("id"),
@@ -189,8 +190,8 @@ class CollectionServiceTest {
 
         val exception =
             assertThrows<ParsingException> {
-                CollectionService(
-                    documentService = documentService,
+                Repository(
+                    fileHandler = fileHandler,
                     appConfig = appConfig,
                     schemaService = schemaService,
                 )
@@ -201,7 +202,7 @@ class CollectionServiceTest {
 
     @Test
     fun `init - collection item identifier value is not an integer or integer string`() {
-        every { documentService.readJsonFile(collectionsFilename) } returns
+        every { fileHandler.readJsonFile(collectionsFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to
@@ -219,7 +220,7 @@ class CollectionServiceTest {
                         ),
                 ),
             )
-        every { documentService.readJsonFile(identifiersFilename) } returns
+        every { fileHandler.readJsonFile(identifiersFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to JsonPrimitive("id"),
@@ -228,8 +229,8 @@ class CollectionServiceTest {
 
         val exception =
             assertThrows<ParsingException> {
-                CollectionService(
-                    documentService = documentService,
+                Repository(
+                    fileHandler = fileHandler,
                     appConfig = appConfig,
                     schemaService = schemaService,
                 )
@@ -240,7 +241,7 @@ class CollectionServiceTest {
 
     @Test
     fun `init - collection is empty`() {
-        every { documentService.readJsonFile(collectionsFilename) } returns
+        every { fileHandler.readJsonFile(collectionsFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to
@@ -258,7 +259,7 @@ class CollectionServiceTest {
                         ),
                 ),
             )
-        every { documentService.readJsonFile(identifiersFilename) } returns
+        every { fileHandler.readJsonFile(identifiersFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to JsonPrimitive("id"),
@@ -267,8 +268,8 @@ class CollectionServiceTest {
 
         val exception =
             assertThrows<ParsingException> {
-                CollectionService(
-                    documentService = documentService,
+                Repository(
+                    fileHandler = fileHandler,
                     appConfig = appConfig,
                     schemaService = schemaService,
                 )
@@ -289,13 +290,13 @@ class CollectionServiceTest {
                     ),
                 ),
             )
-        every { documentService.readJsonFile(collectionsFilename) } returns
+        every { fileHandler.readJsonFile(collectionsFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to collection,
                 ),
             )
-        every { documentService.readJsonFile(identifiersFilename) } returns
+        every { fileHandler.readJsonFile(identifiersFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to JsonPrimitive("id"),
@@ -308,8 +309,8 @@ class CollectionServiceTest {
                 ),
             )
 
-        CollectionService(
-            documentService = documentService,
+        Repository(
+            fileHandler = fileHandler,
             appConfig = appConfig,
             schemaService = schemaService,
         )
@@ -328,19 +329,19 @@ class CollectionServiceTest {
         val collection = JsonArray(listOf(item))
         val schemaCollection = JsonObject(mapOf())
         val schemaFilename2 = "schema.json"
-        every { documentService.readJsonFile(collectionsFilename) } returns
+        every { fileHandler.readJsonFile(collectionsFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to collection,
                 ),
             )
-        every { documentService.readJsonFile(identifiersFilename) } returns
+        every { fileHandler.readJsonFile(identifiersFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to JsonPrimitive("id"),
                 ),
             )
-        every { documentService.readJsonFile(schemaFilename2) } returns schemaCollection
+        every { fileHandler.readJsonFile(schemaFilename2) } returns schemaCollection
         every { schemaService.getCollectionSchema(collectionName, schemaCollection) } returns null
         every { schemaService.inferJsonSchema(any()) } returns
             JsonObject(
@@ -350,8 +351,8 @@ class CollectionServiceTest {
             )
         every { appConfig.schemaFilename } returns schemaFilename2
 
-        CollectionService(
-            documentService = documentService,
+        Repository(
+            fileHandler = fileHandler,
             appConfig = appConfig,
             schemaService = schemaService,
         )
@@ -372,27 +373,28 @@ class CollectionServiceTest {
         val schema = JsonObject(mapOf("properties" to JsonObject(mapOf("id" to JsonPrimitive(1)))))
         val schemaCollection = JsonObject(mapOf(collectionName to schema))
         val schemaFilename2 = "schema.json"
-        every { documentService.readJsonFile(collectionsFilename) } returns
+        every { fileHandler.readJsonFile(collectionsFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to collection,
                 ),
             )
-        every { documentService.readJsonFile(identifiersFilename) } returns
+        every { fileHandler.readJsonFile(identifiersFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to JsonPrimitive("id"),
                 ),
             )
-        every { documentService.readJsonFile(schemaFilename2) } returns schemaCollection
+        every { fileHandler.readJsonFile(schemaFilename2) } returns schemaCollection
         every { schemaService.getCollectionSchema(collectionName, schemaCollection) } returns schema
-        every { schemaService.validateDataAgainstSchema(item, schema) } throws ValidationException("error")
+        every { schemaService.validateCollectionAgainstSchema(listOf(item), collectionName, "id", schema) } throws
+            ValidationException("error")
         every { appConfig.schemaFilename } returns schemaFilename2
 
         val exception =
             assertThrows<ValidationException> {
-                CollectionService(
-                    documentService = documentService,
+                Repository(
+                    fileHandler = fileHandler,
                     appConfig = appConfig,
                     schemaService = schemaService,
                 )
@@ -401,7 +403,7 @@ class CollectionServiceTest {
         assertEquals("error", exception.message)
 
         verify { schemaService.getCollectionSchema(collectionName, schemaCollection) }
-        verify { schemaService.validateDataAgainstSchema(item, schema) }
+        verify { schemaService.validateCollectionAgainstSchema(listOf(item), collectionName, "id", schema) }
     }
 
     @Test
@@ -416,32 +418,32 @@ class CollectionServiceTest {
         val schema = JsonObject(mapOf("properties" to JsonObject(mapOf("id" to JsonPrimitive(1)))))
         val schemaCollection = JsonObject(mapOf(collectionName to schema))
         val schemaFilename2 = "schema.json"
-        every { documentService.readJsonFile(collectionsFilename) } returns
+        every { fileHandler.readJsonFile(collectionsFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to collection,
                 ),
             )
-        every { documentService.readJsonFile(identifiersFilename) } returns
+        every { fileHandler.readJsonFile(identifiersFilename) } returns
             JsonObject(
                 mapOf(
                     collectionName to JsonPrimitive("id"),
                 ),
             )
-        every { documentService.readJsonFile(schemaFilename2) } returns schemaCollection
+        every { fileHandler.readJsonFile(schemaFilename2) } returns schemaCollection
         every { schemaService.getCollectionSchema(collectionName, schemaCollection) } returns schema
-        every { schemaService.validateDataAgainstSchema(item, schema) } just runs
+        every { schemaService.validateCollectionAgainstSchema(listOf(item), collectionName, "id", schema) } just runs
         every { appConfig.schemaFilename } returns schemaFilename2
 
         assertDoesNotThrow {
-            CollectionService(
-                documentService = documentService,
+            Repository(
+                fileHandler = fileHandler,
                 appConfig = appConfig,
                 schemaService = schemaService,
             )
         }
 
         verify { schemaService.getCollectionSchema(collectionName, schemaCollection) }
-        verify { schemaService.validateDataAgainstSchema(item, schema) }
+        verify { schemaService.validateCollectionAgainstSchema(listOf(item), collectionName, "id", schema) }
     }
 }
