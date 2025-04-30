@@ -12,6 +12,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.contentType
 import io.ktor.server.request.receiveText
+import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 
 fun Route.postRoute(
@@ -56,6 +57,8 @@ fun Route.postRoute(
             ) { json -> schemaService.convertTypes(jsonSchema = schema, jsonObject = json) }
         val (identifier, data) = collectionService.insertItemToCollection(collectionName, jsonItem)
         call.response.headers.append("Location", "/$collectionName/$identifier")
-        returnResourceInAcceptedFormat(call, HttpStatusCode.Created, data, accept)
+        val (body, type) = returnResourceInAcceptedFormat(data, accept)
+        call.response.headers.append("Content-Type", type)
+        call.respond(HttpStatusCode.Created, body)
     }
 }

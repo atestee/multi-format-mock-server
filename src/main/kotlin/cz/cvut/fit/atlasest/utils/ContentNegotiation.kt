@@ -1,11 +1,8 @@
 package cz.cvut.fit.atlasest.utils
 
 import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.parseAndSortContentTypeHeader
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.plugins.BadRequestException
-import io.ktor.server.response.respond
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -46,27 +43,21 @@ fun getResourceInJsonFormat(
     }
 }
 
-suspend fun returnResourceInAcceptedFormat(
-    call: ApplicationCall,
-    code: HttpStatusCode,
+fun returnResourceInAcceptedFormat(
     resource: JsonElement,
     accept: String,
-) {
+): Pair<String, String> {
     val acceptNegotiated = processAcceptHeader(accept)
-    when (acceptNegotiated) {
+    return when (acceptNegotiated) {
         ContentType.Application.Json -> {
-            call.response.headers.append("Content-Type", JSON_MIME)
-            call.respond(code, resource)
+            resource.toString() to JSON_MIME
         }
         ContentType.Application.Xml -> {
-            call.response.headers.append("Content-Type", XML_MIME)
-            call.respond(code, resource.toXML())
+            resource.toXML() to XML_MIME
         }
         ContentType.Text.CSV -> {
-            call.response.headers.append("Content-Type", CSV_MIME)
-            call.respond(code, resource.toCSV())
+            resource.toCSV() to CSV_MIME
         }
-
         else -> throw BadRequestException(
             "Unsupported accept type $accept. Supported types are: [$JSON_MIME, $XML_MIME, $CSV_MIME]",
         )

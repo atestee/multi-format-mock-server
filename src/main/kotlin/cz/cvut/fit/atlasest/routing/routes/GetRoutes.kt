@@ -54,11 +54,15 @@ fun Route.getRoutes(
         val params = call.request.queryParameters.toMap()
         if (params.isEmpty()) {
             val data = collectionService.getCollectionItems(collectionName)
-            returnResourceInAcceptedFormat(call, HttpStatusCode.OK, JsonArray(data), accept)
+            val (body, type) = returnResourceInAcceptedFormat(JsonArray(data), accept)
+            call.response.headers.append("Content-Type", type)
+            call.respond(HttpStatusCode.OK, body)
         } else {
             val (data, links) = parameterService.getCollectionItemWithParams(collectionName, params)
             if (links is String) call.response.headers.append("Link", links)
-            returnResourceInAcceptedFormat(call, HttpStatusCode.OK, JsonArray(data), accept)
+            val (body, type) = returnResourceInAcceptedFormat(JsonArray(data), accept)
+            call.response.headers.append("Content-Type", type)
+            call.respond(HttpStatusCode.OK, body)
         }
     }
 
@@ -95,7 +99,9 @@ fun Route.getRoutes(
             } else {
                 collectionService.getItemById(collectionName, id)
             }
-        returnResourceInAcceptedFormat(call, HttpStatusCode.OK, data, accept)
+        val (body, type) = returnResourceInAcceptedFormat(data, accept)
+        call.response.headers.append("Content-Type", type)
+        call.respond(HttpStatusCode.OK, body)
     }
 
     // GET collection schema

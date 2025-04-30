@@ -1,40 +1,20 @@
-package cz.cvut.fit.atlasest.routing
+package cz.cvut.fit.atlasest.utils
 
-import cz.cvut.fit.atlasest.utils.ALL_MIME
-import cz.cvut.fit.atlasest.utils.CSV_MIME
-import cz.cvut.fit.atlasest.utils.JSON_MIME
-import cz.cvut.fit.atlasest.utils.XML_MIME
-import cz.cvut.fit.atlasest.utils.getResourceInJsonFormat
-import cz.cvut.fit.atlasest.utils.processAcceptHeader
-import cz.cvut.fit.atlasest.utils.returnResourceInAcceptedFormat
 import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.plugins.BadRequestException
-import io.ktor.server.response.respond
-import io.mockk.Runs
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-class DataFormatHandlingTest {
+class ContentNegotiation {
     private val json = JsonObject(mapOf("key" to JsonPrimitive("value")))
     private val xml = "<item><key>value</key></item>"
     private val csv = "key\nvalue"
 
     private fun convertAndValidateJson(json: JsonObject): JsonObject = json
-
-    val call = mockk<ApplicationCall>()
 
     @Test
     fun `getResourceInJsonFormat - when req body has invalid JSON - should throw BadRequestException`() {
@@ -75,69 +55,40 @@ class DataFormatHandlingTest {
     @Test
     fun `returnResourceInAcceptedFormat - when accept is json  - should return data in json format`(): Unit =
         runBlocking {
-            val code = HttpStatusCode.OK
+            val (resultData, resultType) = returnResourceInAcceptedFormat(json, JSON_MIME)
 
-            coEvery { call.response.headers.append("Content-Type", JSON_MIME) } just Runs
-            coEvery { call.respond(code, any<JsonElement>()) } just Runs
-
-            returnResourceInAcceptedFormat(call, code, json, JSON_MIME)
-
-            verify { call.response.headers.append("Content-Type", JSON_MIME) }
-            val jsonSlot = slot<JsonElement>()
-            coVerify { call.respond(code, capture(jsonSlot)) }
-
-            assertEquals(jsonSlot.captured.toString(), json.toString())
+            assertEquals(resultData, json.toString())
+            assertEquals(resultType, JSON_MIME)
         }
 
     @Test
     fun `returnResourceInAcceptedFormat - when accept is all media  - should return data in json format`(): Unit =
         runBlocking {
-            val code = HttpStatusCode.OK
+            val (resultData, resultType) = returnResourceInAcceptedFormat(json, ALL_MIME)
 
-            coEvery { call.response.headers.append("Content-Type", JSON_MIME) } just Runs
-            coEvery { call.respond(code, any<JsonElement>()) } just Runs
-
-            returnResourceInAcceptedFormat(call, code, json, ALL_MIME)
-
-            verify { call.response.headers.append("Content-Type", JSON_MIME) }
-            val jsonSlot = slot<JsonElement>()
-            coVerify { call.respond(code, capture(jsonSlot)) }
-
-            assertEquals(jsonSlot.captured.toString(), json.toString())
+            assertEquals(json.toString(), resultData)
+            assertEquals(JSON_MIME, resultType)
         }
 
     @Test
     fun `returnResourceInAcceptedFormat - when accept is xml  - should return data in xml format`(): Unit =
         runBlocking {
-            val code = HttpStatusCode.OK
+            val (resultData, resultType) = returnResourceInAcceptedFormat(json, XML_MIME)
 
-            coEvery { call.response.headers.append("Content-Type", XML_MIME) } just Runs
-            coEvery { call.respond(code, xml) } just Runs
-
-            returnResourceInAcceptedFormat(call, code, json, XML_MIME)
-
-            verify { call.response.headers.append("Content-Type", XML_MIME) }
-            coVerify { call.respond(code, xml) }
+            assertEquals(xml, resultData)
+            assertEquals(resultType, XML_MIME)
         }
 
     @Test
     fun `returnResourceInAcceptedFormat - when accept is csv  - should return data in csv format`(): Unit =
         runBlocking {
-            val code = HttpStatusCode.OK
-
-            coEvery { call.response.headers.append("Content-Type", CSV_MIME) } just Runs
-            coEvery { call.respond(code, any<String>()) } just Runs
-
-            returnResourceInAcceptedFormat(call, code, json, CSV_MIME)
-
-            verify { call.response.headers.append("Content-Type", CSV_MIME) }
-            val csvDataSlot = slot<String>()
-            coVerify { call.respond(code, capture(csvDataSlot)) }
+            val (resultData, resultType) = returnResourceInAcceptedFormat(json, CSV_MIME)
 
             assertEquals(
                 csv.replace(Regex("\\R"), ""),
-                csvDataSlot.captured.replace(Regex("\\R"), ""),
+                resultData.replace(Regex("\\R"), ""),
             )
+            assertEquals(resultType, CSV_MIME)
         }
 
     @Test
@@ -145,7 +96,7 @@ class DataFormatHandlingTest {
         runBlocking {
             val exception =
                 assertFailsWith<BadRequestException> {
-                    returnResourceInAcceptedFormat(call, HttpStatusCode.OK, json, "text/html")
+                    returnResourceInAcceptedFormat(json, "text/html")
                 }
             assertEquals("Unsupported accept type text/html. Supported types are: [$JSON_MIME, $XML_MIME, $CSV_MIME]", exception.message)
         }
