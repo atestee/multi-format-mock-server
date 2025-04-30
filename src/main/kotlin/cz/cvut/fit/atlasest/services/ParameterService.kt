@@ -22,7 +22,7 @@ class ParameterService(
     private val paginationService: PaginationService,
     private val sortingService: SortingService,
 ) {
-    fun getCollectionItemWithParams(
+    fun getCollectionWithParams(
         collectionName: String,
         params: Map<String, List<String>>,
     ): Pair<MutableList<JsonObject>, String?> {
@@ -32,7 +32,7 @@ class ParameterService(
                 val schemas = getEmbedAndExpandCollectionSchemas(params)
                 data to schemas
             } else {
-                collectionService.getCollectionItems(collectionName) to JsonObject(mapOf())
+                collectionService.getCollection(collectionName) to JsonObject(mapOf())
             }
         val queriedData = applyQuerySearch(data, params)
         val schema = collectionService.getCollectionSchema(collectionName)
@@ -207,7 +207,7 @@ class ParameterService(
     ): MutableList<JsonObject> {
         val embedValues = params[EMBED]
         val expandValues = params[EXPAND]
-        val mainCollection = collectionService.getCollectionItems(collectionName)
+        val mainCollection = collectionService.getCollection(collectionName)
         val identifier = collectionService.getCollectionIdentifier(collectionName)
         val embedForeignKey = collectionName.singularize() + "Id"
 
@@ -260,7 +260,7 @@ class ParameterService(
         val idValue = item[identifier]
         var newItem = item
         embedKeys?.forEach { embeddedCollectionName ->
-            val embeddedCollection = collectionService.getCollectionItems(embeddedCollectionName)
+            val embeddedCollection = collectionService.getCollection(embeddedCollectionName)
             val embeddedItems =
                 embeddedCollection.filter { embeddedItem ->
                     idValue == embeddedItem[foreignKey]

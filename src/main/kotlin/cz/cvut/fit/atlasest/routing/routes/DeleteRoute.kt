@@ -7,8 +7,8 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 
 fun Route.deleteRoute(
-    collectionService: CollectionService,
     collectionName: String,
+    collectionService: CollectionService,
 ) {
     delete("/$collectionName/{id}", {
         tags(collectionName)

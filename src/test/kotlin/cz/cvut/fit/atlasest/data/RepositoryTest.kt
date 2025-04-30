@@ -28,7 +28,7 @@ class RepositoryTest {
     @MockK
     lateinit var appConfig: AppConfig
 
-    var schemaFilename: String? = null
+    private var schemaFilename: String? = null
 
     @MockK
     lateinit var schemaService: SchemaService
@@ -102,11 +102,32 @@ class RepositoryTest {
     }
 
     @Test
-    fun `init - no identifier found for collection`() {
+    fun `init - no identifier found for collection - uses default identifier`() {
+        val defaultIdentifier = "defaultIdentifier"
+
         every { fileHandler.readJsonFile(collectionsFilename) } returns
             JsonObject(
                 mapOf(
-                    collectionName to JsonArray(listOf(JsonObject(mapOf()))),
+                    collectionName to
+                        JsonArray(
+                            listOf(
+                                JsonObject(
+                                    mapOf(
+                                        defaultIdentifier to JsonPrimitive("1"),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    "differentCollection" to
+                        JsonArray(
+                            listOf(
+                                JsonObject(
+                                    mapOf(
+                                        "id" to JsonPrimitive(1),
+                                    ),
+                                ),
+                            ),
+                        ),
                 ),
             )
         every { fileHandler.readJsonFile(identifiersFilename) } returns
@@ -116,16 +137,19 @@ class RepositoryTest {
                 ),
             )
 
-        val exception =
-            assertThrows<ParsingException> {
-                Repository(
-                    fileHandler = fileHandler,
-                    appConfig = appConfig,
-                    schemaService = schemaService,
-                )
-            }
+        every { appConfig.defaultIdentifier } returns defaultIdentifier
+        every { schemaService.inferJsonSchema(any()) } returns JsonObject(mapOf())
 
-        assertEquals("No identifier key found for collection '$collectionName'", exception.message)
+        val repository =
+            Repository(
+                fileHandler = fileHandler,
+                appConfig = appConfig,
+                schemaService = schemaService,
+            )
+
+        val identifier = repository.getCollectionIdentifier(collectionName)
+
+        assertEquals(defaultIdentifier, identifier)
     }
 
     @Test

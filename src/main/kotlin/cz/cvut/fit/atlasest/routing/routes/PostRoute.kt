@@ -1,11 +1,9 @@
 package cz.cvut.fit.atlasest.routing.routes
 
 import com.cesarferreira.pluralize.singularize
+import cz.cvut.fit.atlasest.services.ALL_MIME
 import cz.cvut.fit.atlasest.services.CollectionService
-import cz.cvut.fit.atlasest.services.SchemaService
-import cz.cvut.fit.atlasest.utils.ALL_MIME
-import cz.cvut.fit.atlasest.utils.getResourceInJsonFormat
-import cz.cvut.fit.atlasest.utils.returnResourceInAcceptedFormat
+import cz.cvut.fit.atlasest.services.ContentNegotiationService
 import io.github.smiley4.ktoropenapi.config.descriptors.ref
 import io.github.smiley4.ktoropenapi.post
 import io.ktor.http.ContentType
@@ -16,9 +14,9 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 
 fun Route.postRoute(
-    collectionService: CollectionService,
     collectionName: String,
-    schemaService: SchemaService,
+    collectionService: CollectionService,
+    contentNegotiationService: ContentNegotiationService,
 ) {
     post("/$collectionName", {
         tags(collectionName)
@@ -48,17 +46,17 @@ fun Route.postRoute(
     }) {
         val contentType = "${call.request.contentType().contentType}/${call.request.contentType().contentSubtype}"
         val accept = call.request.headers["Accept"] ?: ALL_MIME
-
-        val schema = collectionService.getCollectionSchema(collectionName)
+        val body = call.receiveText()
         val jsonItem =
-            getResourceInJsonFormat(
-                call.receiveText(),
+            contentNegotiationService.getResourceInJsonFormat(
+                collectionName,
+                body,
                 contentType,
-            ) { json -> schemaService.convertTypes(jsonSchema = schema, jsonObject = json) }
-        val (identifier, data) = collectionService.insertItemToCollection(collectionName, jsonItem)
-        call.response.headers.append("Location", "/$collectionName/$identifier")
-        val (body, type) = returnResourceInAcceptedFormat(data, accept)
+            )
+        val (insertedItemId, insertedItem) = collectionService.insertItemToCollection(collectionName, jsonItem)
+        val (bodyInAcceptedFormat, type) = contentNegotiationService.getResourceInAcceptedFormat(insertedItem, accept)
+        call.response.headers.append("Location", "/$collectionName/$insertedItemId")
         call.response.headers.append("Content-Type", type)
-        call.respond(HttpStatusCode.Created, body)
+        call.respond(HttpStatusCode.Created, bodyInAcceptedFormat)
     }
 }

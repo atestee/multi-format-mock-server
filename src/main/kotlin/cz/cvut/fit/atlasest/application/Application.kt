@@ -18,6 +18,7 @@ fun defineCliOptions(args: Array<String>): CommandLine {
         Options().apply {
             this.addOption("s", "schema", true, "JSON Schema")
             this.addOption("l", "limit", true, "Pagination limit")
+            this.addOption("i", "identifier", true, "Default identifier")
             this.addOption("h", "help", false, "Show help")
         }
     val parser = DefaultParser()
@@ -32,12 +33,16 @@ fun defineCliOptions(args: Array<String>): CommandLine {
 fun main(args: Array<String>) {
     val cmd = defineCliOptions(args)
     val schema = cmd.getOptionValue("s")
-    val limit = cmd.getOptionValue("l")
+    val defaultPaginationLimit = cmd.getOptionValue("l")
+    val defaultIdentifier = cmd.getOptionValue("i")
     if (schema != null) {
         System.setProperty("schema", schema)
     }
-    if (limit != null) {
-        System.setProperty("paginationLimit", limit)
+    if (defaultPaginationLimit != null) {
+        System.setProperty("defaultPaginationLimit", defaultPaginationLimit)
+    }
+    if (defaultIdentifier != null) {
+        System.setProperty("defaultIdentifier", defaultIdentifier)
     }
     io.ktor.server.netty.EngineMain
         .main(args)

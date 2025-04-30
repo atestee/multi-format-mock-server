@@ -7,8 +7,8 @@ import cz.cvut.fit.atlasest.routing.routes.getRoutes
 import cz.cvut.fit.atlasest.routing.routes.postRoute
 import cz.cvut.fit.atlasest.routing.routes.putRoute
 import cz.cvut.fit.atlasest.services.CollectionService
+import cz.cvut.fit.atlasest.services.ContentNegotiationService
 import cz.cvut.fit.atlasest.services.ParameterService
-import cz.cvut.fit.atlasest.services.SchemaService
 import io.github.smiley4.ktoropenapi.OpenApi
 import io.github.smiley4.ktoropenapi.openApi
 import io.github.smiley4.ktorswaggerui.swaggerUI
@@ -28,7 +28,7 @@ import org.koin.ktor.ext.inject
 
 fun Application.configureRouting() {
     val collectionService by inject<CollectionService>()
-    val schemaService by inject<SchemaService>()
+    val contentNegotiationService by inject<ContentNegotiationService>()
     val parameterService by inject<ParameterService>()
     val appConfig by inject<AppConfig>()
 
@@ -91,10 +91,10 @@ fun Application.configureRouting() {
             call.respondText("collections: $collectionNames")
         }
         collectionNames.forEach { collectionName ->
-            getRoutes(collectionService, collectionName, parameterService)
-            postRoute(collectionService, collectionName, schemaService)
-            putRoute(collectionService, collectionName, schemaService)
-            deleteRoute(collectionService, collectionName)
+            getRoutes(collectionName, collectionService, contentNegotiationService, parameterService)
+            postRoute(collectionName, collectionService, contentNegotiationService)
+            putRoute(collectionName, collectionService, contentNegotiationService)
+            deleteRoute(collectionName, collectionService)
         }
     }
 }

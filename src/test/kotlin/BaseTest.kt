@@ -40,8 +40,9 @@ open class BaseTest : KoinTest {
             collectionsFilename = config.property("data.collectionsFileName").getString(),
             identifiersFileName = config.property("data.identifiersFileName").getString(),
             schemaFilename = null,
-            isTest = true,
             defaultLimit = 10,
+            defaultIdentifier = "id",
+            isTest = true,
         )
     }
 

@@ -1,7 +1,9 @@
 package cz.cvut.fit.atlasest.routing.routes
 
 import com.cesarferreira.pluralize.singularize
+import cz.cvut.fit.atlasest.services.ALL_MIME
 import cz.cvut.fit.atlasest.services.CollectionService
+import cz.cvut.fit.atlasest.services.ContentNegotiationService
 import cz.cvut.fit.atlasest.services.EMBED
 import cz.cvut.fit.atlasest.services.EXPAND
 import cz.cvut.fit.atlasest.services.LIMIT
@@ -10,8 +12,6 @@ import cz.cvut.fit.atlasest.services.PAGE
 import cz.cvut.fit.atlasest.services.ParameterService
 import cz.cvut.fit.atlasest.services.QUERY
 import cz.cvut.fit.atlasest.services.SORT
-import cz.cvut.fit.atlasest.utils.ALL_MIME
-import cz.cvut.fit.atlasest.utils.returnResourceInAcceptedFormat
 import io.github.smiley4.ktoropenapi.config.descriptors.ref
 import io.github.smiley4.ktoropenapi.get
 import io.ktor.http.ContentType
@@ -24,8 +24,9 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 
 fun Route.getRoutes(
-    collectionService: CollectionService,
     collectionName: String,
+    collectionService: CollectionService,
+    contentNegotiationService: ContentNegotiationService,
     parameterService: ParameterService,
 ) {
     val queryParams = listOf(PAGE, LIMIT, SORT, ORDER, EMBED, EXPAND, QUERY)
@@ -53,14 +54,14 @@ fun Route.getRoutes(
         val accept = call.request.headers["Accept"] ?: ALL_MIME
         val params = call.request.queryParameters.toMap()
         if (params.isEmpty()) {
-            val data = collectionService.getCollectionItems(collectionName)
-            val (body, type) = returnResourceInAcceptedFormat(JsonArray(data), accept)
+            val data = collectionService.getCollection(collectionName)
+            val (body, type) = contentNegotiationService.getResourceInAcceptedFormat(JsonArray(data), accept)
             call.response.headers.append("Content-Type", type)
             call.respond(HttpStatusCode.OK, body)
         } else {
-            val (data, links) = parameterService.getCollectionItemWithParams(collectionName, params)
+            val (data, links) = parameterService.getCollectionWithParams(collectionName, params)
             if (links is String) call.response.headers.append("Link", links)
-            val (body, type) = returnResourceInAcceptedFormat(JsonArray(data), accept)
+            val (body, type) = contentNegotiationService.getResourceInAcceptedFormat(JsonArray(data), accept)
             call.response.headers.append("Content-Type", type)
             call.respond(HttpStatusCode.OK, body)
         }
@@ -99,7 +100,7 @@ fun Route.getRoutes(
             } else {
                 collectionService.getItemById(collectionName, id)
             }
-        val (body, type) = returnResourceInAcceptedFormat(data, accept)
+        val (body, type) = contentNegotiationService.getResourceInAcceptedFormat(data, accept)
         call.response.headers.append("Content-Type", type)
         call.respond(HttpStatusCode.OK, body)
     }

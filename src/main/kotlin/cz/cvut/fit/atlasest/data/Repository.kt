@@ -44,7 +44,7 @@ class Repository(
      * @return A JSON array with JSON objects representing the collection of items.
      * @throws NotFoundException If the collection was not found.
      */
-    fun getCollectionItems(collectionName: String) = getCollectionData(collectionName).items
+    fun getCollection(collectionName: String) = getCollectionData(collectionName).items
 
     /**
      * Retrieves identifier the specified collection.
@@ -183,7 +183,7 @@ class Repository(
                         }.toMutableList()
                 val identifier =
                     identifiers[collectionName]
-                        ?: throw ParsingException("No identifier key found for collection '$collectionName'")
+                        ?: appConfig.defaultIdentifier
                 val lastId = getMaxIdentifier(collectionList, identifier, collectionName)
                 val schema =
                     if (schemaCollection != null) {

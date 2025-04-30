@@ -4,6 +4,7 @@ import cz.cvut.fit.atlasest.application.AppConfig
 import cz.cvut.fit.atlasest.data.FileHandler
 import cz.cvut.fit.atlasest.data.Repository
 import cz.cvut.fit.atlasest.services.CollectionService
+import cz.cvut.fit.atlasest.services.ContentNegotiationService
 import cz.cvut.fit.atlasest.services.FilterService
 import cz.cvut.fit.atlasest.services.PaginationService
 import cz.cvut.fit.atlasest.services.ParameterService
@@ -17,6 +18,7 @@ val appModule = { appConfig: AppConfig ->
         single { FileHandler(appConfig.isTest) }
         single { SchemaService() }
         single { CollectionService(get(), get()) }
+        single { ContentNegotiationService(get(), get()) }
         single { ParameterService(get(), get(), get(), get(), get(), get()) }
         single { FilterService() }
         single { SortingService() }

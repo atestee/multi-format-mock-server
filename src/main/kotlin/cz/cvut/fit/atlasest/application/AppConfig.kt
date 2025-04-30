@@ -12,12 +12,14 @@ data class AppConfig(
     val identifiersFileName: String,
     val schemaFilename: String?,
     val defaultLimit: Int,
+    val defaultIdentifier: String,
     val isTest: Boolean,
 )
 
 fun Application.loadAppConfig(): AppConfig {
     val schemaFilename = System.getProperty("schema")
-    val paginationLimit = System.getProperty("paginationLimit")
+    val defaultPaginationLimit = System.getProperty("defaultPaginationLimit")
+    val defaultIdentifier = System.getProperty("defaultIdentifier")
     val config = environment.config
     return AppConfig(
         port = config.port,
@@ -26,7 +28,8 @@ fun Application.loadAppConfig(): AppConfig {
         collectionsFilename = config.property("data.collectionsFilename").getString(),
         identifiersFileName = config.property("data.identifiersFilename").getString(),
         schemaFilename = schemaFilename,
+        defaultLimit = defaultPaginationLimit?.toIntOrNull() ?: 10,
+        defaultIdentifier = defaultIdentifier ?: "id",
         isTest = false,
-        defaultLimit = paginationLimit?.toIntOrNull() ?: 10,
     )
 }

@@ -29,7 +29,7 @@ class CollectionService(
      * @return A JSON array with JSON objects representing the collection of items.
      * @throws NotFoundException If the collection was not found.
      */
-    fun getCollectionItems(collectionName: String) = repository.getCollectionItems(collectionName)
+    fun getCollection(collectionName: String) = repository.getCollection(collectionName)
 
     /**
      * Retrieves identifier of the specified collection from the repository.
@@ -84,9 +84,9 @@ class CollectionService(
         collectionName: String,
         item: JsonObject,
     ): Pair<Int, JsonObject> {
+        val schema = repository.getCollectionSchema(collectionName)
         val id = repository.getCollectionNextId(collectionName)
         val identifier = repository.getCollectionIdentifier(collectionName)
-        val schema = repository.getCollectionSchema(collectionName)
         val itemWithId = item.add(identifier, JsonPrimitive(id))
         this.schemaService.validateItemAgainstSchema(itemWithId, schema)
         return repository.insertItemToCollection(collectionName, itemWithId)
