@@ -381,7 +381,7 @@ class SchemaServiceTest : BaseTest() {
     fun `convertJsonSchemaToOpenApi - when given JSON object schema - returns corresponding OpenAPI schema`() {
         val jsonSchema = testData.complexSchema.toJsonObject()
 
-        val openApiSchema = schemaService.convertJsonSchemaToOpenApi(jsonSchema)
+        val openApiSchema = schemaService.convertJsonSchemaToOpenApi(jsonSchema, "collection")
 
         assertEquals(setOf("object"), openApiSchema.types)
         assertEquals(SpecVersion.V31, openApiSchema.specVersion)

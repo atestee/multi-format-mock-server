@@ -1,5 +1,7 @@
 package cz.cvut.fit.atlasest.services
 
+import cz.cvut.fit.atlasest.exceptionHandling.NotAcceptableException
+import cz.cvut.fit.atlasest.exceptionHandling.UnsupportedMediaTypeException
 import io.ktor.http.ContentType
 import io.ktor.server.plugins.BadRequestException
 import io.mockk.every
@@ -49,10 +51,10 @@ class ContentNegotiationServiceTest {
         every { schemaServiceMock.convertTypes(schema, any()) } returns json
 
         val exception =
-            assertFailsWith<BadRequestException> {
+            assertFailsWith<UnsupportedMediaTypeException> {
                 contentNegotiationService.getResourceInJsonFormat(collectionName, json.toString(), "text/html")
             }
-        assertEquals("Unsupported content type text/html. Supported types are: [$JSON_MIME, $XML_MIME, $CSV_MIME]", exception.message)
+        assertEquals("Unsupported media type text/html. Supported types are: [$JSON_MIME, $XML_MIME, $CSV_MIME]", exception.message)
     }
 
     @Test
@@ -125,10 +127,10 @@ class ContentNegotiationServiceTest {
     fun `getResourceInAcceptedFormat - when accept is unsupported media type  - should throw BadRequestException`(): Unit =
         runBlocking {
             val exception =
-                assertFailsWith<BadRequestException> {
+                assertFailsWith<NotAcceptableException> {
                     contentNegotiationService.getResourceInAcceptedFormat(json, "text/html")
                 }
-            assertEquals("Unsupported accept type text/html. Supported types are: [$JSON_MIME, $XML_MIME, $CSV_MIME]", exception.message)
+            assertEquals("Supported types are: [$JSON_MIME, $XML_MIME, $CSV_MIME]", exception.message)
         }
 
     @Test

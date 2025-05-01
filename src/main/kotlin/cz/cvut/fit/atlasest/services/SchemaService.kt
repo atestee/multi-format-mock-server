@@ -8,6 +8,7 @@ import com.saasquatch.jsonschemainferrer.FormatInferrers
 import com.saasquatch.jsonschemainferrer.JsonSchemaInferrer
 import com.saasquatch.jsonschemainferrer.RequiredPolicies
 import com.saasquatch.jsonschemainferrer.SpecVersion
+import cz.cvut.fit.atlasest.exceptionHandling.InvalidDataException
 import cz.cvut.fit.atlasest.exceptionHandling.ParsingException
 import cz.cvut.fit.atlasest.utils.log
 import cz.cvut.fit.atlasest.utils.toJsonElement
@@ -165,14 +166,20 @@ class SchemaService {
      *
      * @return The corresponding OpenAPI schema.
      */
-    fun convertJsonSchemaToOpenApi(jsonSchema: JsonElement): Schema<Any> {
+    fun convertJsonSchemaToOpenApi(
+        jsonSchema: JsonElement,
+        key: String,
+    ): Schema<Any> {
         val openApiSchema =
             Schema<Any>().apply {
                 specVersion = io.swagger.v3.oas.models.SpecVersion.V31
             }
 
-        val type = jsonSchema.jsonObject["type"]?.jsonPrimitive?.content
-        if (type != null) {
+        val typeJsonElement = jsonSchema.jsonObject["type"]
+        val type =
+            kotlin.runCatching { typeJsonElement?.jsonPrimitive?.content }.getOrNull()
+                ?: throw InvalidDataException("Data contains mixed data types for $key")
+        if (typeJsonElement != null) {
             openApiSchema.addType(type)
         }
 
@@ -180,9 +187,9 @@ class SchemaService {
             val propertiesNode = jsonSchema.jsonObject["properties"]?.jsonObject
             val propertiesMap = mutableMapOf<String, Schema<Any>>()
 
-            propertiesNode?.forEach { (key, valueNode) ->
+            propertiesNode?.forEach { (propertyKey, valueNode) ->
                 val obj = valueNode.toString().toJsonElement()
-                propertiesMap[key] = convertJsonSchemaToOpenApi(obj)
+                propertiesMap[propertyKey] = convertJsonSchemaToOpenApi(obj, "$key.$propertyKey")
             }
             openApiSchema.properties = propertiesMap
 
@@ -192,7 +199,7 @@ class SchemaService {
             val itemsNode = jsonSchema.jsonObject["items"]
             if (itemsNode != null) {
                 val arraySchema = ArraySchema()
-                arraySchema.items = convertJsonSchemaToOpenApi(itemsNode)
+                arraySchema.items = convertJsonSchemaToOpenApi(itemsNode, key)
                 return arraySchema
             }
         }

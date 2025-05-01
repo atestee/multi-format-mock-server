@@ -82,12 +82,12 @@ class CollectionTest {
         val itemId = 2
         val item = generateItem(JsonPrimitive(1))
         val insertedItem = generateItem(JsonPrimitive(itemId.toString()))
-        val collection = generateCollection(listOf(item)).apply { this.nextId = itemId }
+        val collection = generateCollection(listOf(item), nextId = itemId)
 
         collection.insertItem(item)
 
         assertEquals(2, collection.items.size)
-        assertEquals(itemId + 1, collection.nextId)
+        assertEquals(itemId + 1, collection.getNextId().content.toIntOrNull())
         assertEquals(itemId.toString(), collection.getItemIdValue(insertedItem))
         assertEquals(insertedItem, collection.items[1])
     }
@@ -97,12 +97,12 @@ class CollectionTest {
         val itemId = 2
         val item = generateItem(JsonPrimitive(1))
         val insertedItem = generateItem(JsonPrimitive(itemId))
-        val collection = generateCollection(listOf(item), "number").apply { this.nextId = itemId }
+        val collection = generateCollection(listOf(item), "number", itemId)
 
         collection.insertItem(item)
 
         assertEquals(2, collection.items.size)
-        assertEquals(itemId + 1, collection.nextId)
+        assertEquals(itemId + 1, collection.getNextId().content.toIntOrNull())
         assertEquals(itemId.toString(), collection.getItemIdValue(insertedItem))
         assertEquals(insertedItem, collection.items[1])
     }
@@ -207,12 +207,13 @@ class CollectionTest {
     private fun generateCollection(
         items: List<JsonObject>,
         idType: String = "string",
+        nextId: Int = 1,
     ): Collection =
         Collection(
             collectionName = collectionName,
             identifier = identifier,
             items = items.toMutableList(),
-            nextId = 1,
+            nextId = nextId,
             schema =
                 JsonObject(
                     mapOf(

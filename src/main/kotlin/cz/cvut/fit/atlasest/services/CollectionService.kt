@@ -6,7 +6,6 @@ import cz.cvut.fit.atlasest.utils.add
 import io.ktor.server.plugins.NotFoundException
 import io.swagger.v3.oas.models.media.Schema
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 import javax.validation.ValidationException
 
@@ -87,7 +86,7 @@ class CollectionService(
         val schema = repository.getCollectionSchema(collectionName)
         val id = repository.getCollectionNextId(collectionName)
         val identifier = repository.getCollectionIdentifier(collectionName)
-        val itemWithId = item.add(identifier, JsonPrimitive(id))
+        val itemWithId = item.add(identifier, id)
         this.schemaService.validateItemAgainstSchema(itemWithId, schema)
         return repository.insertItemToCollection(collectionName, itemWithId)
     }
@@ -137,6 +136,6 @@ class CollectionService(
      */
     fun getOpenApiSchema(collectionName: String): Schema<Any> {
         val jsonSchema = repository.getCollectionSchema(collectionName)
-        return schemaService.convertJsonSchemaToOpenApi(jsonSchema.jsonObject)
+        return schemaService.convertJsonSchemaToOpenApi(jsonSchema.jsonObject, collectionName)
     }
 }

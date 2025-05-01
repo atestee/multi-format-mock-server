@@ -14,9 +14,16 @@ class Collection(
     val collectionName: String,
     val identifier: String,
     var items: MutableList<JsonObject>,
-    var nextId: Int,
     var schema: JsonObject,
+    private var nextId: Int,
 ) {
+    fun getNextId(): JsonPrimitive =
+        if (this.getIdentifierType() in listOf("number", "integer")) {
+            JsonPrimitive(nextId)
+        } else {
+            JsonPrimitive(nextId.toString())
+        }
+
     fun getItemIdValue(item: JsonObject): String {
         val itemId =
             item[identifier]

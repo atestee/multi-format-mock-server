@@ -19,8 +19,20 @@ fun Application.configureExceptionHandling() {
             call.respond(HttpStatusCode.NotFound, cause.message as String)
         }
         exception<InvalidDataException> { call, cause ->
-            log.error("Problem with local data", cause)
-            call.respond(HttpStatusCode.InternalServerError, "Data corruption detected")
+            log.error("Invalid data", cause)
+            call.respond(HttpStatusCode.InternalServerError, "Invalid data: ${cause.message}")
+        }
+        exception<ParsingException> { call, cause ->
+            log.error("Parsing error", cause)
+            call.respond(HttpStatusCode.InternalServerError, "Parsing error: ${cause.message}")
+        }
+        exception<NotAcceptableException> { call, cause ->
+            log.error("Not acceptable", cause)
+            call.respond(HttpStatusCode.NotAcceptable, cause.message as String)
+        }
+        exception<UnsupportedMediaTypeException> { call, cause ->
+            log.error("Unsupported media type", cause)
+            call.respond(HttpStatusCode.UnsupportedMediaType, cause.message as String)
         }
         exception<Throwable> { call, cause ->
             log.error("Unhandled error", cause)

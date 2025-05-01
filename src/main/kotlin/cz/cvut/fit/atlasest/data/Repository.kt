@@ -56,7 +56,7 @@ class Repository(
      */
     fun getCollectionIdentifier(collectionName: String) = getCollectionData(collectionName).identifier
 
-    fun getCollectionNextId(collectionName: String) = getCollectionData(collectionName).nextId
+    fun getCollectionNextId(collectionName: String) = getCollectionData(collectionName).getNextId()
 
     /**
      * Retrieves the schema of a specified collection.

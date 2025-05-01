@@ -1,5 +1,7 @@
 package cz.cvut.fit.atlasest.services
 
+import cz.cvut.fit.atlasest.exceptionHandling.NotAcceptableException
+import cz.cvut.fit.atlasest.exceptionHandling.UnsupportedMediaTypeException
 import cz.cvut.fit.atlasest.utils.csvToJson
 import cz.cvut.fit.atlasest.utils.toCSV
 import cz.cvut.fit.atlasest.utils.toXML
@@ -41,8 +43,8 @@ class ContentNegotiationService(
                 schemaService.convertTypes(schema, csvToJson(body))
             }
 
-            else -> throw BadRequestException(
-                "Unsupported content type $contentType. Supported types are: [$JSON_MIME, $XML_MIME, $CSV_MIME]",
+            else -> throw UnsupportedMediaTypeException(
+                "Unsupported media type $contentType. Supported types are: [$JSON_MIME, $XML_MIME, $CSV_MIME]",
             )
         }
     }
@@ -62,8 +64,8 @@ class ContentNegotiationService(
             ContentType.Text.CSV -> {
                 resource.toCSV() to CSV_MIME
             }
-            else -> throw BadRequestException(
-                "Unsupported accept type $accept. Supported types are: [$JSON_MIME, $XML_MIME, $CSV_MIME]",
+            else -> throw NotAcceptableException(
+                "Supported types are: [$JSON_MIME, $XML_MIME, $CSV_MIME]",
             )
         }
     }
