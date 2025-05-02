@@ -229,4 +229,10 @@ class ContentNegotiationServiceTest {
         val mediaType = contentNegotiationService.processAcceptHeader("application/json; q=0, application/xml; q=0, text/csv; q=0")
         assertEquals(null, mediaType)
     }
+
+    @Test
+    fun `processAcceptHeader - when media range has same priority and specific media type - returns the specific media type`() {
+        val mediaType = contentNegotiationService.processAcceptHeader("application/yaml, application/*; q=0.8, text/csv; q=0.8")
+        assertEquals(ContentType.Text.CSV, mediaType)
+    }
 }

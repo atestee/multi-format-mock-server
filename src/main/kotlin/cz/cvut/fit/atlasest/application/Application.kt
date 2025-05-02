@@ -68,6 +68,7 @@ fun Application.configureCORS() {
         allowHeader(HttpHeaders.Accept)
         exposeHeader(HttpHeaders.ContentType)
         exposeHeader(HttpHeaders.Link)
+        exposeHeader(HttpHeaders.Vary)
         allowHost(allowedHost)
     }
 }

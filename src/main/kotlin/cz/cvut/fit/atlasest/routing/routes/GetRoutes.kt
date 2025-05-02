@@ -15,6 +15,7 @@ import cz.cvut.fit.atlasest.services.SORT
 import io.github.smiley4.ktoropenapi.config.descriptors.ref
 import io.github.smiley4.ktoropenapi.get
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -51,18 +52,19 @@ fun Route.getRoutes(
             }
         }
     }) {
-        val accept = call.request.headers["Accept"] ?: ALL_MIME
+        val accept = call.request.headers[HttpHeaders.Accept] ?: ALL_MIME
         val params = call.request.queryParameters.toMap()
+        call.response.headers.append(HttpHeaders.Vary, contentNegotiationService.supportedTypes.joinToString(separator = ", "))
         if (params.isEmpty()) {
             val data = collectionService.getCollection(collectionName)
             val (body, type) = contentNegotiationService.getResourceInAcceptedFormat(JsonArray(data), accept)
-            call.response.headers.append("Content-Type", type)
+            call.response.headers.append(HttpHeaders.ContentType, type)
             call.respond(HttpStatusCode.OK, body)
         } else {
             val (data, links) = parameterService.getCollectionWithParams(collectionName, params)
-            if (links is String) call.response.headers.append("Link", links)
+            if (links is String) call.response.headers.append(HttpHeaders.Link, links)
             val (body, type) = contentNegotiationService.getResourceInAcceptedFormat(JsonArray(data), accept)
-            call.response.headers.append("Content-Type", type)
+            call.response.headers.append(HttpHeaders.ContentType, type)
             call.respond(HttpStatusCode.OK, body)
         }
     }
@@ -92,7 +94,7 @@ fun Route.getRoutes(
         }
     }) {
         val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest, "Missing ID")
-        val accept = call.request.headers["Accept"] ?: ALL_MIME
+        val accept = call.request.headers[HttpHeaders.Accept] ?: ALL_MIME
         val params = call.request.queryParameters.toMap()
         val data =
             if (params[EMBED] is List<String> || params[EXPAND] is List<String>) {
@@ -101,7 +103,8 @@ fun Route.getRoutes(
                 collectionService.getItemById(collectionName, id)
             }
         val (body, type) = contentNegotiationService.getResourceInAcceptedFormat(data, accept)
-        call.response.headers.append("Content-Type", type)
+        call.response.headers.append(HttpHeaders.Vary, contentNegotiationService.supportedTypes.joinToString(separator = ", "))
+        call.response.headers.append(HttpHeaders.ContentType, type)
         call.respond(HttpStatusCode.OK, body)
     }
 

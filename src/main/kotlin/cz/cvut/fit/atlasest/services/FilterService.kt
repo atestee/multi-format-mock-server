@@ -57,7 +57,7 @@ class FilterService {
      *
      * @return A [Pair] containing the key and the corresponding [FilterOperator].
      */
-    internal fun parseKeyOperator(keyOperator: String): Pair<String, FilterOperator> {
+    private fun parseKeyOperator(keyOperator: String): Pair<String, FilterOperator> {
         val parts = keyOperator.split("_", limit = 2)
         val key = parts[0]
         val operatorString = if (parts.size > 1) parts[1].removePrefix("_").uppercase() else return key to FilterOperator.EQ

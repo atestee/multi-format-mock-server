@@ -18,7 +18,7 @@ class ContentNegotiationService(
     val collectionService: CollectionService,
     val schemaService: SchemaService,
 ) {
-    private val supportedTypes = listOf(ContentType.Application.Json, ContentType.Application.Xml, ContentType.Text.CSV)
+    val supportedTypes = listOf(ContentType.Application.Json, ContentType.Application.Xml, ContentType.Text.CSV)
 
     fun getResourceInJsonFormat(
         collectionName: String,

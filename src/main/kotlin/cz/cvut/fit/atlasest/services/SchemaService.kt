@@ -262,6 +262,8 @@ class SchemaService {
 
             if (fieldSchema["type"]?.jsonPrimitive?.content == "object") {
                 currentSchema = fieldSchema
+            } else if (fieldSchema["type"]?.jsonPrimitive?.content == "array") {
+                currentSchema = fieldSchema.get("items")?.jsonObject ?: return null
             } else {
                 return null
             }
