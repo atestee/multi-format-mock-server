@@ -167,7 +167,7 @@ class ParameterService(
     }
 
     /**
-     * Applies query search to a collection of JSON objects based on query parameter _q.
+     * Applies query search to a collection of JSON objects based on query parameter _query.
      *
      * @param collectionItems The list of queried JSON objects.
      * @param params The request query parameters containing the query.

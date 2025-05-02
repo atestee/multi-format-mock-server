@@ -647,7 +647,7 @@ class ParameterServiceTest : BaseTest() {
             parameterService.applyQuerySearch(
                 books,
                 mapOf(
-                    "_q" to listOf("brave"),
+                    "_query" to listOf("brave"),
                 ),
             )
         assertEquals(1, result.size)
@@ -661,7 +661,7 @@ class ParameterServiceTest : BaseTest() {
             parameterService.applyQuerySearch(
                 books,
                 mapOf(
-                    "_q" to listOf("science"),
+                    "_query" to listOf("science"),
                 ),
             )
         assertEquals(3, result.size)
