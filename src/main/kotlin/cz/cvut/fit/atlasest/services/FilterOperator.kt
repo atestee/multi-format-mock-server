@@ -9,3 +9,10 @@ enum class FilterOperator {
     GTE,
     LIKE,
 }
+
+enum class FilterOperatorNumeric {
+    LT,
+    GT,
+    LTE,
+    GTE,
+}

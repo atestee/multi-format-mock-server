@@ -90,9 +90,9 @@ class ParameterService(
         val filterParams = getFilterParameters(params)
         filterParams.forEach { (keyOperator, value) ->
             items =
-                filterService.applyFilter(items, keyOperator, value, { key ->
+                filterService.applyFilter(items, keyOperator, value) { key ->
                     schemaService.getTypeAndFormatFromJsonSchema(schemas, key, collectionName)
-                })
+                }
         }
         return items
     }

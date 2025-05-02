@@ -2,7 +2,9 @@ package cz.cvut.fit.atlasest.services
 
 import BaseTest
 import cz.cvut.fit.atlasest.data.FileHandler
+import cz.cvut.fit.atlasest.testData.TestData
 import cz.cvut.fit.atlasest.utils.getFieldValue
+import cz.cvut.fit.atlasest.utils.toJsonObject
 import io.ktor.server.plugins.BadRequestException
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -29,10 +31,18 @@ class ParameterServiceTest : BaseTest() {
             .map { it.jsonObject }
             .toMutableList()
 
+    private val loans =
+        fileHandler
+            .readJsonFile("db-test.json")["loans"]!!
+            .jsonArray
+            .map { it.jsonObject }
+            .toMutableList()
+
     private val baseUrl = "baseUrl"
     private val totalItems = books.size
 
-    private val schema = fileHandler.readJsonFile("schema.json")["books"]!!.jsonObject
+    private val booksSchema = fileHandler.readJsonFile("schema.json")["books"]!!.jsonObject
+    private val loansSchema = fileHandler.readJsonFile("schema.json")["loans"]!!.jsonObject
 
     @Test
     fun `applyFilter - EQ with nested object key`() {
@@ -42,7 +52,7 @@ class ParameterServiceTest : BaseTest() {
                 books,
                 mapOf("published.place" to listOf("USA")),
                 JsonObject(
-                    mapOf("books" to schema),
+                    mapOf("books" to booksSchema),
                 ),
             )
 
@@ -63,7 +73,7 @@ class ParameterServiceTest : BaseTest() {
                 books,
                 mapOf("author" to listOf("Jane Austen")),
                 JsonObject(
-                    mapOf("books" to schema),
+                    mapOf("books" to booksSchema),
                 ),
             )
 
@@ -82,7 +92,7 @@ class ParameterServiceTest : BaseTest() {
                 books,
                 mapOf("genre" to listOf("Dystopian")),
                 JsonObject(
-                    mapOf("books" to schema),
+                    mapOf("books" to booksSchema),
                 ),
             )
 
@@ -101,7 +111,7 @@ class ParameterServiceTest : BaseTest() {
                 books,
                 mapOf("genre" to listOf("Fiction", "Tragedy")),
                 JsonObject(
-                    mapOf("books" to schema),
+                    mapOf("books" to booksSchema),
                 ),
             )
 
@@ -120,7 +130,7 @@ class ParameterServiceTest : BaseTest() {
                 books,
                 mapOf("published.year" to listOf("1925")),
                 JsonObject(
-                    mapOf("books" to schema),
+                    mapOf("books" to booksSchema),
                 ),
             )
 
@@ -138,7 +148,7 @@ class ParameterServiceTest : BaseTest() {
                 books,
                 mapOf("genre[0]" to listOf("Science Fiction")),
                 JsonObject(
-                    mapOf("books" to schema),
+                    mapOf("books" to booksSchema),
                 ),
             )
 
@@ -156,7 +166,7 @@ class ParameterServiceTest : BaseTest() {
                 books,
                 mapOf("published.place_ne" to listOf("USA")),
                 JsonObject(
-                    mapOf("books" to schema),
+                    mapOf("books" to booksSchema),
                 ),
             )
 
@@ -179,7 +189,7 @@ class ParameterServiceTest : BaseTest() {
                 books,
                 mapOf("author_ne" to listOf("Jane Austen")),
                 JsonObject(
-                    mapOf("books" to schema),
+                    mapOf("books" to booksSchema),
                 ),
             )
 
@@ -198,7 +208,7 @@ class ParameterServiceTest : BaseTest() {
                 books,
                 mapOf("genre_ne" to listOf("Dystopian")),
                 JsonObject(
-                    mapOf("books" to schema),
+                    mapOf("books" to booksSchema),
                 ),
             )
 
@@ -217,7 +227,7 @@ class ParameterServiceTest : BaseTest() {
                 books,
                 mapOf("published.year_lt" to listOf("1925")),
                 JsonObject(
-                    mapOf("books" to schema),
+                    mapOf("books" to booksSchema),
                 ),
             )
 
@@ -239,7 +249,7 @@ class ParameterServiceTest : BaseTest() {
                 books,
                 mapOf("published.year_lte" to listOf("1925")),
                 JsonObject(
-                    mapOf("books" to schema),
+                    mapOf("books" to booksSchema),
                 ),
             )
 
@@ -262,7 +272,7 @@ class ParameterServiceTest : BaseTest() {
                 books,
                 mapOf("published.year_gt" to listOf("1925")),
                 JsonObject(
-                    mapOf("books" to schema),
+                    mapOf("books" to booksSchema),
                 ),
             )
 
@@ -276,6 +286,37 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
+    fun `applyFilter - LT with id as double`() {
+        val testData = TestData()
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("id_lt" to listOf("2")),
+                testData.schemaWithIdAsNumber.toJsonObject(),
+            )
+
+        val titles = result.map { it["title"]!!.jsonPrimitive.content }
+
+        assertEquals(1, result.size)
+        assertContains(titles, "The Catcher in the Rye")
+    }
+
+    @Test
+    fun `applyFilter - LTE with dueDate`() {
+        val result =
+            parameterService.applyFilter(
+                "loans",
+                loans,
+                mapOf("dueDate_lte" to listOf("2025-03-02")),
+                JsonObject(
+                    mapOf("loans" to loansSchema),
+                ),
+            )
+        assertEquals(6, result.size)
+    }
+
+    @Test
     fun `applyFilter - GTE with published year`() {
         val result =
             parameterService.applyFilter(
@@ -283,7 +324,7 @@ class ParameterServiceTest : BaseTest() {
                 books,
                 mapOf("published.year_gte" to listOf("1925")),
                 JsonObject(
-                    mapOf("books" to schema),
+                    mapOf("books" to booksSchema),
                 ),
             )
 
@@ -305,7 +346,7 @@ class ParameterServiceTest : BaseTest() {
                 books,
                 mapOf("genre_like" to listOf("Fiction")),
                 JsonObject(
-                    mapOf("books" to schema),
+                    mapOf("books" to booksSchema),
                 ),
             )
 
@@ -329,7 +370,7 @@ class ParameterServiceTest : BaseTest() {
                 books,
                 mapOf("published.year_like" to listOf("19")),
                 JsonObject(
-                    mapOf("books" to schema),
+                    mapOf("books" to booksSchema),
                 ),
             )
 
@@ -351,7 +392,7 @@ class ParameterServiceTest : BaseTest() {
                 books,
                 mapOf("genre[0]_like" to listOf("Science")),
                 JsonObject(
-                    mapOf("books" to schema),
+                    mapOf("books" to booksSchema),
                 ),
             )
 

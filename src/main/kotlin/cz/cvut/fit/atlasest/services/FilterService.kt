@@ -60,7 +60,8 @@ class FilterService {
     private fun parseKeyOperator(keyOperator: String): Pair<String, FilterOperator> {
         val parts = keyOperator.split("_", limit = 2)
         val key = parts[0]
-        val operatorString = if (parts.size > 1) parts[1].removePrefix("_").uppercase() else return key to FilterOperator.EQ
+        val operatorString =
+            if (parts.size > 1) parts[1].removePrefix("_").uppercase() else return key to FilterOperator.EQ
         val operator = FilterOperator.valueOf(operatorString)
         return key to operator
     }
@@ -87,7 +88,7 @@ class FilterService {
         } else if (field is JsonArray) {
             applyOperator(field, operator, value, type)
         } else {
-            throw BadRequestException("JSON object is not supported for query parameter values.")
+            throw BadRequestException("JSON object is not supported for filter parameter values.")
         }
 
     /**
@@ -109,11 +110,65 @@ class FilterService {
         when (operator) {
             FilterOperator.EQ -> fieldValue.content == value
             FilterOperator.NE -> fieldValue.content != value
-            FilterOperator.LT -> lt(fieldValue, value, type)
-            FilterOperator.GT -> gt(fieldValue, value, type)
-            FilterOperator.LTE -> lte(fieldValue, value, type)
-            FilterOperator.GTE -> gte(fieldValue, value, type)
             FilterOperator.LIKE -> fieldValue.content.contains(value, ignoreCase = true)
+            else -> applyOperatorByType(fieldValue, FilterOperatorNumeric.valueOf(operator.name), value, type)
+        }
+
+    /**
+     * Applies filter operator LT, GT, LTE, GTE based on JSON Schema type or field.
+     *
+     * @param fieldValue The JSON primitive value.
+     * @param operator The filter operator for numeric types.
+     * @param value The value from query to compare against.
+     * @param type data type or format of the field value.
+     *
+     * @return `true` if the condition matches, otherwise `false`.
+     */
+    private fun applyOperatorByType(
+        fieldValue: JsonPrimitive,
+        operator: FilterOperatorNumeric,
+        value: String,
+        type: String,
+    ): Boolean =
+        when (type) {
+            "number", "integer" ->
+                applyCompareOperator(
+                    (fieldValue.doubleOrNull ?: Double.NaN),
+                    value.toDouble(),
+                    operator,
+                )
+            "date" -> {
+                val aDate =
+                    kotlin.runCatching { LocalDate.parse(fieldValue.content) }.getOrNull()
+                        ?: throw BadRequestException("Date is not valid")
+                val bDate =
+                    kotlin.runCatching { LocalDate.parse(value) }.getOrNull()
+                        ?: throw InvalidDataException("Problem when parsing date string.")
+                applyCompareOperator(aDate, bDate, operator)
+            }
+            else -> throw BadRequestException("$operator operator is not supported for $type.")
+        }
+
+    /**
+     * Applies filter operator LT, GT, LTE or GTE between two comparable values using the specified filter operator.
+     *
+     * @param T The type of the values being compared. Must implement [Comparable].
+     * @param a left operand.
+     * @param b right operand.
+     * @param operator the comparison operator to apply.
+     *
+     * @return `true` if the condition matches, otherwise `false`.
+     */
+    private fun <T : Comparable<T>> applyCompareOperator(
+        a: T,
+        b: T,
+        operator: FilterOperatorNumeric,
+    ): Boolean =
+        when (operator) {
+            FilterOperatorNumeric.LT -> a < b
+            FilterOperatorNumeric.GT -> a > b
+            FilterOperatorNumeric.LTE -> a <= b
+            FilterOperatorNumeric.GTE -> a >= b
         }
 
     /**
@@ -138,141 +193,5 @@ class FilterService {
             FilterOperator.NE -> fieldArray.all { it is JsonPrimitive && applyOperator(it, operator, value, type) }
             FilterOperator.LIKE -> fieldArray.any { it is JsonPrimitive && applyOperator(it, operator, value, type) }
             else -> throw BadRequestException("Operator $operator is not supported for multiple values.")
-        }
-
-    /**
-     * Compares two values of a given type and returns whether `a` is less than `b`.
-     *
-     * This function supports comparison for types: "number", "integer", and "date".
-     *
-     * @param a The first value as a JSON primitive. Its content will be parsed based on the specified type.
-     * @param b The second value as a String. This string will be parsed to the same type as "a" for comparison.
-     * @param type The data type to use for comparison. Supported values: "number", "integer", "date".
-     *
-     * @return true if `a` is less than `b`, otherwise false.
-     *
-     * @throws BadRequestException If the type is unsupported or if `a` is an invalid date.
-     * @throws InvalidDataException If `b` is an invalid date when type is "date".
-     */
-    private fun lt(
-        a: JsonPrimitive,
-        b: String,
-        type: String,
-    ): Boolean =
-        when (type) {
-            "number" -> (a.doubleOrNull ?: Double.NaN) < b.toDouble()
-            "integer" -> (a.doubleOrNull ?: Double.NaN) < b.toDouble()
-            "date" -> {
-                val aDate =
-                    kotlin.runCatching { LocalDate.parse(a.content) }.getOrNull()
-                        ?: throw BadRequestException("Date is not valid")
-                val bDate =
-                    kotlin.runCatching { LocalDate.parse(b) }.getOrNull()
-                        ?: throw InvalidDataException("Problem when parsing date string.")
-                aDate < bDate
-            }
-            else -> throw BadRequestException("LT operator is not supported for $type.")
-        }
-
-    /**
-     * Compares two values of a given type and returns whether `a` is less than or equal to `b`.
-     *
-     * This function supports comparison for types: "number", "integer", and "date".
-     *
-     * @param a The first value as a JSON primitive. Its content will be parsed based on the specified type.
-     * @param b The second value as a String. This string will be parsed to the same type as "a" for comparison.
-     * @param type The data type to use for comparison. Supported values: "number", "integer", "date".
-     *
-     * @return true if `a` is less than or equal to `b`, otherwise false.
-     *
-     * @throws BadRequestException If the type is unsupported or if `a` is an invalid date.
-     * @throws InvalidDataException If `b` is an invalid date when type is "date".
-     */
-    private fun lte(
-        a: JsonPrimitive,
-        b: String,
-        type: String,
-    ): Boolean =
-        when (type) {
-            "number" -> (a.doubleOrNull ?: Double.NaN) <= b.toDouble()
-            "integer" -> (a.doubleOrNull ?: Double.NaN) <= b.toDouble()
-            "date" -> {
-                val aDate =
-                    kotlin.runCatching { LocalDate.parse(a.content) }.getOrNull()
-                        ?: throw BadRequestException("Date is not valid")
-                val bDate =
-                    kotlin.runCatching { LocalDate.parse(b) }.getOrNull()
-                        ?: throw InvalidDataException("Problem when parsing date string.")
-                aDate <= bDate
-            }
-            else -> throw BadRequestException("LT operator is not supported for $type.")
-        }
-
-    /**
-     * Compares two values of a given type and returns whether `a` is greater than `b`.
-     *
-     * This function supports comparison for types: "number", "integer", and "date".
-     *
-     * @param a The first value as a JSON primitive. Its content will be parsed based on the specified type.
-     * @param b The second value as a String. This string will be parsed to the same type as "a" for comparison.
-     * @param type The data type to use for comparison. Supported values: "number", "integer", "date".
-     *
-     * @return true if `a` is greater than `b`, otherwise false.
-     *
-     * @throws BadRequestException If the type is unsupported or if `a` is an invalid date.
-     * @throws InvalidDataException If `b` is an invalid date when type is "date".
-     */
-    private fun gt(
-        a: JsonPrimitive,
-        b: String,
-        type: String,
-    ): Boolean =
-        when (type) {
-            "number" -> (a.doubleOrNull ?: Double.NaN) > b.toDouble()
-            "integer" -> (a.doubleOrNull ?: Double.NaN) > b.toDouble()
-            "date" -> {
-                val aDate =
-                    kotlin.runCatching { LocalDate.parse(a.content) }.getOrNull()
-                        ?: throw BadRequestException("Date is not valid")
-                val bDate =
-                    kotlin.runCatching { LocalDate.parse(b) }.getOrNull()
-                        ?: throw InvalidDataException("Problem when parsing date string.")
-                aDate > bDate
-            }
-            else -> throw BadRequestException("LT operator is not supported for $type.")
-        }
-
-    /**
-     * Compares two values of a given type and returns whether `a` is greater than or equal to `b`.
-     *
-     * This function supports comparison for types: "number", "integer", and "date".
-     *
-     * @param a The first value as a JSON primitive. Its content will be parsed based on the specified type.
-     * @param b The second value as a String. This string will be parsed to the same type as "a" for comparison.
-     * @param type The data type to use for comparison. Supported values: "number", "integer", "date".
-     *
-     * @return true if `a` is greater than or equal to `b`, otherwise false.
-     *
-     * @throws BadRequestException If the type is unsupported or if `a` is an invalid date.
-     * @throws InvalidDataException If `b` is an invalid date when type is "date".
-     */
-    private fun gte(
-        a: JsonPrimitive,
-        b: String,
-        type: String,
-    ): Boolean =
-        when (type) {
-            "number" -> (a.doubleOrNull ?: Double.NaN) >= b.toDouble()
-            "integer" -> (a.doubleOrNull ?: Double.NaN) >= b.toDouble()
-            "date" -> {
-                val aDate =
-                    kotlin.runCatching { LocalDate.parse(a.content) }.getOrNull()
-                        ?: throw BadRequestException("Date is not valid")
-                val bDate =
-                    kotlin.runCatching { LocalDate.parse(b) }.getOrNull()
-                        ?: throw InvalidDataException("Problem when parsing date string.")
-                aDate >= bDate
-            }
-            else -> throw BadRequestException("LT operator is not supported for $type.")
         }
 }

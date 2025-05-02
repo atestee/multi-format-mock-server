@@ -1,6 +1,7 @@
 package cz.cvut.fit.atlasest.services
 
 import BaseTest
+import cz.cvut.fit.atlasest.exceptionHandling.InvalidDataException
 import cz.cvut.fit.atlasest.exceptionHandling.ParsingException
 import cz.cvut.fit.atlasest.testData.TestData
 import cz.cvut.fit.atlasest.utils.add
@@ -264,6 +265,45 @@ class SchemaServiceTest : BaseTest() {
         }
 
     @Test
+    fun `validateCollectionAgainstSchema - when author and year is missing - should throw exception with invalid fields`() =
+        testWithApp {
+            val item1 =
+                generateJsonObject(1, "title1", genre = "genre1").add(
+                    RELEASE_DATE,
+                    generateJsonObject(year = 2020, month = 10, day = 11),
+                )
+            val item2 =
+                generateJsonObject(2, "title2", author = "author2").add(
+                    RELEASE_DATE,
+                    generateJsonObject(year = 2021, month = 11),
+                )
+            val schema = schemaService.inferJsonSchema(JsonArray(listOf(item1, item2)))
+            val insertedItem =
+                generateJsonObject(3, author = "author3").add(
+                    RELEASE_DATE,
+                    generateJsonObject(month = 12),
+                )
+
+            val exception =
+                assertFailsWith<ValidationException> {
+                    schemaService.validateCollectionAgainstSchema(
+                        listOf(item1, item2, insertedItem),
+                        "collection",
+                        ID,
+                        schema,
+                    )
+                }
+
+            assertEquals(
+                listOf(
+                    generateValidationError("year", "/$RELEASE_DATE"),
+                    generateValidationError("title"),
+                ).toString(),
+                exception.message,
+            )
+        }
+
+    @Test
     fun `convertTypes - when valid schema and json with wrong types - should return json with correct types`() {
         val jsonWithIncorrectTypes = testData.generateComplexJsonObject(strings = true, flattenArrayWithOneItem = true)
         val jsonWithCorrectTypes = testData.generateComplexJsonObject()
@@ -375,6 +415,29 @@ class SchemaServiceTest : BaseTest() {
             "Unsupported schema version. The supported version is $supportedSpecVersion",
             exception.message,
         )
+    }
+
+    @Test
+    fun `convertJsonSchemaToOpenApi - when given JSON object schema with mixed data types - throws InvalidDataException`() {
+        val schema =
+            """
+            {
+                "${"$"}schema": "https://json-schema.org/draft/2020-12/schema#",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": ["string", "integer"]
+                    }
+                }
+            }
+            """.trimIndent()
+
+        val exception =
+            assertFailsWith<InvalidDataException> {
+                schemaService.convertJsonSchemaToOpenApi(schema.toJsonObject(), "collection")
+            }
+
+        assertEquals("Data contains mixed data types for collection.name", exception.message)
     }
 
     @Test

@@ -16,6 +16,7 @@ import io.ktor.client.request.parameter
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -421,6 +422,74 @@ class GetRoutesTest : BaseTest() {
 
             assertNotNull(loans)
             assertNotNull(libraryRegistration)
+        }
+
+    @Test
+    fun `GET collection item with filter on embedded - when given embed value and filter - should apply filter on embedded data`() =
+        testWithApp {
+            val response =
+                client.get("/users") {
+                    parameter("_embed", "loans")
+                    parameter("loans[0].bookId", 1)
+                }
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = response.bodyAsText().toJsonArray()
+            assertNotNull(responseBody)
+            assertEquals(1, responseBody.size)
+            assertEquals(
+                1,
+                responseBody
+                    .first()
+                    .jsonObject["loans"]
+                    ?.jsonArray
+                    ?.size,
+            )
+            assertEquals(
+                1,
+                responseBody
+                    .first()
+                    .jsonObject["loans"]
+                    ?.jsonArray
+                    ?.first()
+                    ?.jsonObject
+                    ?.get("userId")
+                    ?.jsonPrimitive
+                    ?.intOrNull,
+            )
+        }
+
+    @Test
+    fun `GET collection item with filter on expanded - when given expand value and filter - should apply filter on expanded data`() =
+        testWithApp {
+            val response =
+                client.get("/loans") {
+                    parameter("_expand", "user")
+                    parameter("user.name", "Alice")
+                }
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = response.bodyAsText().toJsonArray()
+            assertNotNull(responseBody)
+            assertEquals(1, responseBody.size)
+            assertEquals(
+                "2025-02-10",
+                responseBody
+                    .first()
+                    .jsonObject
+                    ["loanDate"]
+                    ?.jsonPrimitive
+                    ?.content,
+            )
+            assertEquals(
+                "alice@example.com",
+                responseBody
+                    .first()
+                    .jsonObject
+                    ["user"]
+                    ?.jsonObject
+                    ?.get("email")
+                    ?.jsonPrimitive
+                    ?.content,
+            )
         }
 
     private fun getTitleListFromXmlCollection(xml: String): List<String> {
