@@ -54,7 +54,7 @@ fun Route.getRoutes(
     }) {
         val accept = call.request.headers[HttpHeaders.Accept] ?: ALL_MIME
         val params = call.request.queryParameters.toMap()
-        call.response.headers.append(HttpHeaders.Vary, contentNegotiationService.supportedTypes.joinToString(separator = ", "))
+        call.response.headers.append(HttpHeaders.Vary, HttpHeaders.Accept)
         if (params.isEmpty()) {
             val data = collectionService.getCollection(collectionName)
             val (body, type) = contentNegotiationService.getResourceInAcceptedFormat(JsonArray(data), accept)
@@ -102,6 +102,7 @@ fun Route.getRoutes(
             } else {
                 collectionService.getItemById(collectionName, id)
             }
+        call.response.headers.append(HttpHeaders.Vary, HttpHeaders.Accept)
         val (body, type) = contentNegotiationService.getResourceInAcceptedFormat(data, accept)
         call.response.headers.append(HttpHeaders.Vary, contentNegotiationService.supportedTypes.joinToString(separator = ", "))
         call.response.headers.append(HttpHeaders.ContentType, type)

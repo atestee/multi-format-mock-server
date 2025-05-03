@@ -66,14 +66,15 @@ fun Route.putRoute(
         val itemExists = kotlin.runCatching { collectionService.getItemById(collectionName, id) }.isSuccess
         if (itemExists) {
             val updatedItem = collectionService.updateItemInCollection(collectionName, id, jsonItem)
+            call.response.headers.append(HttpHeaders.Vary, HttpHeaders.Accept)
             val (bodyInAcceptedFormat, type) = contentNegotiationService.getResourceInAcceptedFormat(updatedItem, accept)
             call.response.headers.append(HttpHeaders.ContentType, type)
             call.respond(HttpStatusCode.OK, bodyInAcceptedFormat)
         } else {
             val (insertedItemId, insertedItem) = collectionService.insertItemToCollection(collectionName, jsonItem)
+            call.response.headers.append(HttpHeaders.Vary, HttpHeaders.Accept)
             val (bodyInAcceptedFormat, type) = contentNegotiationService.getResourceInAcceptedFormat(insertedItem, accept)
             call.response.headers.append(HttpHeaders.Location, "/$collectionName/$insertedItemId")
-            call.response.headers.append(HttpHeaders.Vary, contentNegotiationService.supportedTypes.joinToString(separator = ", "))
             call.response.headers.append(HttpHeaders.ContentType, type)
             call.respond(HttpStatusCode.Created, bodyInAcceptedFormat)
         }
