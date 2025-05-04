@@ -9,6 +9,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.doubleOrNull
 import java.time.LocalDate
+import java.time.OffsetDateTime
 
 /**
  * A service for filtering JSON objects based on specified parameters.
@@ -145,6 +146,15 @@ class FilterService {
                     kotlin.runCatching { LocalDate.parse(value) }.getOrNull()
                         ?: throw InvalidDataException("Problem when parsing date string.")
                 applyCompareOperator(aDate, bDate, operator)
+            }
+            "date-time" -> {
+                val aDateTime =
+                    kotlin.runCatching { OffsetDateTime.parse(fieldValue.content) }.getOrNull()
+                        ?: throw BadRequestException("Date is not valid")
+                val bDateTime =
+                    kotlin.runCatching { OffsetDateTime.parse(value) }.getOrNull()
+                        ?: throw InvalidDataException("Problem when parsing date string.")
+                applyCompareOperator(aDateTime, bDateTime, operator)
             }
             else -> throw BadRequestException("$operator operator is not supported for $type.")
         }
