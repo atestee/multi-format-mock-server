@@ -29,10 +29,12 @@ fun Application.configureExceptionHandling() {
         }
         exception<NotAcceptableException> { call, cause ->
             log.error("Not acceptable", cause)
+            call.response.headers.append(HttpHeaders.Vary, HttpHeaders.Accept)
             call.respond(HttpStatusCode.NotAcceptable, cause.message as String)
         }
         exception<UnsupportedMediaTypeException> { call, cause ->
             log.error("Unsupported media type", cause)
+            call.response.headers.append(HttpHeaders.Vary, HttpHeaders.Accept)
             call.response.headers.append(HttpHeaders.Accept, cause.supportedMediaTypes.joinToString(", "))
             call.respond(HttpStatusCode.UnsupportedMediaType, cause.message as String)
         }

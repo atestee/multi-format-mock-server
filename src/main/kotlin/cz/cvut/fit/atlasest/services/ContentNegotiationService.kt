@@ -18,7 +18,7 @@ class ContentNegotiationService(
     val collectionService: CollectionService,
     private val schemaService: SchemaService,
 ) {
-    private val supportedMediaTypes = listOf(ContentType.Application.Json, ContentType.Application.Xml, ContentType.Text.CSV)
+    val supportedMediaTypes = listOf(ContentType.Application.Json, ContentType.Application.Xml, ContentType.Text.CSV)
 
     fun getResourceInJsonFormat(
         collectionName: String,
@@ -66,7 +66,7 @@ class ContentNegotiationService(
                 resource.toCSV() to CSV_MIME
             }
             else -> throw NotAcceptableException(
-                "Supported types are: [$JSON_MIME, $XML_MIME, $CSV_MIME]",
+                "Supported types are: $supportedMediaTypes",
             )
         }
     }

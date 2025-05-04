@@ -12,6 +12,11 @@ fun Route.deleteRoute(
 ) {
     delete("/$collectionName/{id}", {
         tags(collectionName)
+        response {
+            code(HttpStatusCode.OK) {
+                description = "Request processed successfully"
+            }
+        }
     }) {
         val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest, "Missing ID")
         collectionService.deleteItemFromCollection(collectionName, id)

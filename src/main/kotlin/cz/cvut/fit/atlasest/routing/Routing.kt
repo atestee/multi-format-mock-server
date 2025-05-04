@@ -10,6 +10,7 @@ import cz.cvut.fit.atlasest.services.CollectionService
 import cz.cvut.fit.atlasest.services.ContentNegotiationService
 import cz.cvut.fit.atlasest.services.ParameterService
 import io.github.smiley4.ktoropenapi.OpenApi
+import io.github.smiley4.ktoropenapi.get
 import io.github.smiley4.ktoropenapi.openApi
 import io.github.smiley4.ktorswaggerui.swaggerUI
 import io.ktor.serialization.kotlinx.json.json
@@ -17,7 +18,6 @@ import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.response.respondText
-import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import io.swagger.v3.oas.models.media.ArraySchema
@@ -75,6 +75,12 @@ fun Application.configureRouting() {
                             }
                     },
                 )
+                schema(
+                    "string",
+                    Schema<Any>().apply {
+                        type = "string"
+                    },
+                )
             }
         }
     }
@@ -87,7 +93,9 @@ fun Application.configureRouting() {
             swaggerUI("${appConfig.rootPath}/openapi.json")
         }
         val collectionNames = collectionService.getCollectionNames()
-        get("/collections") {
+        get("/collections", {
+            tags("collection names")
+        }) {
             call.respondText("collections: $collectionNames")
         }
         collectionNames.forEach { collectionName ->

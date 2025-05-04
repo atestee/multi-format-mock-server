@@ -12,9 +12,10 @@ import cz.cvut.fit.atlasest.services.PAGE
 import cz.cvut.fit.atlasest.services.ParameterService
 import cz.cvut.fit.atlasest.services.QUERY
 import cz.cvut.fit.atlasest.services.SORT
+import cz.cvut.fit.atlasest.utils.linkHeader
+import cz.cvut.fit.atlasest.utils.varyHeader
 import io.github.smiley4.ktoropenapi.config.descriptors.ref
 import io.github.smiley4.ktoropenapi.get
-import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respond
@@ -30,14 +31,15 @@ fun Route.getRoutes(
     contentNegotiationService: ContentNegotiationService,
     parameterService: ParameterService,
 ) {
-    val queryParams = listOf(PAGE, LIMIT, SORT, ORDER, EMBED, EXPAND, QUERY)
-
     // GET collection
     get("/$collectionName", {
         tags(collectionName)
         request {
-            queryParams.forEach { parameter ->
-                queryParameter<String>(parameter)
+            listOf(PAGE, LIMIT, SORT, ORDER, EMBED, EXPAND, QUERY).forEach { parameter ->
+                queryParameter(
+                    parameter,
+                    ref("string"),
+                )
             }
             queryParameter<JsonObject>("filter") {
                 explode = true
@@ -46,8 +48,23 @@ fun Route.getRoutes(
         }
         response {
             code(HttpStatusCode.OK) {
+                description = "The retrieved collection items"
                 body(ref(collectionName)) {
-                    mediaTypes(ContentType.Application.Json, ContentType.Application.Xml, ContentType.Text.CSV)
+                    mediaTypes(contentNegotiationService.supportedMediaTypes)
+                }
+                header(linkHeader.header, linkHeader.schema) {
+                    description = linkHeader.description
+                }
+                header(varyHeader.header, varyHeader.schema) {
+                    description = varyHeader.description
+                    required = true
+                }
+            }
+            code(HttpStatusCode.NotAcceptable) {
+                description = "Not Acceptable"
+                header(varyHeader.header, varyHeader.schema) {
+                    description = varyHeader.description
+                    required = true
                 }
             }
         }
@@ -74,18 +91,24 @@ fun Route.getRoutes(
         tags(collectionName)
         request {
             pathParameter<String>("id")
-            queryParams.forEach { parameter ->
-                queryParameter<String>(parameter)
-            }
-            queryParameter<JsonObject>("filter") {
-                explode = true
-                style = Parameter.StyleEnum.FORM
-            }
+            queryParameter<String>(EMBED)
+            queryParameter<String>(EXPAND)
         }
         response {
             code(HttpStatusCode.OK) {
                 body(ref(collectionName.singularize())) {
-                    mediaTypes(ContentType.Application.Json, ContentType.Application.Xml, ContentType.Text.CSV)
+                    mediaTypes(contentNegotiationService.supportedMediaTypes)
+                }
+                header(varyHeader.header, varyHeader.schema) {
+                    description = varyHeader.description
+                    required = true
+                }
+            }
+            code(HttpStatusCode.NotAcceptable) {
+                description = "Not Acceptable"
+                header(varyHeader.header, varyHeader.schema) {
+                    description = varyHeader.description
+                    required = true
                 }
             }
             code(HttpStatusCode.NotFound) {
@@ -102,9 +125,8 @@ fun Route.getRoutes(
             } else {
                 collectionService.getItemById(collectionName, id)
             }
-        call.response.headers.append(HttpHeaders.Vary, HttpHeaders.Accept)
         val (body, type) = contentNegotiationService.getResourceInAcceptedFormat(data, accept)
-        call.response.headers.append(HttpHeaders.Vary, contentNegotiationService.supportedTypes.joinToString(separator = ", "))
+        call.response.headers.append(HttpHeaders.Vary, HttpHeaders.Accept)
         call.response.headers.append(HttpHeaders.ContentType, type)
         call.respond(HttpStatusCode.OK, body)
     }

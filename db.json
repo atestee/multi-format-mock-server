@@ -147,13 +147,6 @@
     ],
     "loans": [
         {
-            "id": 1,
-            "bookId": 1,
-            "userId": 1,
-            "loanDate": "2025-02-10",
-            "dueDate": "2025-02-24"
-        },
-        {
             "id": 2,
             "bookId": 2,
             "userId": 2,
