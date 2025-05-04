@@ -16,9 +16,9 @@ import kotlinx.serialization.json.jsonObject
 
 class ContentNegotiationService(
     val collectionService: CollectionService,
-    val schemaService: SchemaService,
+    private val schemaService: SchemaService,
 ) {
-    val supportedTypes = listOf(ContentType.Application.Json, ContentType.Application.Xml, ContentType.Text.CSV)
+    private val supportedMediaTypes = listOf(ContentType.Application.Json, ContentType.Application.Xml, ContentType.Text.CSV)
 
     fun getResourceInJsonFormat(
         collectionName: String,
@@ -44,7 +44,8 @@ class ContentNegotiationService(
             }
 
             else -> throw UnsupportedMediaTypeException(
-                "Unsupported media type $contentType. Supported types are: [$JSON_MIME, $XML_MIME, $CSV_MIME]",
+                "Unsupported media type $contentType. Supported types are: $supportedMediaTypes",
+                supportedMediaTypes = supportedMediaTypes,
             )
         }
     }
@@ -72,7 +73,7 @@ class ContentNegotiationService(
 
     internal fun processAcceptHeader(accept: String): ContentType? {
         if (accept.isBlank()) {
-            return supportedTypes.first()
+            return supportedMediaTypes.first()
         }
         val acceptParsed = parseAndSortContentTypeHeader(accept)
 
@@ -82,7 +83,7 @@ class ContentNegotiationService(
                 .let { (disallowed, allowed) ->
                     disallowed.map { ContentType.parse(it.value) } to allowed.map { ContentType.parse(it.value) }
                 }
-        val allowedSupportedTypes = supportedTypes.filterNot { it in disallowedTypes }
+        val allowedSupportedTypes = supportedMediaTypes.filterNot { it in disallowedTypes }
 
         val result =
             allowedTypes.firstNotNullOfOrNull { accepted ->

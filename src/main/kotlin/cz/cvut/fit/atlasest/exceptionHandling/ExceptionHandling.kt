@@ -1,6 +1,7 @@
 package cz.cvut.fit.atlasest.exceptionHandling
 
 import cz.cvut.fit.atlasest.utils.log
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -32,6 +33,7 @@ fun Application.configureExceptionHandling() {
         }
         exception<UnsupportedMediaTypeException> { call, cause ->
             log.error("Unsupported media type", cause)
+            call.response.headers.append(HttpHeaders.Accept, cause.supportedMediaTypes.joinToString(", "))
             call.respond(HttpStatusCode.UnsupportedMediaType, cause.message as String)
         }
         exception<Throwable> { call, cause ->
