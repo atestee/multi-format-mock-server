@@ -1,5 +1,6 @@
 package cz.cvut.fit.atlasest.utils
 
+import com.nfeld.jsonpathkt.kotlinx.resolvePathOrNull
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -46,38 +47,10 @@ fun String.toJsonObject(): JsonObject = Json.parseToJsonElement(this).jsonObject
 fun String.toJsonArray(): JsonArray = Json.parseToJsonElement(this).jsonArray
 
 /**
- * Retrieves the value of a specified field from the JSON object.
+ * Retrieves the value of a specified field from the JSON object with JSON Path.
  *
  * @param key The key representing the field, supports nested keys using dot notation array keys using indexing.
  *
  * @return The corresponding JSON element, or `null` if not found.
  */
-fun JsonObject.getFieldValue(key: String): JsonElement? {
-    val keys = key.split(".")
-    var currentElement: JsonElement? = this
-
-    for (keyPart in keys) {
-        if (keyPart.contains("[") && keyPart.contains("]")) {
-            val index = keyPart.substringAfter("[").substringBefore("]").toIntOrNull()
-            val currentKey = keyPart.substringBefore("[")
-            if (currentElement is JsonObject) {
-                currentElement = currentElement[currentKey]
-                if (currentElement is JsonArray && index != null && currentElement.size > index) {
-                    currentElement = currentElement[index]
-                } else {
-                    return null
-                }
-            } else {
-                return null
-            }
-        } else {
-            if (currentElement is JsonObject) {
-                currentElement = currentElement[keyPart]
-            } else {
-                return null
-            }
-        }
-    }
-
-    return currentElement
-}
+fun JsonObject.getFieldValue(key: String): JsonElement? = this.resolvePathOrNull("\$.$key")

@@ -3,6 +3,7 @@ package cz.cvut.fit.atlasest.services
 import com.cesarferreira.pluralize.pluralize
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.nfeld.jsonpathkt.kotlinx.resolvePathOrNull
 import com.saasquatch.jsonschemainferrer.AdditionalPropertiesPolicies
 import com.saasquatch.jsonschemainferrer.FormatInferrers
 import com.saasquatch.jsonschemainferrer.JsonSchemaInferrer
@@ -60,7 +61,8 @@ class SchemaService {
             }
 
         val inferredSchema = inferrer.inferForSamples(jsonNodeList)
-        return mapper.writeValueAsString(inferredSchema).toJsonObject()
+        val schema = mapper.writeValueAsString(inferredSchema).toJsonObject()
+        return schema
     }
 
     /**
@@ -214,11 +216,11 @@ class SchemaService {
     /**
      * Retrieves the type and optional format of a property from a nested JSON Schema object.
      *
-     * This function traverses a JSON Schema based on a dot-delimited key (for example "user.address.street"),
+     * This function traverses a JSON Schema based on a dot-delimited and array indexed key (for example "company.branches[1].address.street"),
      * and returns the type and format of the final field, if available, else null.
      *
      * @param schemas The JSON schemas of main collection and related collections (indexed by collection name).
-     * @param key A dot-delimited string representing the path to the wanted property.
+     * @param key A string representing the path to the wanted property, uses dot-notation and array indexing with wildcard.
      * @param collectionName The name of the main collection.
      *
      * @return A Pair with the field's type and optional format, or null if the field doesn't exist
@@ -229,47 +231,27 @@ class SchemaService {
         key: String,
         collectionName: String,
     ): Pair<String, String?>? {
-        val pathSegments = key.split(".").map { it.replace("\\[[\\d*]]".toRegex(), "") }
+        val arrayIndexingRegex = "\\[[\\d*]]".toRegex()
+        val firstSegment = key.substringBefore(".").replace(arrayIndexingRegex, "")
+        val afterFirstSegment = key.substringAfter(".")
+
         val relatedCollectionsNames = schemas.keys.minus(collectionName)
-        var skipFirst = false
 
-        var currentSchema =
-            if (pathSegments.first() in relatedCollectionsNames) {
-                skipFirst = true
-                schemas[pathSegments.first()]?.jsonObject
-            } else if (pathSegments.first().pluralize() in relatedCollectionsNames) {
-                skipFirst = true
-                schemas[pathSegments.first().pluralize()]?.jsonObject
+        val (currentSchema, jsonPath) =
+            if (firstSegment in relatedCollectionsNames) {
+                schemas[firstSegment]?.jsonObject to
+                    "$.$afterFirstSegment".replace(".", ".properties.").replace(arrayIndexingRegex, ".items")
+            } else if (firstSegment.pluralize() in relatedCollectionsNames) {
+                schemas[firstSegment.pluralize()]?.jsonObject to
+                    "$.$afterFirstSegment".replace(".", ".properties.").replace(arrayIndexingRegex, ".items")
             } else {
-                schemas[collectionName]?.jsonObject
+                schemas[collectionName]?.jsonObject to
+                    "$.$key".replace(".", ".properties.").replace(arrayIndexingRegex, ".items")
             }
-
-        for ((i, segment) in pathSegments.withIndex()) {
-            if (skipFirst && i == 0) continue
-            val properties =
-                currentSchema?.get("properties")?.jsonObject
-                    ?: return null
-
-            val fieldSchema =
-                properties[segment]?.jsonObject
-                    ?: return null
-
-            if (i == pathSegments.lastIndex) {
-                val type = fieldSchema["type"]?.jsonPrimitive?.content ?: return null
-                val format = fieldSchema["format"]?.jsonPrimitive?.content
-                return type to format
-            }
-
-            if (fieldSchema["type"]?.jsonPrimitive?.content == "object") {
-                currentSchema = fieldSchema
-            } else if (fieldSchema["type"]?.jsonPrimitive?.content == "array") {
-                currentSchema = fieldSchema.get("items")?.jsonObject ?: return null
-            } else {
-                return null
-            }
-        }
-
-        return null
+        val resultObject = currentSchema?.resolvePathOrNull(jsonPath) as? JsonObject ?: return null
+        val type = resultObject["type"]?.jsonPrimitive?.content ?: return null
+        val format = resultObject["format"]?.jsonPrimitive?.content
+        return type to format
     }
 
     /**
