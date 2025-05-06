@@ -5,13 +5,12 @@ import com.cesarferreira.pluralize.singularize
 import cz.cvut.fit.atlasest.application.AppConfig
 import cz.cvut.fit.atlasest.utils.add
 import cz.cvut.fit.atlasest.utils.toCSV
-import io.ktor.server.plugins.BadRequestException
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 /**
- * A service for applying data processing operations based request parameters such as filtering, pagination, sorting, query search,
+ * A service for applying data processing operations based on request parameters such as filtering, pagination, sorting, query search,
  * embedding and expanding.
  */
 class ParameterService(
@@ -38,7 +37,7 @@ class ParameterService(
         val schema = collectionService.getCollectionSchema(collectionName)
         schemas = schemas.add(collectionName, schema)
         val filteredData = applyFilter(collectionName, queriedData, params, schemas)
-        val (paginatedData, links) = applyPagination(filteredData, params, "${appConfig.host}/$collectionName", filteredData.size)
+        val (paginatedData, links) = applyPagination(filteredData, params, "${appConfig.host}/$collectionName")
         val sortedData = applySorting(paginatedData, params)
         return sortedData to links
     }
@@ -52,7 +51,7 @@ class ParameterService(
      *
      * @return Collection data including embedded items.
      */
-    fun applyEmbedAndExpand(
+    fun getItemByIdWithEmbedAndExpandParams(
         params: Map<String, List<String>>,
         collectionName: String,
         id: String,
@@ -103,7 +102,6 @@ class ParameterService(
      * @param collectionItems The list of JSON objects to be paginated.
      * @param params The request parameters containing pagination details.
      * @param baseUrl The base URL to which pagination parameters will be appended.
-     * @param totalItems The total number of items across all pages.
      *
      * @return A pair containing the paginated list of JSON objects and an optional string of pagination links (RFC 5988 format).
      */
@@ -111,7 +109,6 @@ class ParameterService(
         collectionItems: MutableList<JsonObject>,
         params: Map<String, List<String>>,
         baseUrl: String,
-        totalItems: Int,
     ): Pair<MutableList<JsonObject>, String?> {
         val page = params[PAGE]?.first()?.toIntOrNull()
         val limit = params[LIMIT]?.first()?.toIntOrNull()
@@ -121,28 +118,14 @@ class ParameterService(
                 .flatMap { (key, values) ->
                     values.map { value -> "$key=$value" }
                 }.joinToString("&")
-        if (page == null) {
-            if (limit == null) {
-                return collectionItems to null
-            } else {
-                throw BadRequestException("Pagination parameter $LIMIT is without $PAGE")
-            }
-        }
-        val links =
-            paginationService.createPaginationLinks(
-                baseUrl,
-                page,
-                limit ?: paginationService.defaultLimit,
-                totalItems,
-                paramsString,
-            )
-        val items =
-            paginationService.applyPagination(
-                collectionItems,
-                page,
-                limit,
-            )
-        return items to links
+
+        return paginationService.applyPagination(
+            collectionItems,
+            page,
+            limit,
+            paramsString,
+            baseUrl,
+        )
     }
 
     /**
@@ -170,7 +153,7 @@ class ParameterService(
      * Applies query search to a collection of JSON objects based on query parameter _query.
      *
      * @param collectionItems The list of queried JSON objects.
-     * @param params The request query parameters containing the query.
+     * @param params The request query parameters containing the search term.
      *
      * @return The resulting list of JSON objects.
      */

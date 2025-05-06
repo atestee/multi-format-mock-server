@@ -16,23 +16,43 @@ class PaginationService(
      * @param collectionItems The list of JSON objects to be paginated.
      * @param page The page number (indexed from 1).
      * @param limit The number of items per page. If `null`, the default limit is used.
+     * @param paramsString The query parameters separated by `&`, to include in the pagination links.
+     * @param baseUrl The base URL.
      *
-     * @return A paginated subset of the original collection.
+     * @return A pair containing the paginated list of JSON objects and an optional string of pagination links (RFC 5988 format).
      * @throws BadRequestException If the `_limit` parameter is provided without `_page`.
      */
     internal fun applyPagination(
         collectionItems: MutableList<JsonObject>,
-        page: Int,
+        page: Int?,
         limit: Int?,
-    ): MutableList<JsonObject> {
+        paramsString: String,
+        baseUrl: String,
+    ): Pair<MutableList<JsonObject>, String?> {
+        if (page == null) {
+            if (limit == null) {
+                return collectionItems to null
+            } else {
+                throw BadRequestException("Pagination parameter $LIMIT is without $PAGE")
+            }
+        }
+        val links =
+            createPaginationLinks(
+                baseUrl,
+                page,
+                limit ?: defaultLimit,
+                collectionItems.size,
+                paramsString,
+            )
+
         val newLimit = limit ?: defaultLimit
         val start = (page - 1) * newLimit
         val end = min(start + newLimit, collectionItems.size)
 
         return if (start < collectionItems.size) {
-            collectionItems.subList(start, end).toMutableList()
+            collectionItems.subList(start, end).toMutableList() to links
         } else {
-            mutableListOf()
+            mutableListOf<JsonObject>() to links
         }
     }
 
@@ -51,7 +71,7 @@ class PaginationService(
      *
      * @return A string containing pagination links or an empty string if no links are applicable.
      */
-    fun createPaginationLinks(
+    private fun createPaginationLinks(
         baseUrl: String,
         page: Int,
         limit: Int,

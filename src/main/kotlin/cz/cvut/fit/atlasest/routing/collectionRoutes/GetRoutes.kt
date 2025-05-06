@@ -121,7 +121,7 @@ fun Route.getRoutes(
         val params = call.request.queryParameters.toMap()
         val data =
             if (params[EMBED] is List<String> || params[EXPAND] is List<String>) {
-                parameterService.applyEmbedAndExpand(params, collectionName, id)
+                parameterService.getItemByIdWithEmbedAndExpandParams(params, collectionName, id)
             } else {
                 collectionService.getItemById(collectionName, id)
             }

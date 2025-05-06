@@ -89,14 +89,7 @@ class Repository(
     fun getItemById(
         collectionName: String,
         id: String,
-    ): JsonObject {
-        val collection = getCollectionData(collectionName)
-        val item =
-            collection.items.find {
-                collection.getItemIdValue(it) == id
-            } ?: throw NotFoundException("Item with ${collection.identifier} '$id' not found in collection '$collectionName'")
-        return item
-    }
+    ): JsonObject = getCollectionData(collectionName).getItemById(id)
 
     /**
      * Inserts a new item into a specified collection.

@@ -39,7 +39,6 @@ class ParameterServiceTest : BaseTest() {
             .toMutableList()
 
     private val baseUrl = "baseUrl"
-    private val totalItems = books.size
 
     private val booksSchema = fileHandler.readJsonFile("schema.json")["books"]!!.jsonObject
     private val loansSchema = fileHandler.readJsonFile("schema.json")["loans"]!!.jsonObject
@@ -414,7 +413,6 @@ class ParameterServiceTest : BaseTest() {
                     "_limit" to listOf(limit),
                 ),
                 baseUrl,
-                totalItems,
             )
 
         val expectedLinks =
@@ -443,7 +441,6 @@ class ParameterServiceTest : BaseTest() {
                     "_page" to listOf(page),
                 ),
                 baseUrl,
-                totalItems,
             )
 
         val expectedLinks =
@@ -463,7 +460,6 @@ class ParameterServiceTest : BaseTest() {
                 collectionItems = books,
                 mapOf(),
                 baseUrl,
-                totalItems,
             )
 
         assertEquals(10, pair.size)
@@ -480,7 +476,6 @@ class ParameterServiceTest : BaseTest() {
                         "_limit" to listOf("2"),
                     ),
                     baseUrl,
-                    totalItems,
                 )
             }
         assertEquals("Pagination parameter _limit is without _page", exception.message)
@@ -620,9 +615,9 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyEmbedAndExpand on item - when given 2 embed values - returns the item with embedded items from both collections`() {
+    fun `getItemByIdWithEmbedAndExpandParams on item - when given 2 embed values - returns the item with embedded items from both collections`() {
         val result =
-            parameterService.applyEmbedAndExpand(
+            parameterService.getItemByIdWithEmbedAndExpandParams(
                 mapOf("_embed" to listOf("loans", "libraryBooks")),
                 "books",
                 "1",
@@ -650,9 +645,9 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyEmbedAndExpand on item - when given 2 expand values - returns the item expanded`() {
+    fun `getItemByIdWithEmbedAndExpandParams on item - when given 2 expand values - returns the item expanded`() {
         val result =
-            parameterService.applyEmbedAndExpand(
+            parameterService.getItemByIdWithEmbedAndExpandParams(
                 mapOf("_expand" to listOf("book", "user")),
                 "loans",
                 "1",
@@ -665,9 +660,9 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyEmbedAndExpand on item - when given embed and expand values - returns the item embedded and expanded`() {
+    fun `getItemByIdWithEmbedAndExpandParams on item - when given embed and expand values - returns the item embedded and expanded`() {
         val result =
-            parameterService.applyEmbedAndExpand(
+            parameterService.getItemByIdWithEmbedAndExpandParams(
                 mapOf(
                     "_expand" to listOf("libraryRegistration"),
                     "_embed" to listOf("loans"),

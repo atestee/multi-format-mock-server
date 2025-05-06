@@ -14,9 +14,12 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 
+/**
+ * A service for content negotiation tasks.
+ */
 class ContentNegotiationService(
     val collectionService: CollectionService,
-    private val schemaService: SchemaService,
+    val schemaService: SchemaService,
 ) {
     val supportedMediaTypes = listOf(ContentType.Application.Json, ContentType.Application.Xml, ContentType.Text.CSV)
 

@@ -9,6 +9,9 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import javax.validation.ValidationException
 
+/**
+ * A service for managing collection data, collection JSON and OpenAPI Schema retrieval and data validation.
+ */
 class CollectionService(
     private val schemaService: SchemaService,
     private val repository: Repository,

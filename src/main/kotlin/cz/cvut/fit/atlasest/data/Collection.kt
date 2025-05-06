@@ -4,6 +4,7 @@ import cz.cvut.fit.atlasest.exceptionHandling.InvalidDataException
 import cz.cvut.fit.atlasest.exceptionHandling.ParsingException
 import cz.cvut.fit.atlasest.utils.add
 import io.ktor.server.plugins.BadRequestException
+import io.ktor.server.plugins.NotFoundException
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
@@ -45,6 +46,24 @@ class Collection(
         this.items.indexOfFirst {
             getItemIdValue(it) == id
         }
+
+    /**
+     * Retrieves an item by the given id.
+     *
+     * @param id The identifier value of the item.
+     *
+     * @return The JSON object representing the item.
+     *
+     * @throws NotFoundException If the item is not found.
+     * @throws InvalidDataException If there is a problem with the JSON data.
+     */
+    fun getItemById(id: String): JsonObject {
+        val item =
+            items.find {
+                getItemIdValue(it) == id
+            } ?: throw NotFoundException("Item with $identifier '$id' not found in collection '$collectionName'")
+        return item
+    }
 
     fun insertItem(item: JsonObject): Int {
         val newItem =
