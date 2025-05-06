@@ -2,10 +2,10 @@ package cz.cvut.fit.atlasest.routing
 
 import com.cesarferreira.pluralize.singularize
 import cz.cvut.fit.atlasest.application.AppConfig
-import cz.cvut.fit.atlasest.routing.routes.deleteRoute
-import cz.cvut.fit.atlasest.routing.routes.getRoutes
-import cz.cvut.fit.atlasest.routing.routes.postRoute
-import cz.cvut.fit.atlasest.routing.routes.putRoute
+import cz.cvut.fit.atlasest.routing.collectionRoutes.deleteRoute
+import cz.cvut.fit.atlasest.routing.collectionRoutes.getRoutes
+import cz.cvut.fit.atlasest.routing.collectionRoutes.postRoute
+import cz.cvut.fit.atlasest.routing.collectionRoutes.putRoute
 import cz.cvut.fit.atlasest.services.CollectionService
 import cz.cvut.fit.atlasest.services.ContentNegotiationService
 import cz.cvut.fit.atlasest.services.ParameterService

@@ -1,4 +1,4 @@
-package cz.cvut.fit.atlasest.routing.routes
+package cz.cvut.fit.atlasest.routing.collectionRoutes
 
 import cz.cvut.fit.atlasest.services.CollectionService
 import io.github.smiley4.ktoropenapi.delete

@@ -1,4 +1,4 @@
-package cz.cvut.fit.atlasest.utils
+package cz.cvut.fit.atlasest.routing
 
 import io.ktor.http.HttpHeaders
 import io.swagger.v3.oas.models.media.Schema

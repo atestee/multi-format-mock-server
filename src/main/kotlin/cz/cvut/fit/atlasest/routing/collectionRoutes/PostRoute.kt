@@ -1,4 +1,4 @@
-package cz.cvut.fit.atlasest.routing.routes
+package cz.cvut.fit.atlasest.routing.collectionRoutes
 
 import com.cesarferreira.pluralize.singularize
 import cz.cvut.fit.atlasest.services.ALL_MIME
