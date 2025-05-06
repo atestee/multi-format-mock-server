@@ -58,6 +58,11 @@ class Repository(
 
     fun getCollectionNextId(collectionName: String) = getCollectionData(collectionName).getNextId()
 
+    fun getCollectionIdInCorrectType(
+        collectionName: String,
+        id: String,
+    ) = getCollectionData(collectionName).getIdInCorrectType(id)
+
     /**
      * Retrieves the schema of a specified collection.
      *

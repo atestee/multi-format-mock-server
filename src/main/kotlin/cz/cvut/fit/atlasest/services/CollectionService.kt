@@ -110,8 +110,11 @@ class CollectionService(
         newItem: JsonObject,
     ): JsonObject {
         val schema = repository.getCollectionSchema(collectionName)
-        this.schemaService.validateItemAgainstSchema(newItem, schema)
-        return repository.updateItemInCollection(collectionName, id, newItem)
+        val idInCorrectType = repository.getCollectionIdInCorrectType(collectionName, id)
+        val identifier = repository.getCollectionIdentifier(collectionName)
+        val newItemWithId = newItem.add(identifier, idInCorrectType)
+        this.schemaService.validateItemAgainstSchema(newItemWithId, schema)
+        return repository.updateItemInCollection(collectionName, id, newItemWithId)
     }
 
     /**

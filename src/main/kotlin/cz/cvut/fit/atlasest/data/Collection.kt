@@ -34,6 +34,13 @@ class Collection(
         return idValue
     }
 
+    fun getIdInCorrectType(id: String): JsonPrimitive =
+        if (this.getIdentifierType() in listOf("number", "integer")) {
+            JsonPrimitive(id.toInt())
+        } else {
+            JsonPrimitive(id)
+        }
+
     fun getItemIndex(id: String): Int =
         this.items.indexOfFirst {
             getItemIdValue(it) == id
