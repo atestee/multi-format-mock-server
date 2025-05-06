@@ -197,11 +197,13 @@ class FilterService {
         operator: FilterOperator,
         value: String,
         type: String,
-    ): Boolean =
-        when (operator) {
+    ): Boolean {
+        if (fieldArray.first() !is JsonPrimitive) throw BadRequestException("Operator $operator is not supported array of objects.")
+        return when (operator) {
             FilterOperator.EQ -> fieldArray.any { it is JsonPrimitive && applyOperator(it, operator, value, type) }
             FilterOperator.NE -> fieldArray.all { it is JsonPrimitive && applyOperator(it, operator, value, type) }
             FilterOperator.LIKE -> fieldArray.any { it is JsonPrimitive && applyOperator(it, operator, value, type) }
             else -> throw BadRequestException("Operator $operator is not supported for multiple values.")
         }
+    }
 }
