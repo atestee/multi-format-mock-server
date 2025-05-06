@@ -1,6 +1,8 @@
 package cz.cvut.fit.atlasest.routing.collectionRoutes
 
 import com.cesarferreira.pluralize.singularize
+import cz.cvut.fit.atlasest.routing.linkHeader
+import cz.cvut.fit.atlasest.routing.varyHeader
 import cz.cvut.fit.atlasest.services.ALL_MIME
 import cz.cvut.fit.atlasest.services.CollectionService
 import cz.cvut.fit.atlasest.services.ContentNegotiationService
@@ -12,8 +14,6 @@ import cz.cvut.fit.atlasest.services.PAGE
 import cz.cvut.fit.atlasest.services.ParameterService
 import cz.cvut.fit.atlasest.services.QUERY
 import cz.cvut.fit.atlasest.services.SORT
-import cz.cvut.fit.atlasest.utils.linkHeader
-import cz.cvut.fit.atlasest.utils.varyHeader
 import io.github.smiley4.ktoropenapi.config.descriptors.ref
 import io.github.smiley4.ktoropenapi.get
 import io.ktor.http.HttpHeaders

@@ -1,12 +1,12 @@
 package cz.cvut.fit.atlasest.routing.collectionRoutes
 
 import com.cesarferreira.pluralize.singularize
+import cz.cvut.fit.atlasest.routing.acceptHeader
+import cz.cvut.fit.atlasest.routing.locationHeader
+import cz.cvut.fit.atlasest.routing.varyHeader
 import cz.cvut.fit.atlasest.services.ALL_MIME
 import cz.cvut.fit.atlasest.services.CollectionService
 import cz.cvut.fit.atlasest.services.ContentNegotiationService
-import cz.cvut.fit.atlasest.utils.acceptHeader
-import cz.cvut.fit.atlasest.utils.locationHeader
-import cz.cvut.fit.atlasest.utils.varyHeader
 import io.github.smiley4.ktoropenapi.config.descriptors.ref
 import io.github.smiley4.ktoropenapi.post
 import io.ktor.http.HttpHeaders

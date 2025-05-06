@@ -12,6 +12,9 @@ fun Route.deleteRoute(
 ) {
     delete("/$collectionName/{id}", {
         tags(collectionName)
+        request {
+            pathParameter<String>("id")
+        }
         response {
             code(HttpStatusCode.OK) {
                 description = "Request processed successfully"

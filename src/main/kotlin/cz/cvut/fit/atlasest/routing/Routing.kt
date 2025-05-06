@@ -13,6 +13,7 @@ import io.github.smiley4.ktoropenapi.OpenApi
 import io.github.smiley4.ktoropenapi.get
 import io.github.smiley4.ktoropenapi.openApi
 import io.github.smiley4.ktorswaggerui.swaggerUI
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -95,6 +96,11 @@ fun Application.configureRouting() {
         val collectionNames = collectionService.getCollectionNames()
         get("/collections", {
             tags("collection names")
+            response {
+                code(HttpStatusCode.OK) {
+                    description = "A string with the collection names"
+                }
+            }
         }) {
             call.respondText("collections: $collectionNames")
         }
