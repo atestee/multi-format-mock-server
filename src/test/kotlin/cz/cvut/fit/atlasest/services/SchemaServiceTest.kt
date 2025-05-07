@@ -2,7 +2,6 @@ package cz.cvut.fit.atlasest.services
 
 import BaseTest
 import cz.cvut.fit.atlasest.exceptionHandling.InvalidDataException
-import cz.cvut.fit.atlasest.exceptionHandling.ParsingException
 import cz.cvut.fit.atlasest.testData.TestData
 import cz.cvut.fit.atlasest.utils.add
 import cz.cvut.fit.atlasest.utils.toJsonObject
@@ -368,7 +367,7 @@ class SchemaServiceTest : BaseTest() {
             )
 
         val exception =
-            assertThrows<ParsingException> {
+            assertThrows<InvalidDataException> {
                 schemaService.getCollectionSchema(collectionName, schemaCollection)
             }
 
@@ -387,7 +386,7 @@ class SchemaServiceTest : BaseTest() {
             )
 
         val exception =
-            assertThrows<ParsingException> {
+            assertThrows<InvalidDataException> {
                 schemaService.getCollectionSchema(collectionName, schemaCollection)
             }
 

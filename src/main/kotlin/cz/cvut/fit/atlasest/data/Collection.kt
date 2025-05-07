@@ -1,13 +1,11 @@
 package cz.cvut.fit.atlasest.data
 
 import cz.cvut.fit.atlasest.exceptionHandling.InvalidDataException
-import cz.cvut.fit.atlasest.exceptionHandling.ParsingException
 import cz.cvut.fit.atlasest.utils.add
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
@@ -25,16 +23,6 @@ class Collection(
             JsonPrimitive(nextId.toString())
         }
 
-    fun getItemIdValue(item: JsonObject): String {
-        val itemId =
-            item[identifier]
-                ?: throw InvalidDataException("Item is missing identifier in collection $collectionName")
-        val idValue =
-            itemId.takeIf { value -> value is JsonPrimitive }?.jsonPrimitive?.contentOrNull
-                ?: throw InvalidDataException("Invalid identifier value in collection $collectionName (must be a JSON primitive)")
-        return idValue
-    }
-
     fun getIdInCorrectType(id: String): JsonPrimitive =
         if (this.getIdentifierType() in listOf("number", "integer")) {
             JsonPrimitive(id.toInt())
@@ -44,7 +32,7 @@ class Collection(
 
     fun getItemIndex(id: String): Int =
         this.items.indexOfFirst {
-            getItemIdValue(it) == id
+            it[identifier]!!.jsonPrimitive.content == id
         }
 
     /**
@@ -60,7 +48,7 @@ class Collection(
     fun getItemById(id: String): JsonObject {
         val item =
             items.find {
-                getItemIdValue(it) == id
+                it[identifier]!!.jsonPrimitive.content == id
             } ?: throw NotFoundException("Item with $identifier '$id' not found in collection '$collectionName'")
         return item
     }
@@ -106,17 +94,19 @@ class Collection(
     private fun getIdentifierType(): String {
         val properties =
             this.schema["properties"]?.takeIf { it is JsonObject }
-                ?: throw ParsingException("Invalid or missing properties in schema for collection '$collectionName' (must be JSON object)")
+                ?: throw InvalidDataException(
+                    "Invalid or missing properties in schema for collection '$collectionName' (must be JSON object)",
+                )
 
         val identifierProp =
             properties.jsonObject[this.identifier]?.takeIf { it is JsonObject }
-                ?: throw ParsingException(
+                ?: throw InvalidDataException(
                     "Invalid or missing identifier property in schema for collection '$collectionName' (must be JSON object)",
                 )
 
         val identifierType =
             identifierProp.jsonObject["type"]?.takeIf { it is JsonPrimitive }
-                ?: throw ParsingException(
+                ?: throw InvalidDataException(
                     "Invalid or missing type for identifier property in schema for collection '$collectionName' " +
                         "(must be JSON primitive)",
                 )

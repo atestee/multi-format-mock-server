@@ -1,10 +1,10 @@
 package cz.cvut.fit.atlasest.data
 
-import cz.cvut.fit.atlasest.exceptionHandling.InvalidDataException
 import cz.cvut.fit.atlasest.utils.add
 import io.ktor.server.plugins.BadRequestException
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -12,57 +12,6 @@ import kotlin.test.assertFailsWith
 class CollectionTest {
     private val collectionName = "testCollection"
     private val identifier = "testIdentifier"
-
-    @Test
-    fun `getItemIdValue - when item is missing identifier - throws InvalidDataException`() {
-        val item =
-            JsonObject(
-                mapOf(
-                    "key1" to JsonPrimitive("value1"),
-                    "key2" to JsonPrimitive("value2"),
-                ),
-            )
-
-        val collection = generateCollection(item)
-
-        val exception =
-            assertFailsWith<InvalidDataException> {
-                collection.getItemIdValue(item)
-            }
-
-        assertEquals("Item is missing identifier in collection $collectionName", exception.message)
-    }
-
-    @Test
-    fun `getItemIdValue - when item has invalid identifier - throws InvalidDataException`() {
-        val item =
-            JsonObject(
-                mapOf(
-                    identifier to JsonObject(mapOf()),
-                ),
-            )
-
-        val collection = generateCollection(item)
-
-        val exception =
-            assertFailsWith<InvalidDataException> {
-                collection.getItemIdValue(item)
-            }
-
-        assertEquals("Invalid identifier value in collection $collectionName (must be a JSON primitive)", exception.message)
-    }
-
-    @Test
-    fun `getItemIdValue - when item has valid identifier - returns the id value`() {
-        val idValue = "1"
-        val item = generateItem(JsonPrimitive(idValue))
-
-        val collection = generateCollection(item)
-
-        val result = collection.getItemIdValue(item)
-
-        assertEquals(idValue, result)
-    }
 
     @Test
     fun `getItemIndex - when given valid id value - returns the corresponding item`() {
@@ -88,7 +37,7 @@ class CollectionTest {
 
         assertEquals(2, collection.items.size)
         assertEquals(itemId + 1, collection.getNextId().content.toIntOrNull())
-        assertEquals(itemId.toString(), collection.getItemIdValue(insertedItem))
+        assertEquals(itemId.toString(), insertedItem[identifier]!!.jsonPrimitive.content)
         assertEquals(insertedItem, collection.items[1])
     }
 
@@ -103,7 +52,7 @@ class CollectionTest {
 
         assertEquals(2, collection.items.size)
         assertEquals(itemId + 1, collection.getNextId().content.toIntOrNull())
-        assertEquals(itemId.toString(), collection.getItemIdValue(insertedItem))
+        assertEquals(itemId.toString(), insertedItem[identifier]!!.jsonPrimitive.content)
         assertEquals(insertedItem, collection.items[1])
     }
 
@@ -193,15 +142,6 @@ class CollectionTest {
             mapOf(
                 identifier to id,
             ),
-        )
-
-    private fun generateCollection(item: JsonObject): Collection =
-        Collection(
-            collectionName = collectionName,
-            identifier = identifier,
-            items = mutableListOf(item),
-            nextId = 1,
-            schema = JsonObject(mapOf()),
         )
 
     private fun generateCollection(

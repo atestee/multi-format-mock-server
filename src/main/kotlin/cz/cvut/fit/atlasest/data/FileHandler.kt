@@ -1,6 +1,6 @@
 package cz.cvut.fit.atlasest.data
 
-import cz.cvut.fit.atlasest.exceptionHandling.ParsingException
+import cz.cvut.fit.atlasest.exceptionHandling.InvalidDataException
 import cz.cvut.fit.atlasest.utils.toJsonObject
 import kotlinx.io.files.FileNotFoundException
 import kotlinx.serialization.SerializationException
@@ -23,7 +23,7 @@ class FileHandler(
      *
      * @return The parsed [JsonObject] from the JSON file.
      *
-     * @throws ParsingException If there is an issue parsing the data.
+     * @throws InvalidDataException If there is an issue parsing the data.
      * @throws NullPointerException If the file cannot be found.
      */
     fun readJsonFile(fileName: String): JsonObject {
@@ -40,7 +40,7 @@ class FileHandler(
                 }
             return content
         } catch (e: SerializationException) {
-            throw ParsingException("Failed to parse JSON from $fileName", e)
+            throw InvalidDataException("Failed to parse JSON from $fileName", e)
         } catch (e: NullPointerException) {
             throw FileNotFoundException("File not found: $fileName")
         }
@@ -59,7 +59,7 @@ class FileHandler(
         try {
             File(fileName).writeText(json.encodeToString(data))
         } catch (e: SerializationException) {
-            throw ParsingException("Failed to save JSON object to $fileName", e)
+            throw InvalidDataException("Failed to save JSON object to $fileName", e)
         } catch (e: FileNotFoundException) {
             throw FileNotFoundException("File not found: $fileName")
         }

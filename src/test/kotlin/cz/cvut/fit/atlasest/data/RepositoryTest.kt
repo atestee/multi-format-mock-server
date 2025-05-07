@@ -1,7 +1,7 @@
 package cz.cvut.fit.atlasest.data
 
 import cz.cvut.fit.atlasest.application.AppConfig
-import cz.cvut.fit.atlasest.exceptionHandling.ParsingException
+import cz.cvut.fit.atlasest.exceptionHandling.InvalidDataException
 import cz.cvut.fit.atlasest.services.SchemaService
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -60,7 +60,7 @@ class RepositoryTest {
             )
 
         val exception =
-            assertThrows<ParsingException> {
+            assertThrows<InvalidDataException> {
                 Repository(
                     fileHandler = fileHandler,
                     appConfig = appConfig,
@@ -90,7 +90,7 @@ class RepositoryTest {
             )
 
         val exception =
-            assertThrows<ParsingException> {
+            assertThrows<InvalidDataException> {
                 Repository(
                     fileHandler = fileHandler,
                     appConfig = appConfig,
@@ -177,7 +177,7 @@ class RepositoryTest {
             )
 
         val exception =
-            assertThrows<ParsingException> {
+            assertThrows<InvalidDataException> {
                 Repository(
                     fileHandler = fileHandler,
                     appConfig = appConfig,
@@ -213,7 +213,7 @@ class RepositoryTest {
             )
 
         val exception =
-            assertThrows<ParsingException> {
+            assertThrows<InvalidDataException> {
                 Repository(
                     fileHandler = fileHandler,
                     appConfig = appConfig,
@@ -252,7 +252,7 @@ class RepositoryTest {
             )
 
         val exception =
-            assertThrows<ParsingException> {
+            assertThrows<InvalidDataException> {
                 Repository(
                     fileHandler = fileHandler,
                     appConfig = appConfig,
@@ -291,7 +291,7 @@ class RepositoryTest {
             )
 
         val exception =
-            assertThrows<ParsingException> {
+            assertThrows<InvalidDataException> {
                 Repository(
                     fileHandler = fileHandler,
                     appConfig = appConfig,

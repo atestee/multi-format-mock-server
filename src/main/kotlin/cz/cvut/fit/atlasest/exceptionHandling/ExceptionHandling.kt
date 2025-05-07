@@ -20,10 +20,6 @@ fun Application.configureExceptionHandling() {
             call.respond(HttpStatusCode.NotFound, cause.message as String)
         }
         exception<InvalidDataException> { call, cause ->
-            log.error("Invalid data", cause)
-            call.respond(HttpStatusCode.InternalServerError, "Invalid data: ${cause.message}")
-        }
-        exception<ParsingException> { call, cause ->
             log.error("Parsing error", cause)
             call.respond(HttpStatusCode.InternalServerError, "Parsing error: ${cause.message}")
         }

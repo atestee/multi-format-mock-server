@@ -1,5 +1,8 @@
 package cz.cvut.fit.atlasest.exceptionHandling
 
+import java.lang.Exception
+
 class InvalidDataException(
     message: String,
-) : RuntimeException(message)
+    exception: Exception? = null,
+) : RuntimeException(message, exception)

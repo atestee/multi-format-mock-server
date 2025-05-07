@@ -1,7 +1,6 @@
 package cz.cvut.fit.atlasest.services
 
 import cz.cvut.fit.atlasest.data.Repository
-import cz.cvut.fit.atlasest.exceptionHandling.InvalidDataException
 import cz.cvut.fit.atlasest.utils.add
 import io.ktor.server.plugins.NotFoundException
 import io.swagger.v3.oas.models.media.Schema
@@ -51,7 +50,6 @@ class CollectionService(
      * @return A JSON object representing the schema.
      *
      * @throws NotFoundException If the collection was not found.
-     * @throws InvalidDataException If there is a problem with the JSON data.
      */
     fun getCollectionSchema(collectionName: String) = repository.getCollectionSchema(collectionName)
 
@@ -64,7 +62,6 @@ class CollectionService(
      * @return The JSON object representing the item.
      *
      * @throws NotFoundException If the item is not found.
-     * @throws InvalidDataException If there is a problem with the JSON data.
      */
     fun getItemById(
         collectionName: String,
@@ -105,7 +102,6 @@ class CollectionService(
      *
      * @throws NotFoundException If the item or collection is not found.
      * @throws ValidationException If the new item does not match the schema.
-     * @throws InvalidDataException If there is a problem with the JSON data.
      */
     fun updateItemInCollection(
         collectionName: String,

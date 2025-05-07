@@ -10,12 +10,12 @@ import com.saasquatch.jsonschemainferrer.JsonSchemaInferrer
 import com.saasquatch.jsonschemainferrer.RequiredPolicies
 import com.saasquatch.jsonschemainferrer.SpecVersion
 import cz.cvut.fit.atlasest.exceptionHandling.InvalidDataException
-import cz.cvut.fit.atlasest.exceptionHandling.ParsingException
 import cz.cvut.fit.atlasest.utils.log
 import cz.cvut.fit.atlasest.utils.toJsonElement
 import cz.cvut.fit.atlasest.utils.toJsonObject
 import io.github.optimumcode.json.schema.JsonSchema
 import io.github.optimumcode.json.schema.ValidationError
+import io.ktor.server.plugins.BadRequestException
 import io.swagger.v3.oas.models.media.ArraySchema
 import io.swagger.v3.oas.models.media.Schema
 import kotlinx.serialization.json.JsonArray
@@ -156,7 +156,7 @@ class SchemaService {
         val schema = schemaCollection[collectionName] ?: return null
         val schemaJsonObject =
             schema as? JsonObject
-                ?: throw ParsingException("Schema for collection '$collectionName' is not a JSON object")
+                ?: throw InvalidDataException("Schema for collection '$collectionName' is not a JSON object")
         validateSchemaVersion(schemaJsonObject)
         return schema
     }
@@ -177,13 +177,11 @@ class SchemaService {
                 specVersion = io.swagger.v3.oas.models.SpecVersion.V31
             }
 
-        val typeJsonElement = jsonSchema.jsonObject["type"]
+        val typeJsonElement = jsonSchema.jsonObject["type"] ?: throw InvalidDataException("Type for $key was not found")
         val type =
-            kotlin.runCatching { typeJsonElement?.jsonPrimitive?.content }.getOrNull()
+            kotlin.runCatching { typeJsonElement.jsonPrimitive.content }.getOrNull()
                 ?: throw InvalidDataException("Data contains mixed data types for $key")
-        if (typeJsonElement != null) {
-            openApiSchema.addType(type)
-        }
+        openApiSchema.addType(type)
 
         if (type == "object") {
             val propertiesNode = jsonSchema.jsonObject["properties"]?.jsonObject
@@ -230,7 +228,7 @@ class SchemaService {
         schemas: JsonObject,
         key: String,
         collectionName: String,
-    ): Pair<String, String?>? {
+    ): Pair<String, String?> {
         val arrayIndexingRegex = "\\[[\\d*]]".toRegex()
         val firstSegment = key.substringBefore(".").replace(arrayIndexingRegex, "")
         val afterFirstSegment = key.substringAfter(".")
@@ -248,8 +246,9 @@ class SchemaService {
                 schemas[collectionName]?.jsonObject to
                     "$.$key".replace(".", ".properties.").replace(arrayIndexingRegex, ".items")
             }
-        val resultObject = currentSchema?.resolvePathOrNull(jsonPath) as? JsonObject ?: return null
-        val type = resultObject["type"]?.jsonPrimitive?.content ?: return null
+        val resultObject =
+            currentSchema?.resolvePathOrNull(jsonPath) as? JsonObject ?: throw BadRequestException("Invalid filter key: $key")
+        val type = resultObject["type"]?.jsonPrimitive?.content ?: throw InvalidDataException("Type for $key was not found")
         val format = resultObject["format"]?.jsonPrimitive?.content
         return type to format
     }
@@ -339,12 +338,12 @@ class SchemaService {
      * Validates if the schema version is supported. The currently supported version is Draft 2020-12.
      *
      * @throws ValidationException if the version is not supported
-     * @throws ParsingException if the
+     * @throws InvalidDataException if the
      */
     private fun validateSchemaVersion(collectionSchema: JsonObject) {
         val schemaVersion =
             collectionSchema["\$schema"]?.takeIf { it is JsonPrimitive }?.jsonPrimitive?.content
-                ?: throw ParsingException("Invalid or missing schema version (must be a JSON primitive)")
+                ?: throw InvalidDataException("Invalid or missing schema version (must be a JSON primitive)")
         if (schemaVersion != specVersionUrl) {
             throw ValidationException(
                 "Unsupported schema version. The supported version is $specVersionUrl",

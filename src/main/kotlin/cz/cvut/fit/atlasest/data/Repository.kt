@@ -3,7 +3,6 @@ package cz.cvut.fit.atlasest.data
 import com.cesarferreira.pluralize.singularize
 import cz.cvut.fit.atlasest.application.AppConfig
 import cz.cvut.fit.atlasest.exceptionHandling.InvalidDataException
-import cz.cvut.fit.atlasest.exceptionHandling.ParsingException
 import cz.cvut.fit.atlasest.services.SchemaService
 import cz.cvut.fit.atlasest.utils.getFieldValue
 import cz.cvut.fit.atlasest.utils.log
@@ -158,7 +157,7 @@ class Repository(
     /**
      * Loads and parses collection and schema data from local directory.
      *
-     * @throws ParsingException If there is an issue parsing the data.
+     * @throws InvalidDataException If there is an issue parsing the data.
      * @throws ValidationException When validating collection data against JSON schema.
      */
     private fun loadData() {
@@ -170,18 +169,18 @@ class Repository(
 
         collectionData.forEach { (collectionName, collection) ->
             if (collection !is JsonArray) {
-                throw ParsingException("Invalid value for $collectionName in ${appConfig.collectionsFilename} (must be a JSON array)")
+                throw InvalidDataException("Invalid value for $collectionName in ${appConfig.collectionsFilename} (must be a JSON array)")
             } else {
-                if (collection.isEmpty()) throw ParsingException("Collection $collectionName is empty")
+                if (collection.isEmpty()) throw InvalidDataException("Collection $collectionName is empty")
+                val identifier =
+                    identifiers[collectionName]
+                        ?: appConfig.defaultIdentifier
                 val collectionList =
                     collection
                         .map {
                             it as? JsonObject
-                                ?: throw ParsingException("Invalid item in collection $collectionName (must be a JSON object)")
+                                ?: throw InvalidDataException("Invalid item in collection $collectionName (must be a JSON object)")
                         }.toMutableList()
-                val identifier =
-                    identifiers[collectionName]
-                        ?: appConfig.defaultIdentifier
                 val lastId = getMaxIdentifier(collectionList, identifier, collectionName)
                 val schema =
                     if (schemaCollection != null) {
@@ -232,12 +231,12 @@ class Repository(
      * @param identifiersData The JSON object containing identifiers.
      *
      * @return A map of identifiers indexed by the collection name.
-     * @throws ParsingException If there is an issue parsing the data.
+     * @throws InvalidDataException If there is an issue parsing the data.
      */
     private fun getIdentifiers(identifiersData: JsonObject): Map<String, String> =
         identifiersData.mapValues { entry ->
             (entry.value as? JsonPrimitive)?.jsonPrimitive?.content
-                ?: throw ParsingException(
+                ?: throw InvalidDataException(
                     "Invalid identifier for collection ${entry.key} in ${appConfig.identifiersFileName}" +
                         " (must be a JSON primitive)",
                 )
@@ -252,7 +251,7 @@ class Repository(
      *
      * @return The highest identifier value found.
      *
-     * @throws ParsingException If there is an issue parsing the data.
+     * @throws InvalidDataException If there is an issue parsing the data.
      */
     private fun getMaxIdentifier(
         collection: List<JsonObject>,
@@ -262,16 +261,18 @@ class Repository(
         collection.maxOf { item ->
             val idValue =
                 item[identifier]
-                    ?: throw ParsingException("Missing identifier value for item in collection $collectionName")
+                    ?: throw InvalidDataException("Missing identifier value for item in collection $collectionName")
 
             val idJsonPrimitive =
                 idValue as? JsonPrimitive
-                    ?: throw ParsingException(
+                    ?: throw InvalidDataException(
                         "Invalid identifier value for item in collection $collectionName (must be a JSON primitive)",
                     )
 
             idJsonPrimitive.intOrNull
-                ?: throw ParsingException("Invalid identifier value in collection $collectionName (must be an integer or integer string)")
+                ?: throw InvalidDataException(
+                    "Invalid identifier value in collection $collectionName (must be an integer or integer string)",
+                )
         }
 
     /**

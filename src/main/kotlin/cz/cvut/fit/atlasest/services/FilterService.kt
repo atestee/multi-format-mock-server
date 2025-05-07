@@ -1,6 +1,5 @@
 package cz.cvut.fit.atlasest.services
 
-import cz.cvut.fit.atlasest.exceptionHandling.InvalidDataException
 import cz.cvut.fit.atlasest.utils.getFieldValue
 import io.ktor.server.plugins.BadRequestException
 import kotlinx.serialization.json.JsonArray
@@ -29,13 +28,11 @@ class FilterService {
         collectionItems: MutableList<JsonObject>,
         keyOperator: String,
         values: List<String>,
-        getTypeAndFormatFromJsonSchema: (String) -> Pair<String, String?>?,
+        getTypeAndFormatFromJsonSchema: (String) -> Pair<String, String?>,
     ): MutableList<JsonObject> {
         val (key, operator) = parseKeyOperator(keyOperator)
 
-        var (type, format) =
-            getTypeAndFormatFromJsonSchema(key)
-                ?: throw InvalidDataException("Type for $keyOperator was not found")
+        var (type, format) = getTypeAndFormatFromJsonSchema(key)
 
         type =
             if (type == "string" && format != null) {
@@ -144,7 +141,7 @@ class FilterService {
                         ?: throw BadRequestException("Date is not valid")
                 val bDate =
                     kotlin.runCatching { LocalDate.parse(value) }.getOrNull()
-                        ?: throw InvalidDataException("Problem when parsing date string.")
+                        ?: throw BadRequestException("Problem when parsing date string.")
                 applyCompareOperator(aDate, bDate, operator)
             }
             "date-time" -> {
@@ -153,7 +150,7 @@ class FilterService {
                         ?: throw BadRequestException("Date is not valid")
                 val bDateTime =
                     kotlin.runCatching { OffsetDateTime.parse(value) }.getOrNull()
-                        ?: throw InvalidDataException("Problem when parsing date string.")
+                        ?: throw BadRequestException("Problem when parsing date string.")
                 applyCompareOperator(aDateTime, bDateTime, operator)
             }
             else -> throw BadRequestException("$operator operator is not supported for $type.")
