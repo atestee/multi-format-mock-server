@@ -13,7 +13,6 @@ data class AppConfig(
     val schemaFilename: String?,
     val defaultLimit: Int,
     val defaultIdentifier: String,
-    val isTest: Boolean,
 )
 
 fun Application.loadAppConfig(): AppConfig {
@@ -30,6 +29,5 @@ fun Application.loadAppConfig(): AppConfig {
         schemaFilename = schemaFilename,
         defaultLimit = defaultPaginationLimit?.toIntOrNull() ?: 10,
         defaultIdentifier = defaultIdentifier ?: "id",
-        isTest = false,
     )
 }

@@ -492,6 +492,17 @@ class GetRoutesTest : BaseTest() {
             )
         }
 
+    @Test
+    fun `GET collection schema - when given collection name - should respond with collection schema`() =
+        testWithApp {
+            val response =
+                client.get("/books/schema")
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = response.bodyAsText().toJsonObject()
+            val properties = responseBody["properties"]?.jsonObject
+            assertEquals(setOf("id", "title", "author", "genre", "isbn", "published"), properties?.keys)
+        }
+
     private fun getTitleListFromXmlCollection(xml: String): List<String> {
         val node: JsonNode = xmlMapper.readTree(xml)
         return node.get("item").map { it.get("title").textValue() }

@@ -1,7 +1,10 @@
 package cz.cvut.fit.atlasest.data
 
+import cz.cvut.fit.atlasest.exceptionHandling.InvalidDataException
 import cz.cvut.fit.atlasest.utils.add
 import io.ktor.server.plugins.BadRequestException
+import io.ktor.server.plugins.NotFoundException
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
@@ -14,6 +17,94 @@ class CollectionTest {
     private val identifier = "testIdentifier"
 
     @Test
+    fun `getNextId - when ids are integers - should return nextId as Int`() {
+        val item1 = generateItem(JsonPrimitive(1))
+        val item2 = generateItem(JsonPrimitive(2))
+        val expectedNextId = 3
+        val collection = generateCollection(listOf(item1, item2), "integer", expectedNextId)
+
+        val nextId = collection.getNextId()
+
+        assertEquals(JsonPrimitive(expectedNextId), nextId)
+    }
+
+    @Test
+    fun `getNextId - when ids are strings - should return nextId as String`() {
+        val item1 = generateItem(JsonPrimitive("1"))
+        val item2 = generateItem(JsonPrimitive("2"))
+        val expectedNextId = 3
+        val collection = generateCollection(listOf(item1, item2), "string", expectedNextId)
+
+        val nextId = collection.getNextId()
+
+        assertEquals(JsonPrimitive(expectedNextId.toString()), nextId)
+    }
+
+    @Test
+    fun `getNextId - when schema is missing properties - should throw InvalidDataException`() {
+        val collection = generateCollectionWithMissingProps()
+
+        val exception =
+            assertFailsWith<InvalidDataException> {
+                collection.getNextId()
+            }
+
+        assertEquals("Invalid or missing properties in schema for collection '$collectionName' (must be JSON object)", exception.message)
+    }
+
+    @Test
+    fun `getNextId - when schema is missing identifier property - should throw InvalidDataException`() {
+        val collection = generateCollectionWithIdentifierProps()
+
+        val exception =
+            assertFailsWith<InvalidDataException> {
+                collection.getNextId()
+            }
+
+        assertEquals(
+            "Invalid or missing identifier property in schema for collection '$collectionName' (must be JSON object)",
+            exception.message,
+        )
+    }
+
+    @Test
+    fun `getNextId - when schema is missing identifier type property - should throw InvalidDataException`() {
+        val collection = generateCollectionWithMissingIdentifierType()
+
+        val exception =
+            assertFailsWith<InvalidDataException> {
+                collection.getNextId()
+            }
+
+        assertEquals(
+            "Invalid or missing type for identifier property in schema for collection '$collectionName' (must be JSON primitive)",
+            exception.message,
+        )
+    }
+
+    @Test
+    fun `getIdInCorrectType - when ids are integers - should return items id as Int`() {
+        val item1 = generateItem(JsonPrimitive(1))
+        val item2 = generateItem(JsonPrimitive(2))
+        val collection = generateCollection(listOf(item1, item2), "integer")
+
+        val id = collection.getIdInCorrectType("1")
+
+        assertEquals(JsonPrimitive(1), id)
+    }
+
+    @Test
+    fun `getIdInCorrectType - when ids are string - should return items id as String`() {
+        val item1 = generateItem(JsonPrimitive(1))
+        val item2 = generateItem(JsonPrimitive(2))
+        val collection = generateCollection(listOf(item1, item2), "string")
+
+        val id = collection.getIdInCorrectType("1")
+
+        assertEquals(JsonPrimitive("1"), id)
+    }
+
+    @Test
     fun `getItemIndex - when given valid id value - returns the corresponding item`() {
         val searchedIdValue = "1"
         val item1 = generateItem(JsonPrimitive(searchedIdValue))
@@ -24,6 +115,35 @@ class CollectionTest {
         val result = collection.getItemIndex(searchedIdValue)
 
         assertEquals(0, result)
+    }
+
+    @Test
+    fun `getItemById - when given valid id value - returns the correct item`() {
+        val searchedIdValue = "1"
+        val item1 = generateItem(JsonPrimitive(searchedIdValue))
+        val item2 = generateItem(JsonPrimitive("2"))
+
+        val collection = generateCollection(listOf(item1, item2))
+
+        val result = collection.getItemById(searchedIdValue)
+
+        assertEquals(item1, result)
+    }
+
+    @Test
+    fun `getItemById - when given invalid id value - returns the correct item`() {
+        val searchedIdValue = "3"
+        val item1 = generateItem(JsonPrimitive("1"))
+        val item2 = generateItem(JsonPrimitive("2"))
+
+        val collection = generateCollection(listOf(item1, item2))
+
+        val exception =
+            assertFailsWith<NotFoundException> {
+                collection.getItemById(searchedIdValue)
+            }
+
+        assertEquals("Item with $identifier '$searchedIdValue' not found in collection '$collectionName'", exception.message)
     }
 
     @Test
@@ -168,6 +288,58 @@ class CollectionTest {
                                         ),
                                 ),
                             ),
+                    ),
+                ),
+        )
+
+    private fun generateCollectionWithMissingIdentifierType(): Collection =
+        Collection(
+            collectionName = collectionName,
+            identifier = identifier,
+            items = mutableListOf(JsonObject(mapOf())),
+            nextId = 1,
+            schema =
+                JsonObject(
+                    mapOf(
+                        "properties" to
+                            JsonObject(
+                                mapOf(
+                                    identifier to JsonObject(mapOf()),
+                                ),
+                            ),
+                    ),
+                ),
+        )
+
+    private fun generateCollectionWithIdentifierProps(): Collection =
+        Collection(
+            collectionName = collectionName,
+            identifier = identifier,
+            items = mutableListOf(JsonObject(mapOf())),
+            nextId = 1,
+            schema =
+                JsonObject(
+                    mapOf(
+                        "properties" to
+                            JsonObject(
+                                mapOf(
+                                    identifier to JsonNull,
+                                ),
+                            ),
+                    ),
+                ),
+        )
+
+    private fun generateCollectionWithMissingProps(): Collection =
+        Collection(
+            collectionName = collectionName,
+            identifier = identifier,
+            items = mutableListOf(JsonObject(mapOf())),
+            nextId = 1,
+            schema =
+                JsonObject(
+                    mapOf(
+                        "properties" to JsonNull,
                     ),
                 ),
         )

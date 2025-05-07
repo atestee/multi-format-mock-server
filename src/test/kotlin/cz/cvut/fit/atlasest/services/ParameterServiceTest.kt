@@ -1,7 +1,6 @@
 package cz.cvut.fit.atlasest.services
 
 import BaseTest
-import cz.cvut.fit.atlasest.data.FileHandler
 import cz.cvut.fit.atlasest.testData.TestData
 import cz.cvut.fit.atlasest.utils.getFieldValue
 import cz.cvut.fit.atlasest.utils.toJsonObject
@@ -22,7 +21,6 @@ import kotlin.test.assertTrue
 
 class ParameterServiceTest : BaseTest() {
     private val parameterService by inject<ParameterService>()
-    private val fileHandler by inject<FileHandler>()
 
     private val books =
         fileHandler

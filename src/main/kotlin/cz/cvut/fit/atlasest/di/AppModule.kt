@@ -15,7 +15,7 @@ import org.koin.dsl.module
 val appModule = { appConfig: AppConfig ->
     module {
         single { appConfig }
-        single { FileHandler(appConfig.isTest) }
+        single { FileHandler() }
         single { SchemaService() }
         single { CollectionService(get(), get()) }
         single { ContentNegotiationService(get(), get()) }

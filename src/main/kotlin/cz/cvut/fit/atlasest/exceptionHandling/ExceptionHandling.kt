@@ -20,8 +20,8 @@ fun Application.configureExceptionHandling() {
             call.respond(HttpStatusCode.NotFound, cause.message as String)
         }
         exception<InvalidDataException> { call, cause ->
-            log.error("Parsing error", cause)
-            call.respond(HttpStatusCode.InternalServerError, "Parsing error: ${cause.message}")
+            log.error("Invalid Data", cause)
+            call.respond(HttpStatusCode.InternalServerError, "Invalid Data: ${cause.message}")
         }
         exception<NotAcceptableException> { call, cause ->
             log.error("Not acceptable", cause)
@@ -34,13 +34,13 @@ fun Application.configureExceptionHandling() {
             call.response.headers.append(HttpHeaders.Accept, cause.supportedMediaTypes.joinToString(", "))
             call.respond(HttpStatusCode.UnsupportedMediaType, cause.message as String)
         }
-        exception<Throwable> { call, cause ->
-            log.error("Unhandled error", cause)
-            call.respond(HttpStatusCode.InternalServerError, "Something went wrong")
-        }
         exception<ValidationException> { call, cause ->
             log.error("Validation exception", cause)
             call.respond(HttpStatusCode.BadRequest, cause.message as String)
+        }
+        exception<Throwable> { call, cause ->
+            log.error("Unhandled error", cause)
+            call.respond(HttpStatusCode.InternalServerError, "Something went wrong")
         }
         status(HttpStatusCode.NotFound) { call, _ ->
             call.respond(HttpStatusCode.NotFound, "404: Not Found")

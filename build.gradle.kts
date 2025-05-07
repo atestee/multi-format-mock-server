@@ -106,7 +106,6 @@ tasks.jacocoTestReport {
                     exclude(
                         "**/application/**",
                         "**/di/**",
-                        "**/exceptionHandling/**",
                     )
                 }
             },
