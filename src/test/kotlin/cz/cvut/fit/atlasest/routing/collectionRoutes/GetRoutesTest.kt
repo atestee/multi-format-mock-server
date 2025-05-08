@@ -29,16 +29,16 @@ import kotlin.test.assertNotNull
 class GetRoutesTest : BaseTest() {
     val bookList =
         listOf(
-            "The Catcher in the Rye",
-            "To Kill a Mockingbird",
+            "Les Miserables",
+            "Frankenstein",
             "1984",
-            "Moby Dick",
+            "One Hundred Years of Solitude",
             "Pride and Prejudice",
             "The Great Gatsby",
             "Sense and Sensibility",
-            "Les Miserables",
+            "Jane Eyre",
             "Brave New World",
-            "Frankenstein",
+            "To Kill a Mockingbird",
         )
 
     @Test
@@ -134,7 +134,7 @@ class GetRoutesTest : BaseTest() {
             assertNotNull(responseBody)
             val responseBodyObject = responseBody.toJsonObject()
             assertEquals(responseBodyObject["id"]?.jsonPrimitive?.content, id)
-            assertEquals(responseBodyObject["title"]?.jsonPrimitive?.content, "The Catcher in the Rye")
+            assertEquals(responseBodyObject["title"]?.jsonPrimitive?.content, "Les Miserables")
         }
 
     @Test
@@ -145,7 +145,7 @@ class GetRoutesTest : BaseTest() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
             assertEquals(getValueFromXmlItem(responseBody, "id"), id)
-            assertEquals(getValueFromXmlItem(responseBody, "title"), "The Catcher in the Rye")
+            assertEquals(getValueFromXmlItem(responseBody, "title"), "Les Miserables")
         }
 
     @Test
@@ -156,7 +156,7 @@ class GetRoutesTest : BaseTest() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
             assertEquals(getValueFromCsvItem(responseBody, "id"), id)
-            assertEquals(getValueFromCsvItem(responseBody, "title"), "The Catcher in the Rye")
+            assertEquals(getValueFromCsvItem(responseBody, "title"), "Les Miserables")
         }
 
     @Test
@@ -458,7 +458,7 @@ class GetRoutesTest : BaseTest() {
                         ?.jsonPrimitive
                         ?.content
                 }
-            assertEquals("1960", years.first())
+            assertEquals("1967", years.first())
             assertEquals("1811", years.last())
         }
 
@@ -480,7 +480,7 @@ class GetRoutesTest : BaseTest() {
                         ?.content
                 }
             assertEquals("1811", years.first())
-            assertEquals("1960", years.last())
+            assertEquals("1967", years.last())
         }
 
     @Test

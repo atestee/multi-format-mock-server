@@ -55,10 +55,8 @@ class ParameterServiceTest : BaseTest() {
 
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
-        assertEquals(4, result.size)
-        assertContains(titles, "The Catcher in the Rye")
+        assertEquals(2, result.size)
         assertContains(titles, "To Kill a Mockingbird")
-        assertContains(titles, "Moby Dick")
         assertContains(titles, "The Great Gatsby")
     }
 
@@ -169,13 +167,15 @@ class ParameterServiceTest : BaseTest() {
 
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
-        assertEquals(6, result.size)
+        assertEquals(8, result.size)
         assertContains(titles, "1984")
         assertContains(titles, "Pride and Prejudice")
         assertContains(titles, "Sense and Sensibility")
         assertContains(titles, "Les Miserables")
         assertContains(titles, "Brave New World")
         assertContains(titles, "Frankenstein")
+        assertContains(titles, "One Hundred Years of Solitude")
+        assertContains(titles, "Jane Eyre")
     }
 
     @Test
@@ -231,11 +231,11 @@ class ParameterServiceTest : BaseTest() {
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
         assertEquals(5, result.size)
-        assertContains(titles, "Moby Dick")
         assertContains(titles, "Pride and Prejudice")
         assertContains(titles, "Sense and Sensibility")
         assertContains(titles, "Les Miserables")
         assertContains(titles, "Frankenstein")
+        assertContains(titles, "Jane Eyre")
     }
 
     @Test
@@ -254,11 +254,11 @@ class ParameterServiceTest : BaseTest() {
 
         assertEquals(6, result.size)
         assertContains(titles, "The Great Gatsby")
-        assertContains(titles, "Moby Dick")
         assertContains(titles, "Pride and Prejudice")
         assertContains(titles, "Sense and Sensibility")
         assertContains(titles, "Les Miserables")
         assertContains(titles, "Frankenstein")
+        assertContains(titles, "Jane Eyre")
     }
 
     @Test
@@ -276,10 +276,10 @@ class ParameterServiceTest : BaseTest() {
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
         assertEquals(4, result.size)
-        assertContains(titles, "The Catcher in the Rye")
         assertContains(titles, "To Kill a Mockingbird")
         assertContains(titles, "1984")
         assertContains(titles, "Brave New World")
+        assertContains(titles, "One Hundred Years of Solitude")
     }
 
     @Test
@@ -296,7 +296,7 @@ class ParameterServiceTest : BaseTest() {
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
         assertEquals(1, result.size)
-        assertContains(titles, "The Catcher in the Rye")
+        assertContains(titles, "Les Miserables")
     }
 
     @Test
@@ -329,10 +329,10 @@ class ParameterServiceTest : BaseTest() {
 
         assertEquals(5, result.size)
         assertContains(titles, "The Great Gatsby")
-        assertContains(titles, "The Catcher in the Rye")
         assertContains(titles, "To Kill a Mockingbird")
         assertContains(titles, "1984")
         assertContains(titles, "Brave New World")
+        assertContains(titles, "One Hundred Years of Solitude")
     }
 
     @Test
@@ -349,10 +349,8 @@ class ParameterServiceTest : BaseTest() {
 
         val titles = result.map { it["title"]!!.jsonPrimitive.content }
 
-        assertEquals(7, result.size)
-        assertContains(titles, "The Catcher in the Rye")
+        assertEquals(5, result.size)
         assertContains(titles, "1984")
-        assertContains(titles, "Moby Dick")
         assertContains(titles, "The Great Gatsby")
         assertContains(titles, "Les Miserables")
         assertContains(titles, "Brave New World")
@@ -374,11 +372,11 @@ class ParameterServiceTest : BaseTest() {
         val titles = result.map { it.jsonObject["title"]!!.jsonPrimitive.content }
 
         assertEquals(5, result.size)
-        assertContains(titles, "The Catcher in the Rye")
         assertContains(titles, "To Kill a Mockingbird")
         assertContains(titles, "1984")
         assertContains(titles, "The Great Gatsby")
         assertContains(titles, "Brave New World")
+        assertContains(titles, "One Hundred Years of Solitude")
     }
 
     @Test
@@ -493,7 +491,7 @@ class ParameterServiceTest : BaseTest() {
         val years = result.map { it.getPropertyValue(publishedYearKey)!!.jsonPrimitive.content }
 
         assertEquals("1811", years.first())
-        assertEquals("1960", years.last())
+        assertEquals("1967", years.last())
     }
 
     @Test
@@ -510,7 +508,7 @@ class ParameterServiceTest : BaseTest() {
 
         val years = result.map { it.getPropertyValue(publishedYearKey)!!.jsonPrimitive.content }
 
-        assertEquals("1960", years.first())
+        assertEquals("1967", years.first())
         assertEquals("1811", years.last())
     }
 
@@ -699,7 +697,7 @@ class ParameterServiceTest : BaseTest() {
                 ),
             )
         assertEquals(3, result.size)
-        val expectedBooks = listOf(3, 9, 10).map { collectionService.getItemById("books", "$it") }
+        val expectedBooks = listOf(2, 3, 9).map { collectionService.getItemById("books", "$it") }
         expectedBooks.forEach { expected ->
             assertTrue(
                 result.any { actual ->

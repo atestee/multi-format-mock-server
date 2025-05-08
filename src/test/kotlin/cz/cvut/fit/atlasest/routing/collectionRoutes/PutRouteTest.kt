@@ -38,7 +38,7 @@ class PutRouteTest : BaseTest() {
                 ),
         )
 
-    private val updatedId = 10
+    private val updatedId = 2
     private val insertedId = 11
     private val invalidId = "110"
     private val collectionName = "books"
@@ -172,7 +172,7 @@ class PutRouteTest : BaseTest() {
     @Test
     fun `PUT collection item - when Content-type=JSON, Accept=CSV and valid id - should update item and return CSV`() =
         testWithApp {
-            val id = 10
+            val id = 2
             val expectedCsv = getUpdatedCsv()
 
             val response =

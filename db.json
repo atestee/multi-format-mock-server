@@ -47,18 +47,15 @@
         },
         {
             "id": 4,
-            "title": "Moby Dick",
-            "author": "Herman Melville",
+            "title": "One Hundred Years of Solitude",
+            "author": "Gabriel García Márquez",
             "genre": [
-                "Adventure Fiction",
-                "Epic",
-                "Sea Story",
-                "Encyclopedic novel"
+                "Magical Realism"
             ],
-            "isbn": "9781853260087",
+            "isbn": "9780141032436",
             "published": {
-                "place": "USA",
-                "year": 1851
+                "place": "Buenos Aires",
+                "year": 1967
             }
         },
         {
@@ -104,16 +101,17 @@
         },
         {
             "id": 8,
-            "title": "The Catcher in the Rye",
-            "author": "J.D. Salinger",
+            "title": "Jane Eyre",
+            "author": "Charlotte Brontë",
             "genre": [
-                "Realistic fiction",
-                "Coming-of-age fiction"
+                "Gothic",
+                "Bildungsroman",
+                "Romance"
             ],
-            "isbn": "9780316769488",
+            "isbn": "9780141441146",
             "published": {
-                "place": "USA",
-                "year": 1951
+                "place": "UK",
+                "year": 1847
             }
         },
         {
