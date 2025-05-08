@@ -105,7 +105,7 @@ class CollectionTest {
     }
 
     @Test
-    fun `getItemIndex - when given valid id value - returns the corresponding item`() {
+    fun `getItemIndex - when given valid id value - should return the corresponding item`() {
         val searchedIdValue = "1"
         val item1 = generateItem(JsonPrimitive(searchedIdValue))
         val item2 = generateItem(JsonPrimitive("2"))
@@ -118,7 +118,7 @@ class CollectionTest {
     }
 
     @Test
-    fun `getItemById - when given valid id value - returns the correct item`() {
+    fun `getItemById - when given valid id value - should return the correct item`() {
         val searchedIdValue = "1"
         val item1 = generateItem(JsonPrimitive(searchedIdValue))
         val item2 = generateItem(JsonPrimitive("2"))
@@ -131,7 +131,7 @@ class CollectionTest {
     }
 
     @Test
-    fun `getItemById - when given invalid id value - returns the correct item`() {
+    fun `getItemById - when given invalid id value - should return the correct item`() {
         val searchedIdValue = "3"
         val item1 = generateItem(JsonPrimitive("1"))
         val item2 = generateItem(JsonPrimitive("2"))
@@ -147,7 +147,7 @@ class CollectionTest {
     }
 
     @Test
-    fun `insertItem - identifier type is string - increases nextId and adds item to items`() {
+    fun `insertItem - when identifier type is string - should increase nextId and adds item to items`() {
         val itemId = 2
         val item = generateItem(JsonPrimitive(1))
         val insertedItem = generateItem(JsonPrimitive(itemId.toString()))
@@ -162,7 +162,7 @@ class CollectionTest {
     }
 
     @Test
-    fun `insertItem - identifier type is number - increases nextId and adds item to items`() {
+    fun `insertItem - when identifier type is number - should increase nextId and adds item to items`() {
         val itemId = 2
         val item = generateItem(JsonPrimitive(1))
         val insertedItem = generateItem(JsonPrimitive(itemId))
@@ -177,7 +177,7 @@ class CollectionTest {
     }
 
     @Test
-    fun `updateItem - identifier type is string - updates the item in colleciton`() {
+    fun `updateItem - when identifier type is string - should update the item in colleciton`() {
         val itemId = 2
         val item = generateItem(JsonPrimitive(itemId.toString())).add("key", JsonPrimitive("value"))
         val updatedItem = generateItem(JsonPrimitive(itemId.toString())).add("key", JsonPrimitive("newValue"))
@@ -189,7 +189,7 @@ class CollectionTest {
     }
 
     @Test
-    fun `updateItem - identifier type is number - updates the item in colleciton`() {
+    fun `updateItem - when identifier type is number - should update the item in colleciton`() {
         val itemId = 2
         val item = generateItem(JsonPrimitive(itemId)).add("key", JsonPrimitive("value"))
         val updatedItem = generateItem(JsonPrimitive(itemId)).add("key", JsonPrimitive("newValue"))
@@ -201,7 +201,7 @@ class CollectionTest {
     }
 
     @Test
-    fun `updateItem - item is missing a key-value pair - throws BadRequestException`() {
+    fun `updateItem - when item is missing a key-value pair - should throw BadRequestException`() {
         val itemId = 2
         val item = generateItem(JsonPrimitive(itemId)).add("key", JsonPrimitive("value"))
         val updatedItem = generateItem(JsonPrimitive(itemId))
@@ -216,7 +216,7 @@ class CollectionTest {
     }
 
     @Test
-    fun `updateItem - no item with given id - throws BadRequestException`() {
+    fun `updateItem - when there is no item with given id - should throw BadRequestException`() {
         val wrongId = 3
         val itemId = 1
         val item = generateItem(JsonPrimitive(itemId)).add("key", JsonPrimitive("value"))
@@ -232,7 +232,7 @@ class CollectionTest {
     }
 
     @Test
-    fun `updateItem - when item is present - deletes it`() {
+    fun `updateItem - when item is present - should delete it`() {
         val deletedId = 1
         val item1 = generateItem(JsonPrimitive(deletedId))
         val item2 = generateItem(JsonPrimitive(2))
@@ -245,7 +245,7 @@ class CollectionTest {
     }
 
     @Test
-    fun `updateItem - when item is not present - nothing is thrown`() {
+    fun `updateItem - when item is not present - nothing should be thrown`() {
         val wrongId = 3
         val item1 = generateItem(JsonPrimitive(1))
         val item2 = generateItem(JsonPrimitive(2))

@@ -134,104 +134,104 @@ class ContentNegotiationServiceTest {
         }
 
     @Test
-    fun `processAcceptHeader - when CSV has higher priority than all application types - returns CSV`() {
+    fun `processAcceptHeader - when CSV has higher priority than all application types - should return CSV`() {
         val mediaType = contentNegotiationService.processAcceptHeader("text/csv, application/*; q=0.9")
         assertEquals(ContentType.Text.CSV, mediaType)
     }
 
     @Test
-    fun `processAcceptHeader - when accepts all application types - returns JSON`() {
+    fun `processAcceptHeader - when accepts all application types - should return JSON`() {
         val mediaType = contentNegotiationService.processAcceptHeader("application/*")
         assertEquals(ContentType.Application.Json, mediaType)
     }
 
     @Test
-    fun `processAcceptHeader - when non supported types are given - returns null`() {
+    fun `processAcceptHeader - when non supported types are given - should return null`() {
         val mediaType = contentNegotiationService.processAcceptHeader("text/html, text/plain")
         assertEquals(null, mediaType)
     }
 
     @Test
-    fun `processAcceptHeader - when accepts explicitly XML and all application types - returns XML`() {
+    fun `processAcceptHeader - when accepts explicitly XML and all application types - should return XML`() {
         // application/xml will have higher priority
         val mediaType = contentNegotiationService.processAcceptHeader("application/*, application/xml")
         assertEquals(ContentType.Application.Xml, mediaType)
     }
 
     @Test
-    fun `processAcceptHeader - when all supported types are accepted - returns JSON`() {
+    fun `processAcceptHeader - when all supported types are accepted - should return JSON`() {
         val mediaType = contentNegotiationService.processAcceptHeader("application/json, application/xml, text/csv")
         assertEquals(ContentType.Application.Json, mediaType)
     }
 
     @Test
-    fun `processAcceptHeader - when JSON has highest priority - returns JSON`() {
+    fun `processAcceptHeader - when JSON has highest priority - should return JSON`() {
         val mediaType = contentNegotiationService.processAcceptHeader("application/json; q=0.9, application/xml; q=0.8, text/csv; q=0.6")
         assertEquals(ContentType.Application.Json, mediaType)
     }
 
     @Test
-    fun `processAcceptHeader - when XML has highest priority - returns XML`() {
+    fun `processAcceptHeader - when XML has highest priority - should return XML`() {
         val mediaType = contentNegotiationService.processAcceptHeader("application/json; q=0.5, application/xml; q=0.9, text/csv; q=0.7")
         assertEquals(ContentType.Application.Xml, mediaType)
     }
 
     @Test
-    fun `processAcceptHeader - when CSV has highest priority - returns CSV`() {
+    fun `processAcceptHeader - when CSV has highest priority - should return CSV`() {
         val mediaType = contentNegotiationService.processAcceptHeader("application/json; q=0.4, application/xml; q=0.5, text/csv; q=0.9")
         assertEquals(ContentType.Text.CSV, mediaType)
     }
 
     @Test
-    fun `processAcceptHeader - when any application type is preferred - returns JSON`() {
+    fun `processAcceptHeader - when any application type is preferred - should return JSON`() {
         val mediaType = contentNegotiationService.processAcceptHeader("application/*, text/csv; q=0.9")
         assertEquals(ContentType.Application.Json, mediaType)
     }
 
     @Test
-    fun `processAcceptHeader - when any text type is preferred - returns CSV`() {
+    fun `processAcceptHeader - when any text type is preferred - should return CSV`() {
         val mediaType = contentNegotiationService.processAcceptHeader("text/*, application/*; q=0.9")
         assertEquals(ContentType.Text.CSV, mediaType)
     }
 
     @Test
-    fun `processAcceptHeader - when wildcard is used - returns JSON`() {
+    fun `processAcceptHeader - when wildcard is used - should return JSON`() {
         val mediaType = contentNegotiationService.processAcceptHeader("*/*")
         assertEquals(ContentType.Application.Json, mediaType)
     }
 
     @Test
-    fun `processAcceptHeader - when wildcard is used but JSON is excluded - returns XML`() {
+    fun `processAcceptHeader - when wildcard is used but JSON is excluded - should return XML`() {
         val mediaType = contentNegotiationService.processAcceptHeader("*/*, application/json; q=0")
         assertEquals(ContentType.Application.Xml, mediaType)
     }
 
     @Test
-    fun `processAcceptHeader - when wildcard is used but JSON and XML is excluded - returns CSV`() {
+    fun `processAcceptHeader - when wildcard is used but JSON and XML is excluded - should return CSV`() {
         val mediaType = contentNegotiationService.processAcceptHeader("*/*, application/json; q=0, application/xml; q=0")
         assertEquals(ContentType.Text.CSV, mediaType)
     }
 
     @Test
-    fun `processAcceptHeader - when unsupported media type is preferred, but a supported type is included - returns JSON`() {
+    fun `processAcceptHeader - when unsupported media type is preferred, but a supported type is included - should return JSON`() {
         val mediaType = contentNegotiationService.processAcceptHeader("image/png, application/json; q=0.9")
         assertEquals(ContentType.Application.Json, mediaType)
     }
 
     @Test
-    fun `processAcceptHeader - when no Accept header is present - returns JSON`() {
+    fun `processAcceptHeader - when no Accept header is present - should return JSON`() {
         val mediaType = contentNegotiationService.processAcceptHeader("")
         assertEquals(ContentType.Application.Json, mediaType)
     }
 
     @Test
-    fun `processAcceptHeader - when all formats are explicitly rejected - returns null`() {
+    fun `processAcceptHeader - when all formats are explicitly rejected - should return null`() {
         val mediaType = contentNegotiationService.processAcceptHeader("application/json; q=0, application/xml; q=0, text/csv; q=0")
         assertEquals(null, mediaType)
     }
 
     @Test
-    fun `processAcceptHeader - when media range has same priority and specific media type - returns the specific media type`() {
+    fun `processAcceptHeader - when media range has same priority and specific media type - should return the specific media type`() {
         val mediaType = contentNegotiationService.processAcceptHeader("application/yaml, application/*; q=0.8, text/csv; q=0.8")
         assertEquals(ContentType.Text.CSV, mediaType)
     }

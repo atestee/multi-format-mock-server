@@ -280,7 +280,21 @@
   "libraries": [
     {
       "id": 1,
-      "name": "Library 1"
+      "name": "Library 1",
+      "shiftTimetable": [
+        ["Anna", "Bob", "Charlie", "David", "Eva"],
+        ["Bob", "Charlie", "David", "Eva", "Frank"],
+        ["Charlie", "David", "Eva", "Frank", "Grace"]
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Library 2",
+      "shiftTimetable": [
+        ["Jack", "Isaac", "Hannah", "Grace", "Frank"],
+        ["Anna", "Jack", "Isaac", "Hannah", "Grace"],
+        ["Charlie", "Anna", "Jack", "Isaac", "Hannah"]
+      ]
     }
   ],
   "libraryBooks": [
@@ -298,6 +312,21 @@
       "id": 3,
       "libraryId": 1,
       "bookId": 2
+    },
+    {
+      "id": 4,
+      "libraryId": 2,
+      "bookId": 9
+    },
+    {
+      "id": 5,
+      "libraryId": 2,
+      "bookId": 10
+    },
+    {
+      "id": 6,
+      "libraryId": 2,
+      "bookId": 6
     }
   ],
   "libraryRegistrations": [
@@ -344,7 +373,7 @@
   ],
   "reviews": [
     {
-      "id": 1,
+      "id": "1",
       "userId": 1,
       "bookId": 1,
       "rating": -3.8,
@@ -352,7 +381,7 @@
       "submitted": "2025-02-14T10:40:21Z"
     },
     {
-      "id": 2,
+      "id": "2",
       "userId": 2,
       "bookId": 2,
       "rating": -2.2,
@@ -360,7 +389,7 @@
       "submitted": "2025-03-05T15:13:42Z"
     },
     {
-      "id": 3,
+      "id": "3",
       "userId": 3,
       "bookId": 3,
       "rating": -1.2,
@@ -368,7 +397,7 @@
       "submitted": "2025-03-02T13:20:40Z"
     },
     {
-      "id": 4,
+      "id": "4",
       "userId": 4,
       "bookId": 4,
       "rating": 2.0,
@@ -376,7 +405,7 @@
       "submitted": "2025-03-01T09:20:12Z"
     },
     {
-      "id": 5,
+      "id": "5",
       "userId": 5,
       "bookId": 5,
       "rating": 3,
@@ -384,7 +413,7 @@
       "submitted": "2025-02-28T18:30:50Z"
     },
     {
-      "id": 6,
+      "id": "6",
       "userId": 6,
       "bookId": 6,
       "rating": 4.8,
@@ -392,7 +421,7 @@
       "submitted": "2025-02-24T11:50:00Z"
     },
     {
-      "id": 7,
+      "id": "7",
       "userId": 7,
       "bookId": 7,
       "rating": -1,
@@ -400,7 +429,7 @@
       "submitted": "2025-02-19T10:10:40Z"
     },
     {
-      "id": 8,
+      "id": "8",
       "userId": 8,
       "bookId": 8,
       "rating": -3,
@@ -408,7 +437,7 @@
       "submitted": "2025-02-20T11:20:40Z"
     },
     {
-      "id": 9,
+      "id": "9",
       "userId": 9,
       "bookId": 9,
       "rating": 3.2,
@@ -416,7 +445,7 @@
       "submitted": "2025-02-24T13:20:40Z"
     },
     {
-      "id": 10,
+      "id": "10",
       "userId": 2,
       "bookId": 2,
       "rating": -2.2,

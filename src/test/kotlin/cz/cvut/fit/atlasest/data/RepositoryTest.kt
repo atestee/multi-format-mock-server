@@ -46,7 +46,7 @@ class RepositoryTest {
     }
 
     @Test
-    fun `init - identifier is not a JSON primitive`() {
+    fun `init - when identifier is not a JSON primitive - should throw InvalidDataException`() {
         every { fileHandler.readJsonFile(collectionsFilename) } returns
             JsonObject(
                 mapOf(
@@ -76,7 +76,7 @@ class RepositoryTest {
     }
 
     @Test
-    fun `init - collection is not a JSON array`() {
+    fun `init - when collection is not a JSON array - should throw InvalidDataException`() {
         every { fileHandler.readJsonFile(collectionsFilename) } returns
             JsonObject(
                 mapOf(
@@ -103,7 +103,7 @@ class RepositoryTest {
     }
 
     @Test
-    fun `init - no identifier found for collection - uses default identifier`() {
+    fun `init - when no identifier found for collection - should use default identifier`() {
         val defaultIdentifier = "defaultIdentifier"
 
         every { fileHandler.readJsonFile(collectionsFilename) } returns
@@ -154,7 +154,7 @@ class RepositoryTest {
     }
 
     @Test
-    fun `init - duplicate ids - throws InvalidDataException`() {
+    fun `init - when duplicate ids - should throw InvalidDataException`() {
         every { fileHandler.readJsonFile(collectionsFilename) } returns
             JsonObject(
                 mapOf(
@@ -192,7 +192,7 @@ class RepositoryTest {
     }
 
     @Test
-    fun `init - collection item does not have identifier value`() {
+    fun `init - when collection item does not have identifier value - should throw InvalidDataException`() {
         every { fileHandler.readJsonFile(collectionsFilename) } returns
             JsonObject(
                 mapOf(
@@ -228,7 +228,7 @@ class RepositoryTest {
     }
 
     @Test
-    fun `init - collection item identifier value is not a JSON primitive`() {
+    fun `init - when collection item identifier value is not a JSON primitive - should throw InvalidDataException`() {
         every { fileHandler.readJsonFile(collectionsFilename) } returns
             JsonObject(
                 mapOf(
@@ -264,7 +264,7 @@ class RepositoryTest {
     }
 
     @Test
-    fun `init - collection item identifier value is not an integer or integer string`() {
+    fun `init - when collection item identifier value is not an integer or integer string - should throw InvalidDataException`() {
         every { fileHandler.readJsonFile(collectionsFilename) } returns
             JsonObject(
                 mapOf(
@@ -303,7 +303,7 @@ class RepositoryTest {
     }
 
     @Test
-    fun `init - collection is empty`() {
+    fun `init - when collection is empty - should throw InvalidDataException`() {
         every { fileHandler.readJsonFile(collectionsFilename) } returns
             JsonObject(
                 mapOf(
@@ -342,7 +342,7 @@ class RepositoryTest {
     }
 
     @Test
-    fun `init - when schemaFilename is null - a valid schema is inferred`() {
+    fun `init - when schemaFilename is null - a valid schema should be inferred`() {
         val collection =
             JsonArray(
                 listOf(
@@ -382,7 +382,7 @@ class RepositoryTest {
     }
 
     @Test
-    fun `init - when schemaFilename is not null but schema for collection does not exist - the schema is inferred`() {
+    fun `init - when schemaFilename is not null but schema for collection does not exist - the schema should be inferred`() {
         val item =
             JsonObject(
                 mapOf(
@@ -425,7 +425,7 @@ class RepositoryTest {
     }
 
     @Test
-    fun `init - when schema is provided and collection contains invalid item - a ValidationException is thrown`() {
+    fun `init - when schema is provided and collection contains invalid item - a ValidationException should be thrown`() {
         val item =
             JsonObject(
                 mapOf(
@@ -470,7 +470,7 @@ class RepositoryTest {
     }
 
     @Test
-    fun `init - when schema is provided and collection does not contain invalid item - no exception is thrown`() {
+    fun `init - when schema is provided and collection does not contain invalid item - no exception should be thrown`() {
         val item =
             JsonObject(
                 mapOf(

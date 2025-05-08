@@ -42,7 +42,7 @@ class ParameterServiceTest : BaseTest() {
     private val loansSchema = fileHandler.readJsonFile("schema.json")["loans"]!!.jsonObject
 
     @Test
-    fun `applyFilter - EQ with nested object key`() {
+    fun `applyFilter - EQ with nested object key - should return 2 items`() {
         val result =
             parameterService.applyFilter(
                 "books",
@@ -61,7 +61,7 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyFilter - EQ with author key`() {
+    fun `applyFilter - EQ with author key - should return 2 items`() {
         val result =
             parameterService.applyFilter(
                 "books",
@@ -80,7 +80,7 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyFilter - EQ with array key`() {
+    fun `applyFilter - EQ with array key - should return 2 items`() {
         val result =
             parameterService.applyFilter(
                 "books",
@@ -99,7 +99,7 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyFilter - EQ with array key and value`() {
+    fun `applyFilter - EQ with array key and value - should return 2 items`() {
         val result =
             parameterService.applyFilter(
                 "books",
@@ -118,7 +118,7 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyFilter - EQ with published year`() {
+    fun `applyFilter - EQ with published year - should return 1 item`() {
         val result =
             parameterService.applyFilter(
                 "books",
@@ -136,7 +136,7 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyFilter - EQ with array values matched with index`() {
+    fun `applyFilter - EQ with array values matched with index - should return 1 item`() {
         val result =
             parameterService.applyFilter(
                 "books",
@@ -154,7 +154,7 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyFilter - NE with nested object`() {
+    fun `applyFilter - NE with nested object - should return 8 items`() {
         val result =
             parameterService.applyFilter(
                 "books",
@@ -179,7 +179,7 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyFilter - NE with author property`() {
+    fun `applyFilter - NE with author property - should return 8 items`() {
         val result =
             parameterService.applyFilter(
                 "books",
@@ -198,7 +198,7 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyFilter - NE with array`() {
+    fun `applyFilter - NE with array - should return 8 items`() {
         val result =
             parameterService.applyFilter(
                 "books",
@@ -217,7 +217,7 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyFilter - LT with published year`() {
+    fun `applyFilter - LT with published year - should return 5 items`() {
         val result =
             parameterService.applyFilter(
                 "books",
@@ -239,7 +239,7 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyFilter - LTE with published year`() {
+    fun `applyFilter - LTE with published year - should return 6 items`() {
         val result =
             parameterService.applyFilter(
                 "books",
@@ -262,7 +262,7 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyFilter - GT with published year`() {
+    fun `applyFilter - GT with published year - should return 4 items`() {
         val result =
             parameterService.applyFilter(
                 "books",
@@ -283,13 +283,13 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyFilter - LT with id as double`() {
+    fun `applyFilter - LT with id as double - should return 1 items`() {
         val testData = TestData()
         val result =
             parameterService.applyFilter(
                 "books",
                 books,
-                mapOf("id_lt" to listOf("2")),
+                mapOf("id_lt" to listOf("2.0")),
                 testData.schemaWithIdAsNumber.toJsonObject(),
             )
 
@@ -300,7 +300,7 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyFilter - LTE with dueDate`() {
+    fun `applyFilter - LTE with dueDate - should return 6 items`() {
         val result =
             parameterService.applyFilter(
                 "loans",
@@ -314,7 +314,7 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyFilter - GTE with published year`() {
+    fun `applyFilter - GTE with published year - should return 5 items`() {
         val result =
             parameterService.applyFilter(
                 "books",
@@ -336,7 +336,7 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyFilter - LIKE with genre array`() {
+    fun `applyFilter - LIKE with genre array - should return 5 items`() {
         val result =
             parameterService.applyFilter(
                 "books",
@@ -358,7 +358,7 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyFilter - LIKE with published year`() {
+    fun `applyFilter - LIKE with published year - should return 5 items`() {
         val result =
             parameterService.applyFilter(
                 "books",
@@ -380,7 +380,7 @@ class ParameterServiceTest : BaseTest() {
     }
 
     @Test
-    fun `applyFilter - LIKE with array values matched with index`() {
+    fun `applyFilter - LIKE with array values matched with index - should return 1 item`() {
         val result =
             parameterService.applyFilter(
                 "books",
@@ -599,15 +599,15 @@ class ParameterServiceTest : BaseTest() {
         val firstBookLoans = result.first()["loans"]
         val loan = collectionService.getItemById("loans", "1")
 
-        val firstBooklibraryBooks = result.first()["libraryBooks"]
-        val secondBooklibraryBooks = result[1]["libraryBooks"]
+        val firstBookLibraryBooks = result.first()["libraryBooks"]
+        val secondBookLibraryBooks = result[1]["libraryBooks"]
         val ownership1 = collectionService.getItemById("libraryBooks", "1")
         val ownership2 = collectionService.getItemById("libraryBooks", "2")
         val ownership3 = collectionService.getItemById("libraryBooks", "3")
 
         assertEquals(JsonArray(listOf(loan)), firstBookLoans)
-        assertEquals(JsonArray(listOf(ownership1, ownership2)), firstBooklibraryBooks)
-        assertEquals(JsonArray(listOf(ownership3)), secondBooklibraryBooks)
+        assertEquals(JsonArray(listOf(ownership1, ownership2)), firstBookLibraryBooks)
+        assertEquals(JsonArray(listOf(ownership3)), secondBookLibraryBooks)
     }
 
     @Test

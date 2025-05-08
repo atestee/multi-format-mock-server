@@ -42,7 +42,7 @@ class GetRoutesTest : BaseTest() {
         )
 
     @Test
-    fun `GET collections - returns list of collection names`() =
+    fun `GET collections - when collection endpoint is called - should return list of collection names`() =
         testWithApp {
             val response = client.get("/collections")
             val responseBody = response.bodyAsText()
@@ -216,7 +216,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET review with filter - when given submitted=2025-02-24T13-20-40Z - should return corresponding collection items`() =
+    fun `GET reviews with filter - when given submitted=2025-02-24T13-20-40Z - should return corresponding collection items`() =
         testWithApp {
             val response =
                 client.get("/reviews") {
@@ -231,7 +231,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET review with filter - when given submitted=2025-02-24 - should return corresponding collection items`() =
+    fun `GET reviews with filter - when given submitted=2025-02-24 - should return corresponding collection items`() =
         testWithApp {
             val response =
                 client.get("/reviews") {
@@ -247,7 +247,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET review with filter - when given submitted_gt=2025-02-24 - should return corresponding collection items`() =
+    fun `GET reviews with filter - when given submitted_gt=2025-02-24 - should return corresponding collection items`() =
         testWithApp {
             val response =
                 client.get("/reviews") {
@@ -265,7 +265,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET review with filter - when given submitted_gte=2025-02-24 - should return corresponding collection items`() =
+    fun `GET reviews with filter - when given submitted_gte=2025-02-24 - should return corresponding collection items`() =
         testWithApp {
             val response =
                 client.get("/reviews") {
@@ -275,7 +275,7 @@ class GetRoutesTest : BaseTest() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = body.toJsonArray()
             val ids = responseBody.map { it.jsonObject["id"]?.jsonPrimitive?.content }
-            println(ids)
+
             assertEquals(7, responseBody.size)
             assertContains(ids, "2")
             assertContains(ids, "3")
@@ -287,7 +287,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET review with filter - when given submitted_gte=2025-02-24T13-20-40Z - should return corresponding collection items`() =
+    fun `GET reviews with filter - when given submitted_gte=2025-02-24T13-20-40Z - should return corresponding collection items`() =
         testWithApp {
             val response =
                 client.get("/reviews") {
@@ -297,7 +297,7 @@ class GetRoutesTest : BaseTest() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = body.toJsonArray()
             val ids = responseBody.map { it.jsonObject["id"]?.jsonPrimitive?.content }
-            println(ids)
+
             assertEquals(6, responseBody.size)
             assertContains(ids, "2")
             assertContains(ids, "3")
@@ -308,7 +308,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET review with filter - when given submitted_lt=2025-02-24 - should return corresponding collection items`() =
+    fun `GET reviews with filter - when given submitted_lt=2025-02-24 - should return corresponding collection items`() =
         testWithApp {
             val response =
                 client.get("/reviews") {
@@ -318,7 +318,7 @@ class GetRoutesTest : BaseTest() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = body.toJsonArray()
             val ids = responseBody.map { it.jsonObject["id"]?.jsonPrimitive?.content }
-            println(ids)
+
             assertEquals(3, responseBody.size)
             assertContains(ids, "1")
             assertContains(ids, "7")
@@ -326,7 +326,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET review with filter - when given submitted_lte=2025-02-24 - should return corresponding collection items`() =
+    fun `GET reviews with filter - when given submitted_lte=2025-02-24 - should return corresponding collection items`() =
         testWithApp {
             val response =
                 client.get("/reviews") {
@@ -336,7 +336,7 @@ class GetRoutesTest : BaseTest() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = body.toJsonArray()
             val ids = responseBody.map { it.jsonObject["id"]?.jsonPrimitive?.content }
-            println(ids)
+
             assertEquals(6, responseBody.size)
             assertContains(ids, "1")
             assertContains(ids, "6")
@@ -347,7 +347,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET review with filter - when given submitted_lte=2025-02-24T11-50-00Z - should return corresponding collection items`() =
+    fun `GET reviews with filter - when given submitted_lte=2025-02-24T11-50-00Z - should return corresponding collection items`() =
         testWithApp {
             val response =
                 client.get("/reviews") {
@@ -357,12 +357,43 @@ class GetRoutesTest : BaseTest() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = body.toJsonArray()
             val ids = responseBody.map { it.jsonObject["id"]?.jsonPrimitive?.content }
-            println(ids)
+
             assertEquals(4, responseBody.size)
             assertContains(ids, "1")
             assertContains(ids, "6")
             assertContains(ids, "7")
             assertContains(ids, "8")
+        }
+
+    @Test
+    fun `GET libraries with filter - when given shiftTimetable 1 1 = Jack - should return corresponding collection item`() =
+        testWithApp {
+            val response =
+                client.get("/libraries") {
+                    parameter("shiftTimetable[1][1]", "Jack")
+                }
+            val body = response.bodyAsText()
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = body.toJsonArray()
+            val ids = responseBody.map { it.jsonObject["id"]?.jsonPrimitive?.content }
+            assertEquals(1, responseBody.size)
+            assertContains(ids, "2")
+        }
+
+    @Test
+    fun `GET libraries with filter - when given shiftTimetable wildcard 0 = Anna - should return corresponding collection items`() =
+        testWithApp {
+            val response =
+                client.get("/libraries") {
+                    parameter("shiftTimetable[*][0]", "Anna")
+                }
+            val body = response.bodyAsText()
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = body.toJsonArray()
+            val ids = responseBody.map { it.jsonObject["id"]?.jsonPrimitive?.content }
+            assertEquals(2, responseBody.size)
+            assertContains(ids, "1")
+            assertContains(ids, "2")
         }
 
     @Test

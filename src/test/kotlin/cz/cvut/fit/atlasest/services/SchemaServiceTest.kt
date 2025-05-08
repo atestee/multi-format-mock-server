@@ -54,7 +54,7 @@ class SchemaServiceTest : BaseTest() {
         }
 
     @Test
-    fun `inferJsonSchema - properties that are in all objects will be in required`() =
+    fun `inferJsonSchema - when all collection items contain the same properties - the properties should be in required`() =
         testWithApp {
             val schema =
                 schemaService.inferJsonSchema(
@@ -73,7 +73,7 @@ class SchemaServiceTest : BaseTest() {
         }
 
     @Test
-    fun `inferJsonSchema - nested object has correct types and required array`() =
+    fun `inferJsonSchema - when nested object with incomplete properties - nested schema should have all props but required should have only subset of props`() =
         testWithApp {
             val item1 =
                 generateJsonObject(1, "title1", genre = "genre1").add(
@@ -204,7 +204,7 @@ class SchemaServiceTest : BaseTest() {
     }
 
     @Test
-    fun `validateItemAgainstSchema - given valid data - should not throw exception`() =
+    fun `validateItemAgainstSchema - when given valid data - should not throw exception`() =
         testWithApp {
             val item1 =
                 generateJsonObject(1, "title1", genre = "genre1").add(
@@ -417,7 +417,7 @@ class SchemaServiceTest : BaseTest() {
     }
 
     @Test
-    fun `convertJsonSchemaToOpenApi - when given JSON object schema with mixed data types - throws InvalidDataException`() {
+    fun `convertJsonSchemaToOpenApi - when given JSON object schema with mixed data types - should throw InvalidDataException`() {
         val schema =
             """
             {
@@ -440,7 +440,7 @@ class SchemaServiceTest : BaseTest() {
     }
 
     @Test
-    fun `convertJsonSchemaToOpenApi - when given JSON object schema - returns corresponding OpenAPI schema`() {
+    fun `convertJsonSchemaToOpenApi - when given JSON object schema - should return corresponding OpenAPI schema`() {
         val jsonSchema = testData.complexSchema.toJsonObject()
 
         val openApiSchema = schemaService.convertJsonSchemaToOpenApi(jsonSchema, "collection")
