@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import javax.validation.ValidationException
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 @ExtendWith(MockKExtension::class)
 class RepositoryTest {
@@ -150,6 +151,44 @@ class RepositoryTest {
         val identifier = repository.getCollectionIdentifier(collectionName)
 
         assertEquals(defaultIdentifier, identifier)
+    }
+
+    @Test
+    fun `init - duplicate ids - throws InvalidDataException`() {
+        every { fileHandler.readJsonFile(collectionsFilename) } returns
+            JsonObject(
+                mapOf(
+                    collectionName to
+                        JsonArray(
+                            listOf(
+                                JsonObject(
+                                    mapOf(
+                                        "id" to JsonPrimitive("1"),
+                                    ),
+                                ),
+                                JsonObject(
+                                    mapOf(
+                                        "id" to JsonPrimitive("1"),
+                                    ),
+                                ),
+                            ),
+                        ),
+                ),
+            )
+        every { fileHandler.readJsonFile(identifiersFilename) } returns JsonObject(mapOf())
+
+        every { appConfig.defaultIdentifier } returns "id"
+        every { schemaService.inferJsonSchema(any()) } returns JsonObject(mapOf())
+
+        val exception =
+            assertFailsWith<InvalidDataException> {
+                Repository(
+                    fileHandler = fileHandler,
+                    appConfig = appConfig,
+                    schemaService = schemaService,
+                )
+            }
+        assertEquals("Collection $collectionName contains duplicated ids", exception.message)
     }
 
     @Test

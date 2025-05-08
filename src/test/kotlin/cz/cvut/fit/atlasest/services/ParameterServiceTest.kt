@@ -36,7 +36,7 @@ class ParameterServiceTest : BaseTest() {
             .map { it.jsonObject }
             .toMutableList()
 
-    private val baseUrl = "baseUrl"
+    private val baseUrl = "http://${appConfig.host}:${appConfig.port}/books"
 
     private val booksSchema = fileHandler.readJsonFile("schema.json")["books"]!!.jsonObject
     private val loansSchema = fileHandler.readJsonFile("schema.json")["loans"]!!.jsonObject
@@ -415,10 +415,10 @@ class ParameterServiceTest : BaseTest() {
 
         val expectedLinks =
             """
-            <baseUrl?_page=1&_limit=3>; rel="first", 
-            <baseUrl?_page=1&_limit=3>; rel="prev", 
-            <baseUrl?_page=3&_limit=3>; rel="next", 
-            <baseUrl?_page=4&_limit=3>; rel="last"
+            <$baseUrl?_page=1&_limit=3>; rel="first", 
+            <$baseUrl?_page=1&_limit=3>; rel="prev", 
+            <$baseUrl?_page=3&_limit=3>; rel="next", 
+            <$baseUrl?_page=4&_limit=3>; rel="last"
             """.trimIndent().replace("\n", "")
 
         val ids = items.map { it["id"]!!.jsonPrimitive.content }
@@ -443,8 +443,8 @@ class ParameterServiceTest : BaseTest() {
 
         val expectedLinks =
             """
-            <baseUrl?_page=1&_limit=10>; rel="first", 
-            <baseUrl?_page=1&_limit=10>; rel="prev"
+            <$baseUrl?_page=1&_limit=10>; rel="first", 
+            <$baseUrl?_page=1&_limit=10>; rel="prev"
             """.trimIndent().replace("\n", "")
 
         assertEquals(0, items.size)

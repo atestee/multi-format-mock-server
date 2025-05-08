@@ -15,6 +15,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonArray
@@ -46,12 +47,12 @@ class GetRoutesTest : BaseTest() {
             val response = client.get("/collections")
             val responseBody = response.bodyAsText()
             assertNotNull(responseBody)
-            assertEquals("collections: [books, loans, users, libraries, libraryBooks, libraryRegistrations]", responseBody)
+            assertEquals("collections: [books, loans, users, libraries, libraryBooks, libraryRegistrations, reviews]", responseBody)
             assertEquals(HttpStatusCode.OK, response.status)
         }
 
     @Test
-    fun `GET collection - when given existing collection name - should return valid JSON collection`() =
+    fun `GET collection names - when given existing collection name - should return valid JSON collection`() =
         testWithApp {
             val response = client.get("/books")
             assertEquals(HttpStatusCode.OK, response.status)
@@ -65,7 +66,31 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection - when given existing collection name and Accept=XML - should return valid XML collection`() =
+    fun `GET books - when given unsupported Accept header - should return 406 and Vary header`() =
+        testWithApp {
+            val response =
+                client.get("/books") {
+                    accept(ContentType.Application.Yaml)
+                }
+            assertEquals(HttpStatusCode.NotAcceptable, response.status)
+            assertNotNull(response.headers[HttpHeaders.Vary])
+            assertEquals(HttpHeaders.Accept, response.headers[HttpHeaders.Vary])
+        }
+
+    @Test
+    fun `GET book item - when given unsupported Accept header - should return 406 and Vary header`() =
+        testWithApp {
+            val response =
+                client.get("/books/1") {
+                    accept(ContentType.Application.Yaml)
+                }
+            assertEquals(HttpStatusCode.NotAcceptable, response.status)
+            assertNotNull(response.headers[HttpHeaders.Vary])
+            assertEquals(HttpHeaders.Accept, response.headers[HttpHeaders.Vary])
+        }
+
+    @Test
+    fun `GET books - when given existing collection name and Accept=XML - should return valid XML collection`() =
         testWithApp {
             val response =
                 client.get("/books") {
@@ -79,7 +104,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection - when given existing collection name and Accept=CSV - should return valid CSV collection`() =
+    fun `GET books - when given existing collection name and Accept=CSV - should return valid CSV collection`() =
         testWithApp {
             val response =
                 client.get("/books") {
@@ -93,14 +118,14 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection - when given non-existing collection name - should return 404`() =
+    fun `GET invalidName - when given non-existing collection name - should return 404`() =
         testWithApp {
             val response = client.get("/invalidName")
             assertEquals(HttpStatusCode.NotFound, response.status)
         }
 
     @Test
-    fun `GET collection item - when given valid id - should return corresponding item`() =
+    fun `GET book item - when given valid id - should return corresponding item`() =
         testWithApp {
             val id = "1"
             val response = client.get("/books/$id")
@@ -113,7 +138,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection item - when given valid id and Accept=XML - should return corresponding XML item`() =
+    fun `GET book item - when given valid id and Accept=XML - should return corresponding XML item`() =
         testWithApp {
             val id = "1"
             val response = client.get("/books/$id") { accept(ContentType.Application.Xml) }
@@ -124,7 +149,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection item - when given valid id and Accept=CSV - should return corresponding CSV item`() =
+    fun `GET book item - when given valid id and Accept=CSV - should return corresponding CSV item`() =
         testWithApp {
             val id = "1"
             val response = client.get("/books/$id") { accept(ContentType.Text.CSV) }
@@ -135,7 +160,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection item - when given invalid id - should return 404`() =
+    fun `GET book item - when given invalid id - should return 404`() =
         testWithApp {
             val invalidId = "100"
             val response = client.get("/books/$invalidId")
@@ -145,7 +170,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection item - when given valid id for item with custom identifier - should return corresponding item`() =
+    fun `GET user item - when given valid id for item with custom identifier - should return corresponding item`() =
         testWithApp {
             val id = "1"
             val response = client.get("/users/$id")
@@ -159,7 +184,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection with filter - when given filter - should return corresponding collection items`() =
+    fun `GET books with filter - when given genre=Fiction and genre=Dystopian - should return corresponding collection items`() =
         testWithApp {
             val response =
                 client.get("/books") {
@@ -176,7 +201,209 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection with pagination - when given page=2 and limit=4 - should return corresponding collection items`() =
+    fun `GET books with filter - when given genre0_like=Fiction and genre1=Dystopian - should return corresponding collection items`() =
+        testWithApp {
+            val response =
+                client.get("/books") {
+                    parameter("genre[0]_like", "Fiction")
+                    parameter("genre[1]", "Dystopian")
+                }
+            val responseBody = response.bodyAsText().toJsonArray()
+            val titles = responseBody.map { it.jsonObject["title"]?.jsonPrimitive?.content }
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(1, responseBody.size)
+            assertContains(titles, "Brave New World")
+        }
+
+    @Test
+    fun `GET review with filter - when given submitted=2025-02-24T13-20-40Z - should return corresponding collection items`() =
+        testWithApp {
+            val response =
+                client.get("/reviews") {
+                    parameter("submitted", "2025-02-24T13:20:40Z")
+                }
+            val responseBody = response.bodyAsText().toJsonArray()
+            val ids = responseBody.map { it.jsonObject["id"]?.jsonPrimitive?.content }
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(2, responseBody.size)
+            assertContains(ids, "9")
+            assertContains(ids, "10")
+        }
+
+    @Test
+    fun `GET review with filter - when given submitted=2025-02-24 - should return corresponding collection items`() =
+        testWithApp {
+            val response =
+                client.get("/reviews") {
+                    parameter("submitted_like", "2025-02-24")
+                }
+            val responseBody = response.bodyAsText().toJsonArray()
+            val ids = responseBody.map { it.jsonObject["id"]?.jsonPrimitive?.content }
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(3, responseBody.size)
+            assertContains(ids, "6")
+            assertContains(ids, "9")
+            assertContains(ids, "10")
+        }
+
+    @Test
+    fun `GET review with filter - when given submitted_gt=2025-02-24 - should return corresponding collection items`() =
+        testWithApp {
+            val response =
+                client.get("/reviews") {
+                    parameter("submitted_gt", "2025-02-24")
+                }
+            val body = response.bodyAsText()
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = body.toJsonArray()
+            val ids = responseBody.map { it.jsonObject["id"]?.jsonPrimitive?.content }
+            assertEquals(4, responseBody.size)
+            assertContains(ids, "2")
+            assertContains(ids, "3")
+            assertContains(ids, "4")
+            assertContains(ids, "5")
+        }
+
+    @Test
+    fun `GET review with filter - when given submitted_gte=2025-02-24 - should return corresponding collection items`() =
+        testWithApp {
+            val response =
+                client.get("/reviews") {
+                    parameter("submitted_gte", "2025-02-24")
+                }
+            val body = response.bodyAsText()
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = body.toJsonArray()
+            val ids = responseBody.map { it.jsonObject["id"]?.jsonPrimitive?.content }
+            println(ids)
+            assertEquals(7, responseBody.size)
+            assertContains(ids, "2")
+            assertContains(ids, "3")
+            assertContains(ids, "4")
+            assertContains(ids, "5")
+            assertContains(ids, "6")
+            assertContains(ids, "9")
+            assertContains(ids, "10")
+        }
+
+    @Test
+    fun `GET review with filter - when given submitted_gte=2025-02-24T13-20-40Z - should return corresponding collection items`() =
+        testWithApp {
+            val response =
+                client.get("/reviews") {
+                    parameter("submitted_gte", "2025-02-24T13:20:40Z")
+                }
+            val body = response.bodyAsText()
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = body.toJsonArray()
+            val ids = responseBody.map { it.jsonObject["id"]?.jsonPrimitive?.content }
+            println(ids)
+            assertEquals(6, responseBody.size)
+            assertContains(ids, "2")
+            assertContains(ids, "3")
+            assertContains(ids, "4")
+            assertContains(ids, "5")
+            assertContains(ids, "9")
+            assertContains(ids, "10")
+        }
+
+    @Test
+    fun `GET review with filter - when given submitted_lt=2025-02-24 - should return corresponding collection items`() =
+        testWithApp {
+            val response =
+                client.get("/reviews") {
+                    parameter("submitted_lt", "2025-02-24")
+                }
+            val body = response.bodyAsText()
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = body.toJsonArray()
+            val ids = responseBody.map { it.jsonObject["id"]?.jsonPrimitive?.content }
+            println(ids)
+            assertEquals(3, responseBody.size)
+            assertContains(ids, "1")
+            assertContains(ids, "7")
+            assertContains(ids, "8")
+        }
+
+    @Test
+    fun `GET review with filter - when given submitted_lte=2025-02-24 - should return corresponding collection items`() =
+        testWithApp {
+            val response =
+                client.get("/reviews") {
+                    parameter("submitted_lte", "2025-02-24")
+                }
+            val body = response.bodyAsText()
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = body.toJsonArray()
+            val ids = responseBody.map { it.jsonObject["id"]?.jsonPrimitive?.content }
+            println(ids)
+            assertEquals(6, responseBody.size)
+            assertContains(ids, "1")
+            assertContains(ids, "6")
+            assertContains(ids, "7")
+            assertContains(ids, "8")
+            assertContains(ids, "9")
+            assertContains(ids, "10")
+        }
+
+    @Test
+    fun `GET review with filter - when given submitted_lte=2025-02-24T11-50-00Z - should return corresponding collection items`() =
+        testWithApp {
+            val response =
+                client.get("/reviews") {
+                    parameter("submitted_lte", "2025-02-24T11:50:00Z")
+                }
+            val body = response.bodyAsText()
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = body.toJsonArray()
+            val ids = responseBody.map { it.jsonObject["id"]?.jsonPrimitive?.content }
+            println(ids)
+            assertEquals(4, responseBody.size)
+            assertContains(ids, "1")
+            assertContains(ids, "6")
+            assertContains(ids, "7")
+            assertContains(ids, "8")
+        }
+
+    @Test
+    fun `GET books with pagination - when given page=1 and limit=default 10 - should return corresponding collection items and empty Link`() =
+        testWithApp {
+            val response =
+                client.get("/books") {
+                    parameter("_page", "1")
+                }
+            val responseBody = response.bodyAsText().toJsonArray()
+            val ids = responseBody.map { it.jsonObject["id"]?.jsonPrimitive?.content }
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(10, responseBody.size)
+            assertEquals("1", ids.first())
+            assertEquals("10", ids.last())
+            val linkHeader = response.headers[HttpHeaders.Link]
+            assertEquals("", linkHeader)
+        }
+
+    @Test
+    fun `GET books with pagination - when given page=2 and limit=default 10 - should return 0 items and first and prev links`() =
+        testWithApp {
+            val response =
+                client.get("/books") {
+                    parameter("_page", "2")
+                }
+            val responseBody = response.bodyAsText().toJsonArray()
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(0, responseBody.size)
+            val baseUrl = "http://${appConfig.host}:${appConfig.port}/books"
+            val expectedLinks =
+                """
+                <$baseUrl?_page=1&_limit=10>; rel="first", 
+                <$baseUrl?_page=1&_limit=10>; rel="prev"
+                """.trimIndent().replace("\n", "")
+            val linkHeader = response.headers[HttpHeaders.Link]
+            assertEquals(expectedLinks, linkHeader)
+        }
+
+    @Test
+    fun `GET books with pagination - when given page=2 and limit=4 - should return corresponding collection items and all links`() =
         testWithApp {
             val response =
                 client.get("/books") {
@@ -189,10 +416,21 @@ class GetRoutesTest : BaseTest() {
             assertEquals(4, responseBody.size)
             assertEquals("5", ids.first())
             assertEquals("8", ids.last())
+
+            val baseUrl = "http://${appConfig.host}:${appConfig.port}/books"
+            val expectedLinks =
+                """
+                <$baseUrl?_page=1&_limit=4>; rel="first", 
+                <$baseUrl?_page=1&_limit=4>; rel="prev", 
+                <$baseUrl?_page=3&_limit=4>; rel="next", 
+                <$baseUrl?_page=3&_limit=4>; rel="last"
+                """.trimIndent().replace("\n", "")
+            val linkHeader = response.headers[HttpHeaders.Link]
+            assertEquals(expectedLinks, linkHeader)
         }
 
     @Test
-    fun `GET collection with pagination - when given page=null and limit=4 - should throw 400`() =
+    fun `GET books with pagination - when given page=null and limit=4 - should throw 400`() =
         testWithApp {
             val response =
                 client.get("/books") {
@@ -203,7 +441,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection with sorting - when given sort=published year and order=desc - should return items sorted desc`() =
+    fun `GET books with sorting - when given nested sort=published year and order=desc - should return items sorted desc`() =
         testWithApp {
             val publishedYearKey = "published.year"
             val response =
@@ -225,7 +463,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection with sorting - when given sort=published year and order=null - should return items sorted asc`() =
+    fun `GET books with sorting - when given nested sort=published year and order=null - should return items sorted asc`() =
         testWithApp {
             val publishedYearKey = "published.year"
             val response =
@@ -246,7 +484,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection with sorting - when given sort=author and order=desc - should return items sorted desc`() =
+    fun `GET books with sorting - when given sort=author and order=desc - should return items sorted desc`() =
         testWithApp {
             val authorKey = "author"
             val response =
@@ -267,7 +505,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection with sorting - when given sort=null and order=null - should return items unsorted`() =
+    fun `GET books with sorting - when given sort=null and order=null - should return items unsorted`() =
         testWithApp {
             val response =
                 client.get("/books")
@@ -284,7 +522,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection with sorting - when given sort=null and order=asc - should throw 400`() =
+    fun `GET books with sorting - when given sort=null and order=asc - should throw 400`() =
         testWithApp {
             val response =
                 client.get("/books") {
@@ -295,7 +533,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection with sorting - when given sort=author order is invalid - should throw 400`() =
+    fun `GET books with sorting - when given sort=author order is invalid - should throw 400`() =
         testWithApp {
             val response =
                 client.get("/books") {
@@ -307,7 +545,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection with sorting - when given sorting key is invalid - should throw 400`() =
+    fun `GET books with sorting - when given sorting key is invalid - should throw 400`() =
         testWithApp {
             val invalidKey = "wrongKey"
             val response =
@@ -319,7 +557,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection with embedding - when given 2 embed values - should return collection with embedded items from both collections`() =
+    fun `GET books with embedding - when given 2 embed values - should return collection with embedded items from both collections`() =
         testWithApp {
             val response =
                 client.get("/books") {
@@ -338,7 +576,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection with embedding - when given 2 expand values - should return collection with embedded items from both collections`() =
+    fun `GET books with embedding - when given 2 expand values - should return collection with embedded items from both collections`() =
         testWithApp {
             val response =
                 client.get("/loans") {
@@ -355,7 +593,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection with embedding - when given embed and expand values - should return collection with related items`() =
+    fun `GET users with embedding and expanding - when given embed and expand values - should return collection with related items`() =
         testWithApp {
             val response =
                 client.get("/users") {
@@ -372,7 +610,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection item with embedding - when given 2 embed values - should return collection item with embedded items`() =
+    fun `GET book item with embedding - when given 2 embed values - should return collection item with embedded items`() =
         testWithApp {
             val response =
                 client.get("/books/1") {
@@ -391,7 +629,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection item with embedding - when given 2 expand values - should return collection item with expanded items`() =
+    fun `GET book item with embedding - when given 2 expand values - should return collection item with expanded items`() =
         testWithApp {
             val response =
                 client.get("/loans/1") {
@@ -408,7 +646,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection item with embedding - when given embed and expand values - should return item with related items`() =
+    fun `GET user item with embedding - when given embed and expand values - should return item with related items`() =
         testWithApp {
             val response =
                 client.get("/users/1") {
@@ -425,7 +663,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection item with filter on embedded - when given embed value and filter - should apply filter on embedded data`() =
+    fun `GET user item with filter on embedded - when given embed value and filter - should apply filter on embedded data`() =
         testWithApp {
             val response =
                 client.get("/users") {
@@ -459,7 +697,41 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection item with filter on expanded - when given expand value and filter - should apply filter on expanded data`() =
+    fun `GET user item with filter on embedded - when given embed=loans and loans wildcard bookId=1 - should apply filter on embedded data`() =
+        testWithApp {
+            val response =
+                client.get("/users") {
+                    parameter("_embed", "loans")
+                    parameter("loans[*].bookId", 1)
+                }
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = response.bodyAsText().toJsonArray()
+            assertNotNull(responseBody)
+            assertEquals(1, responseBody.size)
+            assertEquals(
+                1,
+                responseBody
+                    .first()
+                    .jsonObject["loans"]
+                    ?.jsonArray
+                    ?.size,
+            )
+            assertEquals(
+                1,
+                responseBody
+                    .first()
+                    .jsonObject["loans"]
+                    ?.jsonArray
+                    ?.first()
+                    ?.jsonObject
+                    ?.get("userId")
+                    ?.jsonPrimitive
+                    ?.intOrNull,
+            )
+        }
+
+    @Test
+    fun `GET book item with filter on expanded - when given expand value and filter - should apply filter on expanded data`() =
         testWithApp {
             val response =
                 client.get("/loans") {
@@ -493,7 +765,7 @@ class GetRoutesTest : BaseTest() {
         }
 
     @Test
-    fun `GET collection schema - when given collection name - should respond with collection schema`() =
+    fun `GET books schema - when given collection name - should respond with collection schema`() =
         testWithApp {
             val response =
                 client.get("/books/schema")

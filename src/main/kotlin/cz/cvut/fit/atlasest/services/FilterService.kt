@@ -9,6 +9,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.doubleOrNull
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 
 /**
  * A service for filtering JSON objects based on specified parameters.
@@ -128,6 +129,7 @@ class FilterService {
         value: String,
         type: String,
     ): Boolean =
+
         when (type) {
             "number", "integer" ->
                 applyCompareOperator(
@@ -145,13 +147,32 @@ class FilterService {
                 applyCompareOperator(aDate, bDate, operator)
             }
             "date-time" -> {
-                val aDateTime =
-                    kotlin.runCatching { OffsetDateTime.parse(fieldValue.content) }.getOrNull()
-                        ?: throw BadRequestException("Date is not valid")
-                val bDateTime =
-                    kotlin.runCatching { OffsetDateTime.parse(value) }.getOrNull()
-                        ?: throw BadRequestException("Problem when parsing date string.")
-                applyCompareOperator(aDateTime, bDateTime, operator)
+                val valueIsDateTime = runCatching { OffsetDateTime.parse(value) }.isSuccess
+                if (valueIsDateTime) {
+                    val aDate =
+                        kotlin.runCatching { OffsetDateTime.parse(fieldValue.content) }.getOrNull()
+                            ?: throw BadRequestException("Date is not valid")
+                    val bDate =
+                        kotlin.runCatching { OffsetDateTime.parse(value) }.getOrNull()
+                            ?: throw BadRequestException("Problem when parsing date string.")
+                    applyCompareOperator(aDate, bDate, operator)
+                } else {
+                    val aDateTime =
+                        kotlin
+                            .runCatching {
+                                OffsetDateTime.parse(fieldValue.content).toLocalDate()
+                            }.getOrNull()
+                            ?: throw BadRequestException("Date is not valid")
+                    val bDateTime =
+                        kotlin
+                            .runCatching {
+                                LocalDate.parse(value, DateTimeFormatter.ISO_LOCAL_DATE)
+                            }.getOrNull()
+                            ?: throw BadRequestException("Problem when parsing date string.")
+                    val result = applyCompareOperator(aDateTime, bDateTime, operator)
+                    println("${fieldValue.content}: $result")
+                    result
+                }
             }
             else -> throw BadRequestException("$operator operator is not supported for $type.")
         }

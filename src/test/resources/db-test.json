@@ -111,7 +111,7 @@
       }
     }
   ],
-"loans": [
+  "loans": [
     {
       "id": 1,
       "bookId": 1,
@@ -308,6 +308,88 @@
     {
       "id": 10,
       "libraryId": 1
+    }
+  ],
+  "reviews": [
+    {
+      "id": 1,
+      "userId": 1,
+      "bookId": 1,
+      "rating": -3.8,
+      "liked": false,
+      "submitted": "2025-02-14T10:40:21Z"
+    },
+    {
+      "id": 2,
+      "userId": 2,
+      "bookId": 2,
+      "rating": -2.2,
+      "liked": false,
+      "submitted": "2025-03-05T15:13:42Z"
+    },
+    {
+      "id": 3,
+      "userId": 3,
+      "bookId": 3,
+      "rating": -1.2,
+      "liked": false,
+      "submitted": "2025-03-02T13:20:40Z"
+    },
+    {
+      "id": 4,
+      "userId": 4,
+      "bookId": 4,
+      "rating": 2.0,
+      "liked": false,
+      "submitted": "2025-03-01T09:20:12Z"
+    },
+    {
+      "id": 5,
+      "userId": 5,
+      "bookId": 5,
+      "rating": 3,
+      "liked": true,
+      "submitted": "2025-02-28T18:30:50Z"
+    },
+    {
+      "id": 6,
+      "userId": 6,
+      "bookId": 6,
+      "rating": 4.8,
+      "liked": true,
+      "submitted": "2025-02-24T11:50:00Z"
+    },
+    {
+      "id": 7,
+      "userId": 7,
+      "bookId": 7,
+      "rating": -1,
+      "liked": false,
+      "submitted": "2025-02-19T10:10:40Z"
+    },
+    {
+      "id": 8,
+      "userId": 8,
+      "bookId": 8,
+      "rating": -3,
+      "liked": false,
+      "submitted": "2025-02-20T11:20:40Z"
+    },
+    {
+      "id": 9,
+      "userId": 9,
+      "bookId": 9,
+      "rating": 3.2,
+      "liked": true,
+      "submitted": "2025-02-24T13:20:40Z"
+    },
+    {
+      "id": 10,
+      "userId": 2,
+      "bookId": 2,
+      "rating": -2.2,
+      "liked": false,
+      "submitted": "2025-02-24T13:20:40Z"
     }
   ]
 }

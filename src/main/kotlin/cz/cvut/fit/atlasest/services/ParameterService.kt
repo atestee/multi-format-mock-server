@@ -37,9 +37,9 @@ class ParameterService(
         val schema = collectionService.getCollectionSchema(collectionName)
         schemas = schemas.add(collectionName, schema)
         val filteredData = applyFilter(collectionName, queriedData, params, schemas)
-        val (paginatedData, links) = applyPagination(filteredData, params, "${appConfig.host}/$collectionName")
-        val sortedData = applySorting(paginatedData, params)
-        return sortedData to links
+        val sortedData = applySorting(filteredData, params)
+        val (paginatedData, links) = applyPagination(sortedData, params, "http://${appConfig.host}:${appConfig.port}/$collectionName")
+        return paginatedData to links
     }
 
     /**

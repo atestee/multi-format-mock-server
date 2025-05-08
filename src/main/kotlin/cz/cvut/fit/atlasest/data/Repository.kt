@@ -11,6 +11,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import javax.validation.ValidationException
 
@@ -182,6 +183,9 @@ class Repository(
                                 ?: throw InvalidDataException("Invalid item in collection $collectionName (must be a JSON object)")
                         }.toMutableList()
                 val lastId = getMaxIdentifier(collectionList, identifier, collectionName)
+                val idsList = collection.map { it.jsonObject[identifier]?.jsonPrimitive?.content }
+                val idsSet = idsList.toSet()
+                if (idsSet.size != idsList.size) throw InvalidDataException("Collection $collectionName contains duplicated ids")
                 val schema =
                     if (schemaCollection != null) {
                         log.info("Trying to retrieve schema from given file ${appConfig.schemaFilename} for collection '$collectionName'")
@@ -199,7 +203,7 @@ class Repository(
                         log.info("Schema file was not included, inferring schema for collection '$collectionName'")
                         schemaService.inferJsonSchema(collection)
                     }
-
+                println(schema)
                 collections[collectionName] =
                     Collection(
                         collectionName = collectionName,

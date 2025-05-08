@@ -49,6 +49,38 @@ class PutRouteTest : BaseTest() {
         }
 
     @Test
+    fun `PUT collection item - when given unsupported Accept header - should return 406 and Vary header`() =
+        testWithApp {
+            val collectionName = "books"
+            val response =
+                client.put("/$collectionName/$updatedId") {
+                    accept(ContentType.Application.Yaml)
+                    contentType(ContentType.Application.Json)
+                    setBody(JsonObject(updatedItemMap).toString())
+                }
+
+            assertEquals(HttpStatusCode.NotAcceptable, response.status)
+            assertNotNull(response.headers[HttpHeaders.Vary])
+            assertEquals(HttpHeaders.Accept, response.headers[HttpHeaders.Vary])
+        }
+
+    @Test
+    fun `PUT collection item - when given unsupported ContentType header - should return 415 and Vary and Accept header`() =
+        testWithApp {
+            val collectionName = "books"
+            val response =
+                client.put("/$collectionName/$updatedId") {
+                    contentType(ContentType.Application.Yaml)
+                }
+
+            assertEquals(HttpStatusCode.UnsupportedMediaType, response.status)
+            assertNotNull(response.headers[HttpHeaders.Vary])
+            assertNotNull(response.headers[HttpHeaders.Accept])
+            assertEquals(HttpHeaders.Accept, response.headers[HttpHeaders.Vary])
+            assertEquals(listOf("application/json", "application/xml", "text/csv").joinToString(", "), response.headers[HttpHeaders.Accept])
+        }
+
+    @Test
     fun `PUT collection item - when given valid id and valid item - should update item and return 200`() =
         testWithApp {
             val response =

@@ -19,7 +19,7 @@ import org.koin.test.inject
 import java.io.File
 
 open class BaseTest : KoinTest {
-    private val appConfig: AppConfig = loadConfig()
+    val appConfig: AppConfig = loadConfig()
     val collectionService by inject<CollectionService>()
     val fileHandler by inject<FileHandler>()
 
