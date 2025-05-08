@@ -11,6 +11,9 @@ import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.respond
 import javax.validation.ValidationException
 
+/**
+ * Configures exception handling for the Ktor application using [StatusPages]
+ */
 fun Application.configureExceptionHandling() {
     install(StatusPages) {
         exception<BadRequestException> { call, cause ->

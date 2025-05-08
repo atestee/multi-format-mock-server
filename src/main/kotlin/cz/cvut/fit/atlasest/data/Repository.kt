@@ -4,8 +4,9 @@ import com.cesarferreira.pluralize.singularize
 import cz.cvut.fit.atlasest.application.AppConfig
 import cz.cvut.fit.atlasest.exceptionHandling.InvalidDataException
 import cz.cvut.fit.atlasest.services.SchemaService
-import cz.cvut.fit.atlasest.utils.getFieldValue
+import cz.cvut.fit.atlasest.utils.getPropertyValue
 import cz.cvut.fit.atlasest.utils.log
+import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -30,61 +31,77 @@ class Repository(
     }
 
     /**
-     * Retrieves all collection names.
+     * Retrieves all collection names
      *
-     * @return A list of strings representing the names of all the collections.
+     * @return A list of strings representing the names of all the collections
      */
     fun getCollectionNames() = this.collections.keys
 
     /**
-     * Retrieves all items from a specified collection.
+     * Retrieves all items from a specified collection
      *
-     * @param collectionName The name of the collection.
+     * @param collectionName The name of the collection
      *
-     * @return A JSON array with JSON objects representing the collection of items.
+     * @return A JSON array with JSON objects representing the collection of items
      * @throws NotFoundException If the collection was not found.
      */
     fun getCollection(collectionName: String) = getCollectionData(collectionName).items
 
     /**
-     * Retrieves identifier the specified collection.
+     * Retrieves identifier the specified collection
      *
-     * @param collectionName The name of the collection.
+     * @param collectionName The name of the collection
      *
-     * @return A string representing the collection identifier.
+     * @return A string representing the collection identifier
      * @throws NotFoundException If the collection was not found.
      */
     fun getCollectionIdentifier(collectionName: String) = getCollectionData(collectionName).identifier
 
+    /**
+     * Retrieves the next id the specified collection
+     *
+     * @param collectionName The name of the collection
+     *
+     * @return the next id as [JsonPrimitive] with string integer or integer, depending on its type in JSON Schema
+     * @throws NotFoundException If the collection was not found.
+     */
     fun getCollectionNextId(collectionName: String) = getCollectionData(collectionName).getNextId()
 
+    /**
+     * Converts the given item [id] into the correct data type according to the collection JSON Schema
+     *
+     * @param collectionName The name of the collection
+     * @param id item id
+     *
+     * @return the item id as [JsonPrimitive] with string integer or integer, depending on its type in JSON Schema
+     * @throws NotFoundException If the collection was not found.
+     */
     fun getCollectionIdInCorrectType(
         collectionName: String,
         id: String,
     ) = getCollectionData(collectionName).getIdInCorrectType(id)
 
     /**
-     * Retrieves the schema of a specified collection.
+     * Retrieves the schema of a specified collection
      *
-     * @param collectionName The name of the collection.
+     * @param collectionName The name of the collection
      *
-     * @return A JSON object representing the schema.
+     * @return A JSON object representing the schema
      *
-     * @throws NotFoundException If the collection was not found.
-     * @throws InvalidDataException If there is a problem with the JSON data.
+     * @throws NotFoundException If the collection was not found
      */
     fun getCollectionSchema(collectionName: String) = getCollectionData(collectionName).schema
 
     /**
-     * Retrieves an item by its identifier from a specified collection.
+     * Retrieves an item by its identifier from a specified collection
      *
-     * @param collectionName The name of the collection.
-     * @param id The identifier value of the item.
+     * @param collectionName The name of the collection
+     * @param id The identifier value of the item
      *
-     * @return The JSON object representing the item.
+     * @return The JSON object representing the item
      *
-     * @throws NotFoundException If the item is not found.
-     * @throws InvalidDataException If there is a problem with the JSON data.
+     * @throws NotFoundException If the item is not found
+     * @throws InvalidDataException If there is a problem with the JSON data
      */
     fun getItemById(
         collectionName: String,
@@ -92,15 +109,14 @@ class Repository(
     ): JsonObject = getCollectionData(collectionName).getItemById(id)
 
     /**
-     * Inserts a new item into a specified collection.
+     * Inserts a new item into a specified collection
      *
-     * @param collectionName The name of the collection.
-     * @param item The JSON object representing the item to be inserted.
+     * @param collectionName The name of the collection
+     * @param item The JSON object representing the item to be inserted
      *
-     * @return The inserted item and its identifier.
+     * @return The inserted item and its identifier
      *
-     * @throws NotFoundException If the collection was not found.
-     * @throws ValidationException If the item does not match the schema.
+     * @throws NotFoundException If the collection was not found
      */
     fun insertItemToCollection(
         collectionName: String,
@@ -113,17 +129,16 @@ class Repository(
     }
 
     /**
-     * If the item exists, updates it, otherwise inserts a new item.
+     * If the item exists, updates it, otherwise inserts a new item
      *
-     * @param collectionName The name of the collection.
-     * @param id The identifier of the item to update.
-     * @param newItem A JSON object representing the updated or inserted item.
+     * @param collectionName The name of the collection
+     * @param id The identifier of the item to update
+     * @param newItem A JSON object representing the updated or inserted item
      *
-     * @return The updated JSON object.
+     * @return The updated JSON object
      *
-     * @throws NotFoundException If the item or collection is not found.
-     * @throws ValidationException If the new item does not match the schema.
-     * @throws InvalidDataException If there is a problem with the JSON data.
+     * @throws NotFoundException If the item or collection is not found
+     * @throws BadRequestException if the collection does not have item with given [id] or the given [newItem] is incomplete
      */
     fun updateItemInCollection(
         collectionName: String,
@@ -137,10 +152,10 @@ class Repository(
     }
 
     /**
-     * Deletes an item from a specified collection.
+     * Deletes an item from a specified collection
      *
-     * @param collectionName The name of the collection.
-     * @param id The identifier of the item to delete.
+     * @param collectionName The name of the collection
+     * @param id The identifier of the item to delete
      */
     fun deleteItemFromCollection(
         collectionName: String,
@@ -148,18 +163,18 @@ class Repository(
     ) {
         val collection = getCollectionData(collectionName)
         val foreignKey = collectionName.singularize() + "Id"
-        this.collections.forEach { _, c ->
-            c.items.removeIf { it.getFieldValue(foreignKey)?.jsonPrimitive?.content == id }
+        this.collections.forEach { (_, c) ->
+            c.items.removeIf { it.getPropertyValue(foreignKey)?.jsonPrimitive?.content == id }
         }
         collection.deleteItem(id)
         saveData()
     }
 
     /**
-     * Loads and parses collection and schema data from local directory.
+     * Loads and parses collection and schema data from local directory
      *
-     * @throws InvalidDataException If there is an issue parsing the data.
-     * @throws ValidationException When validating collection data against JSON schema.
+     * @throws InvalidDataException If there is an issue parsing the data
+     * @throws ValidationException When validating collection data against JSON schema
      */
     private fun loadData() {
         val collectionData = fileHandler.readJsonFile(appConfig.collectionsFilename)
@@ -203,7 +218,6 @@ class Repository(
                         log.info("Schema file was not included, inferring schema for collection '$collectionName'")
                         schemaService.inferJsonSchema(collection)
                     }
-                println(schema)
                 collections[collectionName] =
                     Collection(
                         collectionName = collectionName,
@@ -217,7 +231,7 @@ class Repository(
     }
 
     /**
-     * Saves collection data to file in local directory.
+     * Saves collection data to file in local directory
      */
     private fun saveData() {
         val collectionsObject =
@@ -230,12 +244,12 @@ class Repository(
     }
 
     /**
-     * Extracts collection identifiers.
+     * Extracts collection identifiers
      *
-     * @param identifiersData The JSON object containing identifiers.
+     * @param identifiersData The JSON object containing identifiers
      *
-     * @return A map of identifiers indexed by the collection name.
-     * @throws InvalidDataException If there is an issue parsing the data.
+     * @return A map of identifiers indexed by the collection name
+     * @throws InvalidDataException If there is an issue parsing the data
      */
     private fun getIdentifiers(identifiersData: JsonObject): Map<String, String> =
         identifiersData.mapValues { entry ->
@@ -247,15 +261,15 @@ class Repository(
         }
 
     /**
-     * Finds the maximum identifier value in a collection. Expects collection to not be empty.
+     * Finds the maximum identifier value in a collection. Expects collection to not be empty
      *
-     * @param collection The JSON array representing the collection.
-     * @param identifier The collection identifier key.
-     * @param collectionName The name of the collection.
+     * @param collection The JSON array representing the collection
+     * @param identifier The collection identifier key
+     * @param collectionName The name of the collection
      *
-     * @return The highest identifier value found.
+     * @return The highest identifier value found
      *
-     * @throws InvalidDataException If there is an issue parsing the data.
+     * @throws InvalidDataException If there is an issue parsing the data
      */
     private fun getMaxIdentifier(
         collection: List<JsonObject>,
@@ -280,12 +294,12 @@ class Repository(
         }
 
     /**
-     * Retrieves a collection by name.
+     * Retrieves a collection by name
      *
-     * @param collectionName The name of the collection.
+     * @param collectionName The name of the collection
      *
-     * @return The [Collection] object.
-     * @throws NotFoundException If the collection does not exist.
+     * @return The [Collection] object
+     * @throws NotFoundException If the collection does not exist
      */
     private fun getCollectionData(collectionName: String) =
         this.collections[collectionName] ?: throw NotFoundException("Collection $collectionName not found")

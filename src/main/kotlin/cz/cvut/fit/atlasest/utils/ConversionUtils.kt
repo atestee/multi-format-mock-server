@@ -22,8 +22,8 @@ val xmlMapper = XmlMapper()
 /**
  * Converts a [JsonElement] to an XML string.
  *
- * @throws BadRequestException if the JSON is not an object or an array of objects.
- * @return The XML representation of the JSON.
+ * @throws BadRequestException if the JSON is not a [JsonObject] or a [JsonArray] of [JsonObject]
+ * @return The XML representation of the JSON
  */
 fun JsonElement.toXML(): String =
     when (this) {
@@ -45,7 +45,7 @@ fun JsonElement.toXML(): String =
     }
 
 /**
- * Converts an XML string to a JSON object.
+ * Converts an XML string to a [JsonObject]
  *
  * @param xmlString The XML content as a string.
  * @return A [JsonObject] representation of the XML.
@@ -57,12 +57,12 @@ fun xmlToJson(xmlString: String): JsonObject {
 }
 
 /**
- * Converts a CSV string into a JSON object.
+ * Converts a CSV string into a [JsonObject]
  *
- * This function assumes that the CSV contains only one row of data.
+ * This function assumes that the CSV contains only one row of data
  *
- * @param csvString The CSV content as a string.
- * @return A [JsonObject] representation of the CSV data.
+ * @param csvString The CSV content as a string
+ * @return A [JsonObject] representation of the CSV data
  */
 fun csvToJson(csvString: String): JsonObject {
     val csvData =
@@ -74,10 +74,10 @@ fun csvToJson(csvString: String): JsonObject {
 }
 
 /**
- * Converts a JSON object or array into a CSV string.
+ * Converts a [JsonObject] or [JsonArray] into a CSV string
  *
- * @throws BadRequestException if the input is not a JSON object or array.
- * @return The CSV representation of the JSON.
+ * @throws BadRequestException if the input is not a [JsonObject] or [JsonArray]
+ * @return The CSV representation of the JSON
  */
 fun JsonElement.toCSV(): String =
     when (this) {
@@ -87,10 +87,10 @@ fun JsonElement.toCSV(): String =
     }
 
 /**
- * Converts a list of JSON objects (as strings) into a CSV format.
+ * Converts a list of JSON objects (as strings) into a CSV format
  *
- * @param jsonArray A list of JSON objects represented as strings.
- * @return The CSV representation of the JSON array.
+ * @param jsonArray A list of JSON objects represented as strings
+ * @return The CSV representation of the JSON array
  */
 fun jsonArrayToCsv(jsonArray: List<String>): String {
     val csv = mutableListOf<List<Any>>()
@@ -105,10 +105,10 @@ fun jsonArrayToCsv(jsonArray: List<String>): String {
 }
 
 /**
- * Converts a single JSON object (as a string) into CSV format.
+ * Converts a single JSON object (as a string) into CSV format
  *
- * @param jsonString A JSON object as a string.
- * @return The CSV representation of the JSON object.
+ * @param jsonString A JSON object as a string
+ * @return The CSV representation of the JSON object
  */
 fun jsonItemToCsv(jsonString: String): String {
     val flattened = JsonFlattener.flattenAsMap(jsonString) as Map<String, Any>
@@ -118,9 +118,9 @@ fun jsonItemToCsv(jsonString: String): String {
 }
 
 /**
- * Converts a [JsonObject] to an XML string.
+ * Converts a [JsonObject] to an XML string
  *
- * @return The XML representation of the JSON object.
+ * @return The XML representation of the [JsonObject]
  */
 private fun JsonObject.toXML(): String {
     val json = JSONObject(this.toString())
@@ -130,9 +130,9 @@ private fun JsonObject.toXML(): String {
 }
 
 /**
- * Converts a [JsonArray] to an XML string.
+ * Converts a [JsonArray] to an XML string
  *
- * @return The XML representation of the JSON array.
+ * @return The XML representation of the [JsonArray]
  */
 private fun JsonArray.toXML(): String {
     val json = JSONArray(this.toString())

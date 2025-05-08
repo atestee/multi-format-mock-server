@@ -6,6 +6,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 
+/**
+ * Defines a DELETE route for deleting collection items based on its id
+ */
 fun Route.deleteRoute(
     collectionName: String,
     collectionService: CollectionService,

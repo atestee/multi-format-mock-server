@@ -9,20 +9,20 @@ import kotlinx.serialization.json.JsonObject
 import java.io.File
 
 /**
- * A service for reading and writing JSON documents.
+ * A service for reading and writing JSON files
  */
 class FileHandler {
     private val json = Json { prettyPrint = true }
 
     /**
-     * Reads the specified JSON file and parses its contents into a JSON object.
+     * Reads the specified JSON file and parses its contents into a JSON object
      *
-     * @param filename The name of the file to read.
+     * @param filename The name of the file to read
      *
-     * @return The parsed [JsonObject] from the JSON file.
+     * @return The parsed [JsonObject] from the JSON file
      *
-     * @throws InvalidDataException If there is an issue parsing the data.
-     * @throws NullPointerException If the file cannot be found.
+     * @throws InvalidDataException If there is an issue parsing the data
+     * @throws NullPointerException If the file cannot be found
      */
     fun readJsonFile(filename: String): JsonObject {
         try {
@@ -37,10 +37,10 @@ class FileHandler {
     }
 
     /**
-     * Saves a JSON object to a specified JSON file.
+     * Saves a JSON object to a specified JSON file
      *
-     * @param filename The name of the file to save the JSON object.
-     * @param data The saved JSON object.
+     * @param filename The name of the file to save the JSON object
+     * @param data The saved JSON object
      */
     fun saveJsonFile(
         filename: String,

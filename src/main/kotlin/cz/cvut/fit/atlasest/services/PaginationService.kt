@@ -19,7 +19,7 @@ class PaginationService(
      * @param paramsString The query parameters separated by `&`, to include in the pagination links.
      * @param baseUrl The base URL.
      *
-     * @return A pair containing the paginated list of JSON objects and an optional string of pagination links (RFC 5988 format).
+     * @return A pair containing the paginated list of JSON objects and an optional string of pagination links.
      * @throws BadRequestException If the `_limit` parameter is provided without `_page`.
      */
     internal fun applyPagination(
@@ -57,7 +57,7 @@ class PaginationService(
     }
 
     /**
-     * Generates a string of pagination links in the RFC 5988 format.
+     * Generates a string of pagination links.
      *
      * This function builds navigation links for paginated results, such as "first", "prev", "next", and "last",
      * depending on the current page and total number of pages. The links are returned as a comma-separated string

@@ -1,6 +1,6 @@
 package cz.cvut.fit.atlasest.services
 
-import cz.cvut.fit.atlasest.utils.getFieldValue
+import cz.cvut.fit.atlasest.utils.getPropertyValue
 import io.ktor.server.plugins.BadRequestException
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -12,16 +12,17 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
 /**
- * A service for filtering JSON objects based on specified parameters.
+ * A service for filtering collection items based on specified parameters
  */
 class FilterService {
     /**
-     * Applies filtering to a collection of JSON objects based on a given key with operator, and values.
+     * Applies filtering to a collection of collection items based on a given key with operator, and values
      *
-     * @param collectionItems The list of JSON objects to be filtered.
-     * @param keyOperator The string with key and optional operator used for filtering, divided by underscore, for example "name_like".
-     * @param values The list of values to filter against.
-     * @param getTypeAndFormatFromJsonSchema A function to retrieve data type and format from JSON schema.
+     * @param collectionItems The list of collection items to be filtered
+     * @param keyOperator The [String] with key and optional operator used for filtering, divided by underscore, for example "name_like",
+     * for more information see `Route.getRoutes`.
+     * @param values The list of values to filter against
+     * @param getTypeAndFormatFromJsonSchema A function to retrieve data type and format from JSON schema
      *
      * @return A filtered list of JSON objects.
      */
@@ -44,17 +45,17 @@ class FilterService {
 
         return collectionItems
             .filter { json ->
-                val fieldValue = json.getFieldValue(key)
-                fieldValue != null && values.any { value -> applyOperator(fieldValue, operator, value, type) }
+                val propertyValue = json.getPropertyValue(key)
+                propertyValue != null && values.any { value -> applyOperator(propertyValue, operator, value, type) }
             }.toMutableList()
     }
 
     /**
-     * Parses a key-operator string into key and a [FilterOperator].
+     * Parses a key-operator string into key and a [FilterOperator]
      *
-     * @param keyOperator The key-operator string.
+     * @param keyOperator The key-operator string
      *
-     * @return A [Pair] containing the key and the corresponding [FilterOperator].
+     * @return A [Pair] containing the key and the corresponding [FilterOperator]
      */
     private fun parseKeyOperator(keyOperator: String): Pair<String, FilterOperator> {
         val parts = keyOperator.split("_", limit = 2)
@@ -66,15 +67,15 @@ class FilterService {
     }
 
     /**
-     * Applies a filter operator to a JSON field and a given value.
+     * Applies a filter operator to a JSON property and a given value
      *
-     * @param field The JSON field value, supports JSON primitives and arrays.
-     * @param operator The filter operator.
-     * @param value The value from query to compare against.
-     * @param type data type or format of JSON field.
+     * @param field The JSON property value, supports [JsonPrimitive] and [JsonArray]
+     * @param operator The filter operator
+     * @param value The value from query to compare against
+     * @param type data type or format of JSON field
      *
-     * @return `true` if the condition matches, otherwise `false`.
-     * @throws BadRequestException If filtering is attempted on an unsupported JSON type.
+     * @return `true` if the condition matches, otherwise `false`
+     * @throws BadRequestException If filtering is attempted on an unsupported [JsonElement]
      */
     private fun applyOperator(
         field: JsonElement,
@@ -91,12 +92,12 @@ class FilterService {
         }
 
     /**
-     * Applies a filter operator to a JSON primitive and a given value.
+     * Applies a filter operator on a [JsonPrimitive] and a given value
      *
-     * @param fieldValue The JSON primitive value.
-     * @param operator The filter operator.
-     * @param value The value from query to compare against.
-     * @param type data type or format of the field value.
+     * @param fieldValue The [JsonPrimitive] value on which to apply the operator
+     * @param operator The filter operator
+     * @param value The query parameter value to compare against
+     * @param type data type or format of the field value
      *
      * @return `true` if the condition matches, otherwise `false`.
      */
@@ -114,14 +115,15 @@ class FilterService {
         }
 
     /**
-     * Applies filter operator LT, GT, LTE, GTE based on JSON Schema type or field.
+     * Applies filter operator LT, GT, LTE, GTE based on JSON Schema types `number` and `integer` or formats `date` or `date-time`
      *
-     * @param fieldValue The JSON primitive value.
-     * @param operator The filter operator for numeric types.
-     * @param value The value from query to compare against.
-     * @param type data type or format of the field value.
+     * @param fieldValue The [JsonPrimitive] value on which to apply the operator
+     * @param operator The filter operator for numeric types
+     * @param value The query parameter value to compare against
+     * @param type data type or format of the field value
      *
-     * @return `true` if the condition matches, otherwise `false`.
+     * @return `true` if the condition matches, otherwise `false`
+     * @throws BadRequestException if the type or format is not one of `number`, `integer`, `date`, or `date-time`
      */
     private fun applyOperatorByType(
         fieldValue: JsonPrimitive,
@@ -129,7 +131,6 @@ class FilterService {
         value: String,
         type: String,
     ): Boolean =
-
         when (type) {
             "number", "integer" ->
                 applyCompareOperator(
@@ -178,14 +179,14 @@ class FilterService {
         }
 
     /**
-     * Applies filter operator LT, GT, LTE or GTE between two comparable values using the specified filter operator.
+     * Applies filter operator LT, GT, LTE or GTE between two comparable values using the specified filter operator
      *
-     * @param T The type of the values being compared. Must implement [Comparable].
-     * @param a left operand.
-     * @param b right operand.
-     * @param operator the comparison operator to apply.
+     * @param T The type of the values being compared. Must implement [Comparable]
+     * @param a left operand
+     * @param b right operand
+     * @param operator the comparison operator to apply
      *
-     * @return `true` if the condition matches, otherwise `false`.
+     * @return `true` if the condition matches, otherwise `false`
      */
     private fun <T : Comparable<T>> applyCompareOperator(
         a: T,
@@ -200,15 +201,15 @@ class FilterService {
         }
 
     /**
-     * Applies a filter operator to a JSON array and a given value.
+     * Applies a filter operator to a [JsonArray] and a given value.
      *
-     * @param fieldArray The JSON array.
-     * @param operator The filter operator.
-     * @param value The value from query to compare against.
-     * @param type data type or format of JSON array items.
+     * @param fieldArray The [JsonArray] on which to apply the operator
+     * @param operator The filter operator
+     * @param value The query parameter value to compare against
+     * @param type data type or format of JSON array items
      *
-     * @return `true` if the condition matches, otherwise `false`.
-     * @throws BadRequestException If the filter operator is not supported for arrays.
+     * @return `true` if the condition matches, otherwise `false`
+     * @throws BadRequestException If the filter operator is not supported for arrays
      */
     private fun applyOperator(
         fieldArray: JsonArray,

@@ -1,7 +1,7 @@
 package cz.cvut.fit.atlasest.routing.collectionRoutes
 
 import BaseTest
-import cz.cvut.fit.atlasest.utils.getFieldValue
+import cz.cvut.fit.atlasest.utils.getPropertyValue
 import io.ktor.client.request.delete
 import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.json.jsonPrimitive
@@ -17,10 +17,16 @@ class DeleteRouteTest : BaseTest() {
             assertEquals(HttpStatusCode.OK, response.status)
 
             val books = collectionService.getCollection("books")
-            assertTrue(books.none { it.getFieldValue("id")?.jsonPrimitive?.content == "1" })
+            assertTrue(books.none { it.getPropertyValue("id")?.jsonPrimitive?.content == "1" })
 
             val loans = collectionService.getCollection("loans")
-            assertTrue(loans.none { it.getFieldValue("bookId")?.jsonPrimitive?.content == "1" })
+            assertTrue(loans.none { it.getPropertyValue("bookId")?.jsonPrimitive?.content == "1" })
+
+            val libraryBooks = collectionService.getCollection("libraryBooks")
+            assertTrue(libraryBooks.none { it.getPropertyValue("bookId")?.jsonPrimitive?.content == "1" })
+
+            val reviews = collectionService.getCollection("reviews")
+            assertTrue(reviews.none { it.getPropertyValue("bookId")?.jsonPrimitive?.content == "1" })
         }
 
     @Test

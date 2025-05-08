@@ -9,57 +9,57 @@ import kotlinx.serialization.json.jsonObject
 import javax.validation.ValidationException
 
 /**
- * A service for managing collection data, collection JSON and OpenAPI Schema retrieval and data validation.
+ * A service for managing collection data, collection JSON and OpenAPI Schema retrieval and data validation
  */
 class CollectionService(
     private val schemaService: SchemaService,
     private val repository: Repository,
 ) {
     /**
-     * Retrieves all collection names from repository.
+     * Retrieves all collection names from [Repository]
      *
-     * @return A list of strings representing the names of all the collections.
+     * @return A list of strings representing the names of all the collections
      */
     fun getCollectionNames() = repository.getCollectionNames()
 
     /**
-     * Retrieves all items from a specified collection from the repository.
+     * Retrieves all items from a specified collection from the repository
      *
-     * @param collectionName The name of the collection.
+     * @param collectionName The name of the collection
      *
-     * @return A JSON array with JSON objects representing the collection of items.
-     * @throws NotFoundException If the collection was not found.
+     * @return A [MutableList] with [JsonObject] objects representing the collection of items.
+     * @throws NotFoundException If the collection was not found
      */
     fun getCollection(collectionName: String) = repository.getCollection(collectionName)
 
     /**
-     * Retrieves identifier of the specified collection from the repository.
+     * Retrieves the identifier of the specified collection from the [Repository]
      *
-     * @param collectionName The name of the collection.
+     * @param collectionName The name of the collection
      *
-     * @return A string representing the collection identifier.
-     * @throws NotFoundException If the collection was not found.
+     * @return A [String] representing the collection identifier
+     * @throws NotFoundException If the collection was not found
      */
     fun getCollectionIdentifier(collectionName: String) = repository.getCollectionIdentifier(collectionName)
 
     /**
-     * Retrieves the schema of a specified collection from the repository.
+     * Retrieves the schema of a specified collection from the [Repository]
      *
-     * @param collectionName The name of the collection.
+     * @param collectionName The name of the collection
      *
-     * @return A JSON object representing the schema.
+     * @return A [JsonObject] representing the schema
      *
      * @throws NotFoundException If the collection was not found.
      */
     fun getCollectionSchema(collectionName: String) = repository.getCollectionSchema(collectionName)
 
     /**
-     * Retrieves an item by its identifier from a specified collection from the repository.
+     * Retrieves an item by its identifier from a specified collection from the [Repository]
      *
-     * @param collectionName The name of the collection.
-     * @param id The identifier value of the item.
+     * @param collectionName The name of the collection
+     * @param id The identifier value of the item
      *
-     * @return The JSON object representing the item.
+     * @return The [JsonObject] representing the item
      *
      * @throws NotFoundException If the item is not found.
      */
@@ -69,15 +69,15 @@ class CollectionService(
     ) = repository.getItemById(collectionName, id)
 
     /**
-     * Inserts a new item into a specified collection using the repository.
+     * Inserts a new item into a specified collection using the [Repository]
      *
-     * @param collectionName The name of the collection.
-     * @param item The JSON object representing the item to be inserted.
+     * @param collectionName The name of the collection
+     * @param item A [JsonObject] representing the item to be inserted
      *
-     * @return The inserted item and its identifier.
+     * @return The inserted item and its identifier
      *
-     * @throws NotFoundException If the collection was not found.
-     * @throws ValidationException If the item does not match the schema.
+     * @throws NotFoundException If the collection was not found
+     * @throws ValidationException If the item does not match the schema
      */
     fun insertItemToCollection(
         collectionName: String,
@@ -92,11 +92,11 @@ class CollectionService(
     }
 
     /**
-     * If the item exists, updates it, otherwise inserts a new item using the repository.
+     * If the item exists, updates it, otherwise inserts a new item using the [Repository]
      *
-     * @param collectionName The name of the collection.
-     * @param id The identifier of the item to update.
-     * @param newItem A JSON object representing the updated or inserted item.
+     * @param collectionName The name of the collection
+     * @param id The identifier of the item to update
+     * @param newItem A [JsonObject] representing the updated or inserted item
      *
      * @return The updated JSON object.
      *
@@ -117,10 +117,10 @@ class CollectionService(
     }
 
     /**
-     * Deletes an item from a specified collection using the repository.
+     * Deletes an item from a specified collection using the [Repository]
      *
-     * @param collectionName The name of the collection.
-     * @param id The identifier of the item to delete.
+     * @param collectionName The name of the collection
+     * @param id The identifier of the item to delete
      */
     fun deleteItemFromCollection(
         collectionName: String,
@@ -130,11 +130,11 @@ class CollectionService(
     }
 
     /**
-     * Retrieves the OpenAPI schema for a specified collection.
+     * Retrieves the OpenAPI [Schema] for a specified collection
      *
-     * @param collectionName The name of the collection.
+     * @param collectionName The name of the collection
      *
-     * @return An OpenAPI [Schema] object representing the collection schema.
+     * @return An OpenAPI [Schema] object representing the collection schema
      */
     fun getOpenApiSchema(collectionName: String): Schema<Any> {
         val jsonSchema = repository.getCollectionSchema(collectionName)

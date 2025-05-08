@@ -31,7 +31,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import javax.validation.ValidationException
 
 /**
- * A service for handling JSON schema operations such as inference, validation, and conversion.
+ * A service for handling JSON schema operations such as inference, validation, and conversion
  */
 class SchemaService {
     private val mapper = ObjectMapper()
@@ -39,11 +39,11 @@ class SchemaService {
     private val specVersionUrl = "https://json-schema.org/draft/2020-12/schema#"
 
     /**
-     * Infers a JSON schema using the DRAFT_2020_12 version based on the provided JSON array.
+     * Infers a JSON schema using the DRAFT_2020_12 version based on the provided [JsonArray]
      *
-     * @param collection JSON array with objects representing a data collection.
+     * @param collection A [JsonArray] with objects representing a data collection
      *
-     * @return The JSON object representing the inferred JSON schema.
+     * @return A [JsonObject] representing the inferred JSON schema
      */
     fun inferJsonSchema(collection: JsonArray): JsonObject {
         val inferrer =
@@ -66,31 +66,30 @@ class SchemaService {
     }
 
     /**
-     * Converts all data types in the given JSON object according to the provided JSON schema.
-     * For example the string "10" will be transformed to integer 10, if the schema defines the property as integer.
+     * Converts all data types in the given [JsonObject] according to the provided JSON schema
+     * For example the string "10" will be transformed to integer 10, if the schema defines the property as `integer`
      *
-     * @param jsonSchema JSON schema describing the structure of expected data structure.
-     * @param jsonObject The JSON object to be converted.
+     * @param jsonSchema JSON schema describing the structure of expected data structure
+     * @param jsonObject The [JsonObject] to be converted
      *
-     * @return The JSON object with correct data types.
-     * @throws ValidationException If the JSON schema is invalid.
+     * @return The [jsonObject] with correct data types
+     * @throws ValidationException If the JSON schema is invalid
      */
     fun convertTypes(
         jsonSchema: JsonObject,
         jsonObject: JsonObject,
     ): JsonObject {
-        val properties =
-            jsonSchema["properties"]?.jsonObject ?: throw ValidationException("#: missing properties field")
+        val properties = jsonSchema["properties"]?.jsonObject ?: throw ValidationException("#: missing properties field")
         val jsonObjectWithTypes = convertTypesInJson("#", jsonObject, properties)
         return jsonObjectWithTypes
     }
 
     /**
-     * Validates a JSON object against a JSON schema.
+     * Validates a [JsonObject] against a JSON schema
      *
-     * @param jsonObject The JSON object to be validated.
-     * @param jsonSchema The JSON schema describing the expected structure.
-     * @throws ValidationException If validation errors occur.
+     * @param jsonObject The [JsonObject] to be validated
+     * @param jsonSchema The JSON schema describing the expected structure
+     * @throws ValidationException If validation errors occur
      */
     fun validateItemAgainstSchema(
         jsonObject: JsonObject,
@@ -113,7 +112,7 @@ class SchemaService {
     /**
      * Validates collection items against a given JSON schema.
      *
-     * @param collection The JSON array representing the collection.
+     * @param collection A [JsonArray] representing the collection.
      * @param collectionName The name of the collection.
      * @param identifier The collection identifier key.
      * @param schema The JSON schema used for validation.
@@ -141,13 +140,14 @@ class SchemaService {
     }
 
     /**
-     * Retrieves a JSON schema for a specified collection from a JSON schema collection.
+     * Retrieves a JSON schema for a specified collection from a JSON schema collection
      *
-     * @param collectionName The name of the collection whose schema is retrieved.
-     * @param schemaCollection A JSON object containing multiple schemas.
+     * @param collectionName The name of the collection whose schema is retrieved
+     * @param schemaCollection A [JsonObject] containing multiple schemas
      *
-     * @return The JSON schema for the specified collection.
-     * @throws ValidationException If the schema cannot be found or parsed.
+     * @return The JSON schema for the specified collection
+     * @throws InvalidDataException If the schema cannot be found
+     * @throws ValidationException If the schema cannot be parsed
      */
     fun getCollectionSchema(
         collectionName: String,
@@ -162,11 +162,11 @@ class SchemaService {
     }
 
     /**
-     * Converts a JSON schema to a OpenAPI schema.
+     * Converts a JSON Schema to a OpenAPI [Schema]
      *
-     * @param jsonSchema The JSON schema to be converted.
+     * @param jsonSchema The JSON Schema to be converted
      *
-     * @return The corresponding OpenAPI schema.
+     * @return The corresponding OpenAPI [Schema]
      */
     fun convertJsonSchemaToOpenApi(
         jsonSchema: JsonElement,
@@ -212,17 +212,16 @@ class SchemaService {
     }
 
     /**
-     * Retrieves the type and optional format of a property from a nested JSON Schema object.
+     * Retrieves the type and optionally format of a property from a nested JSON Schema object
      *
      * This function traverses a JSON Schema based on a dot-delimited and array indexed key (for example "company.branches[1].address.street"),
-     * and returns the type and format of the final field, if available, else null.
+     * and returns the type and format of the final field, if available, else `null`
      *
-     * @param schemas The JSON schemas of main collection and related collections (indexed by collection name).
-     * @param key A string representing the path to the wanted property, uses dot-notation and array indexing with wildcard.
-     * @param collectionName The name of the main collection.
+     * @param schemas The JSON schemas of main collection and related collections (indexed by collection name)
+     * @param key A string representing the path to the wanted property, uses dot-notation and array indexing with wildcard
+     * @param collectionName The name of the main collection
      *
-     * @return A Pair with the field's type and optional format, or null if the field doesn't exist
-     *         or the path is invalid.
+     * @return A Pair with the field's type and optional format, or `null` if the field doesn't exist or the path is invalid
      */
     fun getTypeAndFormatFromJsonSchema(
         schemas: JsonObject,
@@ -254,18 +253,19 @@ class SchemaService {
     }
 
     /**
-     * Recursively converts object properties to their correct data types based on the schema.
-     * If the cast is not possible the original property value is kept.
+     * Recursively converts object properties to their correct data types based on the JSON Schema
      *
-     * @param jsonPath The current JSON path.
-     * @param jsonObject The JSON object that is being transformed.
-     * @param schemaProperties The schema properties defining the expected data types.
+     * If the cast is not possible the original property value is kept
+     *
+     * @param propertyKey The property key, dot-notation and array indexing with wildcard can be used to refer to nested objects or arrays
+     * @param jsonObject The [JsonObject] that is being transformed
+     * @param schemaProperties The schema properties defining the expected data types
      *
      * @return A JSON object with correct property values.
      * @throws ValidationException If the schema is invalid.
      */
     private fun convertTypesInJson(
-        jsonPath: String,
+        propertyKey: String,
         jsonObject: JsonObject,
         schemaProperties: JsonObject,
     ): JsonObject {
@@ -273,28 +273,28 @@ class SchemaService {
         jsonObject.forEach { key, value ->
             val property =
                 schemaProperties[key]?.jsonObject
-                    ?: throw ValidationException("$jsonPath: missing property $key in schema")
+                    ?: throw ValidationException("$propertyKey: missing property $key in schema")
             val expectedType =
                 property["type"]
                     ?.jsonPrimitive
-                    ?.content ?: throw ValidationException("$jsonPath: missing type field")
-            updatedJson[key] = getNewPropertyValue("$jsonPath/$key", expectedType, value, property)
+                    ?.content ?: throw ValidationException("$propertyKey: missing type field")
+            updatedJson[key] = getNewPropertyValue("$propertyKey/$key", expectedType, value, property)
         }
         return JsonObject(updatedJson)
     }
 
     /**
-     * Converts a JSON property value to the expected type based on the schema.
+     * Converts a JSON property value to the expected type based on the JSON Schema
      *
-     * @param path The current JSON path
-     * @param expectedType The expected type of the value.
-     * @param property The JSON property to be converted.
-     * @param schema The property JSON schema.
+     * @param propertyKey The property key, dot-notation and array indexing with wildcard can be used to refer to nested objects or arrays
+     * @param expectedType The expected type of the value
+     * @param property The JSON property to be converted
+     * @param schema The property JSON schema
      *
-     * @return The converted JSON element.
+     * @return The converted property as [JsonElement]
      */
     private fun getNewPropertyValue(
-        path: String,
+        propertyKey: String,
         expectedType: String,
         property: JsonElement,
         schema: JsonObject,
@@ -307,26 +307,26 @@ class SchemaService {
                 if (property is JsonObject) {
                     val properties =
                         schema["properties"]?.jsonObject
-                            ?: throw ValidationException("$path: missing properties")
-                    convertTypesInJson(path, property, properties)
+                            ?: throw ValidationException("$propertyKey: missing properties")
+                    convertTypesInJson(propertyKey, property, properties)
                 } else {
                     property
                 }
 
             "array" -> {
-                val items = schema["items"]?.jsonObject ?: throw ValidationException("$path: missing items field")
+                val items = schema["items"]?.jsonObject ?: throw ValidationException("$propertyKey: missing items field")
                 val type =
                     items["type"]?.jsonPrimitive?.content
-                        ?: throw ValidationException("$path: missing items type field")
+                        ?: throw ValidationException("$propertyKey: missing items type field")
                 if (property is JsonArray) {
                     JsonArray(
                         property.mapIndexed { index, element ->
-                            getNewPropertyValue("$path[$index]/", type, element, items)
+                            getNewPropertyValue("$propertyKey[$index]/", type, element, items)
                         },
                     )
                 } else {
                     JsonArray(
-                        listOf(getNewPropertyValue("$path[0]/", type, property, items)),
+                        listOf(getNewPropertyValue("$propertyKey[0]/", type, property, items)),
                     )
                 }
             }
@@ -337,8 +337,8 @@ class SchemaService {
     /**
      * Validates if the schema version is supported. The currently supported version is Draft 2020-12.
      *
-     * @throws ValidationException if the version is not supported
-     * @throws InvalidDataException if the
+     * @throws ValidationException If the version is not supported
+     * @throws InvalidDataException If the schema version is missing
      */
     private fun validateSchemaVersion(collectionSchema: JsonObject) {
         val schemaVersion =

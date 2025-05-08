@@ -4,6 +4,9 @@ import io.ktor.server.application.Application
 import io.ktor.server.application.host
 import io.ktor.server.application.port
 
+/**
+ * Data class holding configuration data
+ */
 data class AppConfig(
     val port: Int,
     val host: String,
@@ -15,6 +18,9 @@ data class AppConfig(
     val defaultIdentifier: String,
 )
 
+/**
+ * Initialized [AppConfig]
+ */
 fun Application.loadAppConfig(): AppConfig {
     val schemaFilename = System.getProperty("schema")
     val defaultPaginationLimit = System.getProperty("defaultPaginationLimit")

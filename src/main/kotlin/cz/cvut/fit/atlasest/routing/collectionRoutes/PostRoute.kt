@@ -16,6 +16,9 @@ import io.ktor.server.request.receiveText
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 
+/**
+ * Defines a POST route for inserting collection items
+ */
 fun Route.postRoute(
     collectionName: String,
     collectionService: CollectionService,

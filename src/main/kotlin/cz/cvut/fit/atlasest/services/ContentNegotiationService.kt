@@ -15,7 +15,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 
 /**
- * A service for content negotiation tasks.
+ * A service for content negotiation tasks
  */
 class ContentNegotiationService(
     val collectionService: CollectionService,
@@ -23,6 +23,19 @@ class ContentNegotiationService(
 ) {
     val supportedMediaTypes = listOf(ContentType.Application.Json, ContentType.Application.Xml, ContentType.Text.CSV)
 
+    /**
+     * Converts a request body to the media type specified in the `Content-Type` request header
+     *
+     * Uses collection schema for the string primitive types to correct type.
+     *
+     * @param collectionName The name of the collection
+     * @param body The request body
+     * @param contentTypeValue The value of the `Content-Type` request header
+     *
+     * @return The content in request body as [JsonObject]
+     * @throws BadRequestException When there is a problem when parsing JSON request body
+     * @throws UnsupportedMediaTypeException When the media type in the `Content-Type` request header is not supported
+     */
     fun getResourceInJsonFormat(
         collectionName: String,
         body: String,
@@ -53,6 +66,17 @@ class ContentNegotiationService(
         }
     }
 
+    /**
+     * Converts a [JsonElement] resource to the media types specified in the `Accept` request header
+     *
+     * calls [processAcceptHeader] to process the `Accept` request header and choose the media type to respond with
+     *
+     * @param resource The [JsonElement] to be converted
+     * @param accept The value in the `Accept` request header
+     *
+     * @return The converted resource and its media type, both as [String]
+     * @throws NotAcceptableException When there is not supported media type to respond with
+     */
     fun getResourceInAcceptedFormat(
         resource: JsonElement,
         accept: String,
@@ -74,6 +98,13 @@ class ContentNegotiationService(
         }
     }
 
+    /**
+     * Processes the `Accept` request header and chooses the media type to respond with
+     *
+     * @param accept The value of the `Accept` request header
+     *
+     * @return The [ContentType] representing the chosen media type to respond with
+     */
     internal fun processAcceptHeader(accept: String): ContentType? {
         if (accept.isBlank()) {
             return supportedMediaTypes.first()

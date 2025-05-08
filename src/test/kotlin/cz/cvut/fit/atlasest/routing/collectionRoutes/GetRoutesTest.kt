@@ -6,7 +6,7 @@ import cz.cvut.fit.atlasest.services.LIMIT
 import cz.cvut.fit.atlasest.services.ORDER
 import cz.cvut.fit.atlasest.services.PAGE
 import cz.cvut.fit.atlasest.services.SORT
-import cz.cvut.fit.atlasest.utils.getFieldValue
+import cz.cvut.fit.atlasest.utils.getPropertyValue
 import cz.cvut.fit.atlasest.utils.toJsonArray
 import cz.cvut.fit.atlasest.utils.toJsonObject
 import cz.cvut.fit.atlasest.utils.xmlMapper
@@ -454,7 +454,7 @@ class GetRoutesTest : BaseTest() {
             val years =
                 responseBody.map {
                     it.jsonObject
-                        .getFieldValue(publishedYearKey)
+                        .getPropertyValue(publishedYearKey)
                         ?.jsonPrimitive
                         ?.content
                 }
@@ -475,7 +475,7 @@ class GetRoutesTest : BaseTest() {
             val years =
                 responseBody.map {
                     it.jsonObject
-                        .getFieldValue(publishedYearKey)
+                        .getPropertyValue(publishedYearKey)
                         ?.jsonPrimitive
                         ?.content
                 }

@@ -12,6 +12,9 @@ import cz.cvut.fit.atlasest.services.SchemaService
 import cz.cvut.fit.atlasest.services.SortingService
 import org.koin.dsl.module
 
+/**
+ * Koin module that provides the dependencies for the application
+ */
 val appModule = { appConfig: AppConfig ->
     module {
         single { appConfig }

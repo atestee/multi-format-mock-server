@@ -27,6 +27,11 @@ import io.swagger.v3.oas.models.media.XML
 import kotlinx.serialization.json.Json
 import org.koin.ktor.ext.inject
 
+/**
+ * Defines the main routing logic for the application
+ *
+ * Uses [ContentNegotiation] and [OpenApi]
+ */
 fun Application.configureRouting() {
     val collectionService by inject<CollectionService>()
     val contentNegotiationService by inject<ContentNegotiationService>()

@@ -2,7 +2,7 @@ package cz.cvut.fit.atlasest.services
 
 import BaseTest
 import cz.cvut.fit.atlasest.testData.TestData
-import cz.cvut.fit.atlasest.utils.getFieldValue
+import cz.cvut.fit.atlasest.utils.getPropertyValue
 import cz.cvut.fit.atlasest.utils.toJsonObject
 import io.ktor.server.plugins.BadRequestException
 import kotlinx.serialization.json.JsonArray
@@ -490,7 +490,7 @@ class ParameterServiceTest : BaseTest() {
                 ),
             )
 
-        val years = result.map { it.getFieldValue(publishedYearKey)!!.jsonPrimitive.content }
+        val years = result.map { it.getPropertyValue(publishedYearKey)!!.jsonPrimitive.content }
 
         assertEquals("1811", years.first())
         assertEquals("1960", years.last())
@@ -508,7 +508,7 @@ class ParameterServiceTest : BaseTest() {
                 ),
             )
 
-        val years = result.map { it.getFieldValue(publishedYearKey)!!.jsonPrimitive.content }
+        val years = result.map { it.getPropertyValue(publishedYearKey)!!.jsonPrimitive.content }
 
         assertEquals("1960", years.first())
         assertEquals("1811", years.last())
@@ -526,7 +526,7 @@ class ParameterServiceTest : BaseTest() {
                 ),
             )
 
-        val authors = result.map { it.getFieldValue(authorKey)!!.jsonPrimitive.content }
+        val authors = result.map { it.getPropertyValue(authorKey)!!.jsonPrimitive.content }
 
         assertEquals("Aldous Huxley", authors.first())
         assertEquals("Victor Hugo", authors.last())
@@ -540,7 +540,7 @@ class ParameterServiceTest : BaseTest() {
                 mapOf(),
             )
 
-        val authors = result.map { it.getFieldValue("id")!!.jsonPrimitive.content }
+        val authors = result.map { it.getPropertyValue("id")!!.jsonPrimitive.content }
 
         assertEquals("1", authors.first())
         assertEquals("10", authors.last())

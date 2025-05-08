@@ -25,13 +25,45 @@ import io.swagger.v3.oas.models.parameters.Parameter
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 
+/**
+ * Defines the following GET routes for retrieving collection data:
+ *
+ * GET /{collectionName} - for retrieving items in a collection
+ *
+ * query parameters:
+ *
+ *      - filter params: <filterKey>_<filterOperator>
+ *          filterKey can be any JSON property key, can be nested using dot-notation,
+ *              or array indexing square brackets, either with the index or `*`
+ *          filterOperator options: ne, like, lt, gt, lte, gte
+ *              in the case of filtering with equals operator, the underscore and
+ *              filterOperator is omitted
+ *      - pagination: params _page and _limit
+ *          _page value is the expected page number
+ *          _limit value is the number of items in each page, the default value is defined
+ *              by application.yaml or cli-option -l, by default it is 10
+ *      - sorting: params _sort and _order
+ *          _sort value can also be any JSON property key, same rules apply as in filterKey
+ *          _order value is 'asc' or 'desc', default is 'asc'
+ *      - embedding: param `_embed`
+ *      - expanding: param `_expand`
+ *      - query search: param `_query`
+ *
+ * GET /{collectionName}/{id} - for retrieving an item in a collection by its id
+ *
+ * query parameters:
+ *
+ *      - embedding: param `_embed`
+ *      - expanding: param `_expand`
+ *
+ * GET /{collection}/schema - for retrieving a collection JSON Schema
+ */
 fun Route.getRoutes(
     collectionName: String,
     collectionService: CollectionService,
     contentNegotiationService: ContentNegotiationService,
     parameterService: ParameterService,
 ) {
-    // GET collection
     get("/$collectionName", {
         tags(collectionName)
         request {

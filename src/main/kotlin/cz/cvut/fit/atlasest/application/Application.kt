@@ -13,6 +13,9 @@ import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.HelpFormatter
 import org.apache.commons.cli.Options
 
+/**
+ * Defines command-line options
+ */
 fun defineCliOptions(args: Array<String>): CommandLine {
     val options =
         Options().apply {
@@ -30,6 +33,10 @@ fun defineCliOptions(args: Array<String>): CommandLine {
     return cmd
 }
 
+/**
+ * Parses the command-line option values and starts the server with [io.ktor.server.netty.EngineMain]
+ * and loads [Application.module]
+ */
 fun main(args: Array<String>) {
     val cmd = defineCliOptions(args)
     val schema = cmd.getOptionValue("s")
@@ -48,6 +55,9 @@ fun main(args: Array<String>) {
         .main(args)
 }
 
+/**
+ * Loads [AppConfig], configures DI, exception handling, routing and CORS
+ */
 fun Application.module() {
     val appConfig = loadAppConfig()
     configureDI(appConfig)
@@ -56,6 +66,9 @@ fun Application.module() {
     configureCORS()
 }
 
+/**
+ * Configures CORS
+ */
 fun Application.configureCORS() {
     val config = environment.config
     val allowedHost = config.property("cors.allowed-host").getString()

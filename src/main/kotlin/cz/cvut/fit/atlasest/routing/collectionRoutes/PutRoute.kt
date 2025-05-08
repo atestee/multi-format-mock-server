@@ -16,6 +16,10 @@ import io.ktor.server.request.receiveText
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 
+/**
+ * Defines a PUT route for updating collection items based on their id,
+ * or inserting items if item with given id is not in collection
+ */
 fun Route.putRoute(
     collectionName: String,
     collectionService: CollectionService,

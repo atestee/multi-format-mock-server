@@ -5,6 +5,7 @@ import com.cesarferreira.pluralize.singularize
 import cz.cvut.fit.atlasest.application.AppConfig
 import cz.cvut.fit.atlasest.utils.add
 import cz.cvut.fit.atlasest.utils.toCSV
+import io.ktor.server.plugins.NotFoundException
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -21,6 +22,15 @@ class ParameterService(
     private val paginationService: PaginationService,
     private val sortingService: SortingService,
 ) {
+    /**
+     * Retrieves collection items based on given query parameters
+     *
+     * @param collectionName The name of the collection
+     * @param params The query parameters
+     *
+     * @return A pair containing collection items and the `Link` header value
+     * @throws NotFoundException If there is a problem with processing the data based on the parameters
+     */
     fun getCollectionWithParams(
         collectionName: String,
         params: Map<String, List<String>>,
@@ -43,13 +53,13 @@ class ParameterService(
     }
 
     /**
-     * Embeds and expands an item with other collections defined by request parameters to main collection based on foreign keys.
+     * Embeds and expands an item with related collections (based on foreign keys) defined by request parameters
      *
-     * @param params The request parameters containing embedding and expanding details.
-     * @param collectionName The name of the main collection.
-     * @param id The identifier value of the item.
+     * @param params The request parameters containing embedding and expanding details
+     * @param collectionName The name of the embedded or expanded collection
+     * @param id The identifier value of the item
      *
-     * @return Collection data including embedded items.
+     * @return Collection data including embedded items
      */
     fun getItemByIdWithEmbedAndExpandParams(
         params: Map<String, List<String>>,
@@ -67,17 +77,19 @@ class ParameterService(
     }
 
     /**
-     * Applies filtering to a collection of JSON objects based on request parameters.
-     * Request parameters are either only the property, like "title" which we want to match with a value.
-     * Or there can be a field and operator divided with an underscore like, "title_ne".
-     * The operators available are: ne, lt, lte, gt, lte, like.
+     * Applies filtering to a [MutableList] of [JsonObject] based on request parameters
      *
-     * @param collectionName The name of the collection.
-     * @param collectionItems The list of JSON objects to be filtered.
-     * @param params The request parameters containing filter criteria.
-     * @param schemas The JSON schemas of collection items and related collection items (indexed by collection name).
+     * Request parameters are either only the property, like "title" which we want to match with a value,
+     * or there can be a field and operator divided with an underscore like, "title_ne"
      *
-     * @return A filtered list of JSON objects.
+     * The operators available are: ne, lt, lte, gt, lte, like
+     *
+     * @param collectionName The name of the collection
+     * @param collectionItems The list of [JsonObject] to be filtered
+     * @param params The request parameters containing filter criteria
+     * @param schemas The JSON Schemas of collection items and related collection items (indexed by collection name)
+     *
+     * @return A filtered list of [JsonObject]
      */
     internal fun applyFilter(
         collectionName: String,
@@ -97,13 +109,13 @@ class ParameterService(
     }
 
     /**
-     * Applies pagination to a collection of JSON objects based on request parameters _page and _limit.
+     * Applies pagination to a list of [JsonObject] based on request parameters `_page` and `_limit`
      *
-     * @param collectionItems The list of JSON objects to be paginated.
-     * @param params The request parameters containing pagination details.
-     * @param baseUrl The base URL to which pagination parameters will be appended.
+     * @param collectionItems The list of [JsonObject] objects to be paginated
+     * @param params The request parameters containing pagination details
+     * @param baseUrl The base URL
      *
-     * @return A pair containing the paginated list of JSON objects and an optional string of pagination links (RFC 5988 format).
+     * @return A pair containing the paginated list of [JsonObject] and an optional string of pagination links
      */
     internal fun applyPagination(
         collectionItems: MutableList<JsonObject>,
@@ -129,12 +141,12 @@ class ParameterService(
     }
 
     /**
-     * Applies sorting to a collection of JSON objects based on request parameters _sort and _order.
+     * Applies sorting to a list of [JsonObject] based on request parameters `_sort` and `_order`
      *
-     * @param collectionItems The list of JSON objects to be sorted.
-     * @param params The request query parameters containing sorting details.
+     * @param collectionItems The list of [JsonObject] to be sorted
+     * @param params The request query parameters containing sorting details
      *
-     * @return A sorted list of JSON objects.
+     * @return A sorted list of [JsonObject]
      */
     internal fun applySorting(
         collectionItems: MutableList<JsonObject>,
@@ -150,12 +162,12 @@ class ParameterService(
     }
 
     /**
-     * Applies query search to a collection of JSON objects based on query parameter _query.
+     * Applies query search to a list of [JsonObject] based on query parameter `_query`
      *
-     * @param collectionItems The list of queried JSON objects.
-     * @param params The request query parameters containing the search term.
+     * @param collectionItems The list of queried [JsonObject]
+     * @param params The request query parameters containing the search terms
      *
-     * @return The resulting list of JSON objects.
+     * @return The resulting list of [JsonObject]
      */
     internal fun applyQuerySearch(
         collectionItems: MutableList<JsonObject>,
@@ -177,12 +189,12 @@ class ParameterService(
     }
 
     /**
-     * Embeds and expands a collection with other collections defined by request parameters to main collection based on foreign keys.
+     * Embeds and expands a collection with related collections (based on foreign keys) defined by request parameters
      *
-     * @param params The request parameters containing embedding and expanding details.
-     * @param collectionName The name of the main collection.
+     * @param params The request parameters containing embedding and expanding details
+     * @param collectionName The name of the embedded or expanded collection
      *
-     * @return Collection data including embedded items.
+     * @return Collection data including embedded or expanded items
      */
     internal fun applyEmbedAndExpand(
         params: Map<String, List<String>>,
@@ -202,7 +214,7 @@ class ParameterService(
     }
 
     /**
-     * Retrieves the JSON schemas of collections related to the main collection from embed and expand parameters.
+     * Retrieves the JSON schemas of related collections based embed and expand parameters.
      *
      * @param params The request parameters containing embedding and expanding details.
      *
@@ -225,12 +237,12 @@ class ParameterService(
     }
 
     /**
-     * Embeds related items that reference the main item (using a foreign key in related items) into the main item.
+     * Embeds a collection item with items from related collections (using a foreign key)
      *
-     * @param item The main item to embed data from related collections into.
-     * @param embedKeys A list of collection names to embed into the JSON object.
-     * @param identifier The identifier key for the main collection.
-     * @param foreignKey The key in the related collection that links back to the main item.
+     * @param item The embedded item (main item)
+     * @param embedKeys A list of collection names to embed into the main item.
+     * @param identifier The identifier key for the main collection
+     * @param foreignKey The key in the related collection that links back to the main item
      *
      * @return The main item with related collection data embedded.
      */
@@ -254,9 +266,9 @@ class ParameterService(
     }
 
     /**
-     * Expands main item with related items by using foreign key references found in the main item.
+     * Expands a collection item with items from related collections (using a foreign key)
      *
-     * @param item The main item to embed data from related collections into.
+     * @param item The expanded item (main item)
      * @param expandKeys A list of collection names (singularized) to expand the JSON object with.
      *
      * @return The main item
@@ -277,7 +289,7 @@ class ParameterService(
     }
 
     /**
-     * Extracts filter parameters from the request by removing pagination, sorting, nested, full-text query parameters.
+     * Extracts filter parameters from the request by removing pagination, sorting, embed, expand, and query search parameters.
      *
      * @param params The request parameters.
      *

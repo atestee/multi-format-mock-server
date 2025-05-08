@@ -1,6 +1,6 @@
 package cz.cvut.fit.atlasest.services
 
-import cz.cvut.fit.atlasest.utils.getFieldValue
+import cz.cvut.fit.atlasest.utils.getPropertyValue
 import io.ktor.server.plugins.BadRequestException
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -10,13 +10,14 @@ import kotlinx.serialization.json.jsonPrimitive
  */
 class SortingService {
     /**
-     * Applies sorting to a collection of JSON objects based on the provided sort and order parameters.
+     * Applies sorting to a list of [JsonObject] based on the provided sort and order parameters
      *
-     * @param collectionItems The list of JSON objects to be sorted.
-     * @param sort The key to be sorted by.
-     * @param order The sorting order. If `null`, the default sorting order is used.
+     * @param collectionItems The list of [JsonObject] to be sorted
+     * @param sort The key to be sorted by, dot-notation and array indexing with wildcard can be used to refer to nested objects or arrays
+     * @param order The sorting order (`asc` or `desc`). If `null`, the default sorting order is used
      *
-     * @return The sorted collection.
+     * @return The sorted collection
+     * @throws BadRequestException if there is a problem with the parameter values
      */
     internal fun applySorting(
         collectionItems: MutableList<JsonObject>,
@@ -42,7 +43,7 @@ class SortingService {
 
         sortFunction(newItems) {
             it
-                .getFieldValue(sort)
+                .getPropertyValue(sort)
                 ?.jsonPrimitive
                 ?.content
                 ?: throw BadRequestException("Value of '$sort' is not present")

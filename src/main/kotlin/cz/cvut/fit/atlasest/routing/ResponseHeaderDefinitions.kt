@@ -3,6 +3,9 @@ package cz.cvut.fit.atlasest.routing
 import io.ktor.http.HttpHeaders
 import io.swagger.v3.oas.models.media.Schema
 
+/**
+ * Defines response header definitions for the generated OpenAPI specification
+ */
 data class ResponseHeaderDefinition(
     val header: String,
     val schema: Schema<*>,
