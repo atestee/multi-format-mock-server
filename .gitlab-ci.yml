@@ -36,8 +36,8 @@ Coverage check:
       apt-get update && apt-get install -y bc
       COVERAGE=$(cat coverage.txt)
       echo "Extracted coverage: $COVERAGE%"
-      if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-        echo "Code coverage $COVERAGE% is less than 80%"
+      if (( $(echo "$COVERAGE < 90" | bc -l) )); then
+        echo "Code coverage $COVERAGE% is less than 90%"
         exit 1
       else
         echo "Code coverage is acceptable ($COVERAGE%)"
