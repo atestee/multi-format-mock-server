@@ -1,9 +1,8 @@
 package cz.cvut.fit.atlasest.application
 
 import cz.cvut.fit.atlasest.di.configureDI
-import cz.cvut.fit.atlasest.exceptions.configureExceptionHandling
+import cz.cvut.fit.atlasest.exceptionHandling.configureExceptionHandling
 import cz.cvut.fit.atlasest.routing.configureRouting
-import cz.cvut.fit.atlasest.utils.log
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.server.application.Application
@@ -14,51 +13,62 @@ import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.HelpFormatter
 import org.apache.commons.cli.Options
 
-fun createOptions(): Options {
-    val options = Options()
-    options.addOption("s", "schema", true, "JSON Schema")
-    options.addOption("h", "help", false, "Show help")
-    options.addOption("c", "config", true, "Config file")
-    return options
-}
-
-fun parseCommandLineArgs(
-    options: Options,
-    args: Array<String>,
-): CommandLine {
+/**
+ * Defines command-line options
+ */
+fun defineCliOptions(args: Array<String>): CommandLine {
+    val options =
+        Options().apply {
+            this.addOption("s", "schema", true, "JSON Schema")
+            this.addOption("l", "limit", true, "Pagination limit")
+            this.addOption("i", "identifier", true, "Default identifier")
+            this.addOption("h", "help", false, "Show help")
+        }
     val parser = DefaultParser()
-    return parser.parse(options, args)
+    val cmd = parser.parse(options, args)
+    if (cmd.hasOption("h")) {
+        val formatter = HelpFormatter()
+        formatter.printHelp("java -jar build/libs/multi-format-mock-server-all.jar", options)
+    }
+    return cmd
 }
 
-fun showHelp(options: Options) {
-    val formatter = HelpFormatter()
-    formatter.printHelp("java -jar build/libs/multi-format-mock-server-all.jar", options)
-    return
-}
-
+/**
+ * Parses the command-line option values and starts the server with [io.ktor.server.netty.EngineMain]
+ * and loads [Application.module]
+ */
 fun main(args: Array<String>) {
-    val options = createOptions()
-    val cmd = parseCommandLineArgs(options, args)
-    if (cmd.hasOption("h")) showHelp(options)
-
+    val cmd = defineCliOptions(args)
     val schema = cmd.getOptionValue("s")
+    val defaultPaginationLimit = cmd.getOptionValue("l")
+    val defaultIdentifier = cmd.getOptionValue("i")
     if (schema != null) {
         System.setProperty("schema", schema)
+    }
+    if (defaultPaginationLimit != null) {
+        System.setProperty("defaultPaginationLimit", defaultPaginationLimit)
+    }
+    if (defaultIdentifier != null) {
+        System.setProperty("defaultIdentifier", defaultIdentifier)
     }
     io.ktor.server.netty.EngineMain
         .main(args)
 }
 
+/**
+ * Loads [AppConfig], configures DI, exception handling, routing and CORS
+ */
 fun Application.module() {
-    log.info("Starting Ktor application...")
-    val schemaFile = System.getProperty("schema")
+    val appConfig = loadAppConfig()
+    configureDI(appConfig)
     configureExceptionHandling()
-    configureDI(loadAppConfig(), schemaFile)
     configureRouting()
     configureCORS()
-    log.info("Application started successfully!")
 }
 
+/**
+ * Configures CORS
+ */
 fun Application.configureCORS() {
     val config = environment.config
     val allowedHost = config.property("cors.allowed-host").getString()
@@ -70,7 +80,10 @@ fun Application.configureCORS() {
         allowHeader(HttpHeaders.ContentType)
         allowHeader(HttpHeaders.Accept)
         exposeHeader(HttpHeaders.ContentType)
+        exposeHeader(HttpHeaders.Location)
+        exposeHeader(HttpHeaders.Accept)
         exposeHeader(HttpHeaders.Link)
+        exposeHeader(HttpHeaders.Vary)
         allowHost(allowedHost)
     }
 }

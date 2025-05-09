@@ -61,6 +61,7 @@ dependencies {
     implementation("com.jsoizo:kotlin-csv:1.10.0")
     implementation("org.json:json:20250107")
     implementation("com.github.wnameless.json:json-flattener:0.17.2")
+    implementation("com.eygraber:jsonpathkt-kotlinx:3.0.2")
 
     // Testing
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
@@ -97,6 +98,19 @@ tasks.jacocoTestReport {
         xml.required.set(true)
         html.required.set(true)
     }
+
+    classDirectories.setFrom(
+        files(
+            classDirectories.files.map {
+                fileTree(it) {
+                    exclude(
+                        "**/application/**",
+                        "**/di/**",
+                    )
+                }
+            },
+        ),
+    )
 }
 
 tasks.check {

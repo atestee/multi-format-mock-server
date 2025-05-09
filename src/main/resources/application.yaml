@@ -8,8 +8,8 @@ ktor:
     rootPath: "/api"
 
 data:
-  fileName: "db.json"
-  identifiersFileName: "identifiers.json"
+  collectionsFilename: "db.json"
+  identifiersFilename: "identifiers.json"
 
 cors:
   allowed-host: *

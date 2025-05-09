@@ -2,22 +2,23 @@ package cz.cvut.fit.atlasest.routing
 
 import com.cesarferreira.pluralize.singularize
 import cz.cvut.fit.atlasest.application.AppConfig
-import cz.cvut.fit.atlasest.routing.routes.deleteRoute
-import cz.cvut.fit.atlasest.routing.routes.getRoutes
-import cz.cvut.fit.atlasest.routing.routes.postRoute
-import cz.cvut.fit.atlasest.routing.routes.putRoute
-import cz.cvut.fit.atlasest.service.CollectionService
-import cz.cvut.fit.atlasest.service.ParameterService
-import cz.cvut.fit.atlasest.service.SchemaService
+import cz.cvut.fit.atlasest.routing.collectionRoutes.deleteRoute
+import cz.cvut.fit.atlasest.routing.collectionRoutes.getRoutes
+import cz.cvut.fit.atlasest.routing.collectionRoutes.postRoute
+import cz.cvut.fit.atlasest.routing.collectionRoutes.putRoute
+import cz.cvut.fit.atlasest.services.CollectionService
+import cz.cvut.fit.atlasest.services.ContentNegotiationService
+import cz.cvut.fit.atlasest.services.ParameterService
 import io.github.smiley4.ktoropenapi.OpenApi
+import io.github.smiley4.ktoropenapi.get
 import io.github.smiley4.ktoropenapi.openApi
 import io.github.smiley4.ktorswaggerui.swaggerUI
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.response.respondText
-import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import io.swagger.v3.oas.models.media.ArraySchema
@@ -26,9 +27,14 @@ import io.swagger.v3.oas.models.media.XML
 import kotlinx.serialization.json.Json
 import org.koin.ktor.ext.inject
 
+/**
+ * Defines the main routing logic for the application
+ *
+ * Uses [ContentNegotiation] and [OpenApi]
+ */
 fun Application.configureRouting() {
     val collectionService by inject<CollectionService>()
-    val schemaService by inject<SchemaService>()
+    val contentNegotiationService by inject<ContentNegotiationService>()
     val parameterService by inject<ParameterService>()
     val appConfig by inject<AppConfig>()
 
@@ -51,7 +57,7 @@ fun Application.configureRouting() {
         }
         rootPath = ""
         schemas {
-            collectionService.collections.keys.forEach { collectionName ->
+            collectionService.getCollectionNames().forEach { collectionName ->
                 schema(
                     collectionName.singularize(),
                     collectionService.getOpenApiSchema(collectionName).apply {
@@ -75,6 +81,12 @@ fun Application.configureRouting() {
                             }
                     },
                 )
+                schema(
+                    "string",
+                    Schema<Any>().apply {
+                        type = "string"
+                    },
+                )
             }
         }
     }
@@ -86,14 +98,22 @@ fun Application.configureRouting() {
         route("swagger-ui") {
             swaggerUI("${appConfig.rootPath}/openapi.json")
         }
-        get("/collections") {
-            call.respondText("collections: ${collectionService.collections.keys}")
+        val collectionNames = collectionService.getCollectionNames()
+        get("/collections", {
+            tags("collection names")
+            response {
+                code(HttpStatusCode.OK) {
+                    description = "A string with the collection names"
+                }
+            }
+        }) {
+            call.respondText("collections: $collectionNames")
         }
-        collectionService.collections.keys.forEach { collectionName ->
-            getRoutes(collectionService, collectionName, parameterService, appConfig.host)
-            postRoute(collectionService, collectionName, schemaService)
-            putRoute(collectionService, collectionName, schemaService)
-            deleteRoute(collectionService, collectionName)
+        collectionNames.forEach { collectionName ->
+            getRoutes(collectionName, collectionService, contentNegotiationService, parameterService)
+            postRoute(collectionName, collectionService, contentNegotiationService)
+            putRoute(collectionName, collectionService, contentNegotiationService)
+            deleteRoute(collectionName, collectionService)
         }
     }
 }
