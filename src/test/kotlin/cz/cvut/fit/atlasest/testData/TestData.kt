@@ -402,4 +402,23 @@ class TestData {
           ]
         }
         """.trimIndent()
+
+    val schemaWithIdAsNumber =
+        """
+        {
+          "books": {
+            "${"$"}schema": "https://json-schema.org/draft/2020-12/schema#",
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "id"
+            ]
+          }
+        }
+        """.trimIndent()
 }

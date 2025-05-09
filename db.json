@@ -2,30 +2,32 @@
     "books": [
         {
             "id": 1,
-            "title": "The Catcher in the Rye",
-            "author": "J.D. Salinger",
+            "title": "Les Miserables",
+            "author": "Victor Hugo",
             "genre": [
-                "Realistic fiction",
-                "Coming-of-age fiction"
+                "Epic Novel",
+                "Historical Fiction",
+                "Tragedy"
             ],
-            "isbn": "9780316769488",
+            "isbn": "9798669943646",
             "published": {
-                "place": "USA",
-                "year": 1951
+                "place": "Belgium",
+                "year": 1862
             }
         },
         {
             "id": 2,
-            "title": "To Kill a Mockingbird",
-            "author": "Harper Lee",
+            "title": "Frankenstein",
+            "author": "Mary Shelley",
             "genre": [
-                "Southern Gothic",
-                "Bildungsroman"
+                "Gothic Novel",
+                "Horror Fiction",
+                "Science Fiction"
             ],
-            "isbn": "9780061120084",
+            "isbn": "9780143131847",
             "published": {
-                "place": "USA",
-                "year": 1960
+                "place": "UK",
+                "year": 1818
             }
         },
         {
@@ -45,18 +47,15 @@
         },
         {
             "id": 4,
-            "title": "Moby Dick",
-            "author": "Herman Melville",
+            "title": "One Hundred Years of Solitude",
+            "author": "Gabriel García Márquez",
             "genre": [
-                "Adventure Fiction",
-                "Epic",
-                "Sea Story",
-                "Encyclopedic novel"
+                "Magical Realism"
             ],
-            "isbn": "9781853260087",
+            "isbn": "9780141032436",
             "published": {
-                "place": "USA",
-                "year": 1851
+                "place": "Buenos Aires",
+                "year": 1967
             }
         },
         {
@@ -102,17 +101,17 @@
         },
         {
             "id": 8,
-            "title": "Les Miserables",
-            "author": "Victor Hugo",
+            "title": "Jane Eyre",
+            "author": "Charlotte Brontë",
             "genre": [
-                "Epic Novel",
-                "Historical Fiction",
-                "Tragedy"
+                "Gothic",
+                "Bildungsroman",
+                "Romance"
             ],
-            "isbn": "9798669943646",
+            "isbn": "9780141441146",
             "published": {
-                "place": "Belgium",
-                "year": 1862
+                "place": "UK",
+                "year": 1847
             }
         },
         {
@@ -131,17 +130,16 @@
         },
         {
             "id": 10,
-            "title": "Frankenstein",
-            "author": "Mary Shelley",
+            "title": "To Kill a Mockingbird",
+            "author": "Harper Lee",
             "genre": [
-                "Gothic Novel",
-                "Horror Fiction",
-                "Science Fiction"
+                "Southern Gothic",
+                "Bildungsroman"
             ],
-            "isbn": "9780143131847",
+            "isbn": "9780061120084",
             "published": {
-                "place": "UK",
-                "year": 1818
+                "place": "USA",
+                "year": 1960
             }
         }
     ],

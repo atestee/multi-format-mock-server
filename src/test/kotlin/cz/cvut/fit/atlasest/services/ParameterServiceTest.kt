@@ -1,0 +1,709 @@
+package cz.cvut.fit.atlasest.services
+
+import BaseTest
+import cz.cvut.fit.atlasest.testData.TestData
+import cz.cvut.fit.atlasest.utils.getPropertyValue
+import cz.cvut.fit.atlasest.utils.toJsonObject
+import io.ktor.server.plugins.BadRequestException
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import org.koin.test.inject
+import kotlin.test.Test
+import kotlin.test.assertContains
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+
+class ParameterServiceTest : BaseTest() {
+    private val parameterService by inject<ParameterService>()
+
+    private val books =
+        fileHandler
+            .readJsonFile("db-test.json")["books"]!!
+            .jsonArray
+            .map { it.jsonObject }
+            .toMutableList()
+
+    private val loans =
+        fileHandler
+            .readJsonFile("db-test.json")["loans"]!!
+            .jsonArray
+            .map { it.jsonObject }
+            .toMutableList()
+
+    private val baseUrl = "http://${appConfig.host}:${appConfig.port}/books"
+
+    private val booksSchema = fileHandler.readJsonFile("schema.json")["books"]!!.jsonObject
+    private val loansSchema = fileHandler.readJsonFile("schema.json")["loans"]!!.jsonObject
+
+    @Test
+    fun `applyFilter - EQ with nested object key - should return 2 items`() {
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("published.place" to listOf("USA")),
+                JsonObject(
+                    mapOf("books" to booksSchema),
+                ),
+            )
+
+        val titles = result.map { it["title"]!!.jsonPrimitive.content }
+
+        assertEquals(2, result.size)
+        assertContains(titles, "To Kill a Mockingbird")
+        assertContains(titles, "The Great Gatsby")
+    }
+
+    @Test
+    fun `applyFilter - EQ with author key - should return 2 items`() {
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("author" to listOf("Jane Austen")),
+                JsonObject(
+                    mapOf("books" to booksSchema),
+                ),
+            )
+
+        val titles = result.map { it["title"]!!.jsonPrimitive.content }
+
+        assertEquals(2, result.size)
+        assertContains(titles, "Pride and Prejudice")
+        assertContains(titles, "Sense and Sensibility")
+    }
+
+    @Test
+    fun `applyFilter - EQ with array key - should return 2 items`() {
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("genre" to listOf("Dystopian")),
+                JsonObject(
+                    mapOf("books" to booksSchema),
+                ),
+            )
+
+        val titles = result.map { it["title"]!!.jsonPrimitive.content }
+
+        assertEquals(2, result.size)
+        assertContains(titles, "1984")
+        assertContains(titles, "Brave New World")
+    }
+
+    @Test
+    fun `applyFilter - EQ with array key and value - should return 2 items`() {
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("genre" to listOf("Fiction", "Tragedy")),
+                JsonObject(
+                    mapOf("books" to booksSchema),
+                ),
+            )
+
+        val titles = result.map { it["title"]!!.jsonPrimitive.content }
+
+        assertEquals(2, result.size)
+        assertContains(titles, "The Great Gatsby")
+        assertContains(titles, "Les Miserables")
+    }
+
+    @Test
+    fun `applyFilter - EQ with published year - should return 1 item`() {
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("published.year" to listOf("1925")),
+                JsonObject(
+                    mapOf("books" to booksSchema),
+                ),
+            )
+
+        val titles = result.map { it["title"]!!.jsonPrimitive.content }
+
+        assertEquals(1, result.size)
+        assertContains(titles, "The Great Gatsby")
+    }
+
+    @Test
+    fun `applyFilter - EQ with array values matched with index - should return 1 item`() {
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("genre[0]" to listOf("Science Fiction")),
+                JsonObject(
+                    mapOf("books" to booksSchema),
+                ),
+            )
+
+        val titles = result.map { it["title"]!!.jsonPrimitive.content }
+
+        assertEquals(1, result.size)
+        assertContains(titles, "Brave New World")
+    }
+
+    @Test
+    fun `applyFilter - NE with nested object - should return 8 items`() {
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("published.place_ne" to listOf("USA")),
+                JsonObject(
+                    mapOf("books" to booksSchema),
+                ),
+            )
+
+        val titles = result.map { it["title"]!!.jsonPrimitive.content }
+
+        assertEquals(8, result.size)
+        assertContains(titles, "1984")
+        assertContains(titles, "Pride and Prejudice")
+        assertContains(titles, "Sense and Sensibility")
+        assertContains(titles, "Les Miserables")
+        assertContains(titles, "Brave New World")
+        assertContains(titles, "Frankenstein")
+        assertContains(titles, "One Hundred Years of Solitude")
+        assertContains(titles, "Jane Eyre")
+    }
+
+    @Test
+    fun `applyFilter - NE with author property - should return 8 items`() {
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("author_ne" to listOf("Jane Austen")),
+                JsonObject(
+                    mapOf("books" to booksSchema),
+                ),
+            )
+
+        val titles = result.map { it["title"]!!.jsonPrimitive.content }
+
+        assertEquals(8, result.size)
+        assertFalse(titles.contains("Pride and Prejudice"))
+        assertFalse(titles.contains("Sense and Sensibility"))
+    }
+
+    @Test
+    fun `applyFilter - NE with array - should return 8 items`() {
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("genre_ne" to listOf("Dystopian")),
+                JsonObject(
+                    mapOf("books" to booksSchema),
+                ),
+            )
+
+        val titles = result.map { it["title"]!!.jsonPrimitive.content }
+
+        assertEquals(8, result.size)
+        assertFalse(titles.contains("1984"))
+        assertFalse(titles.contains("Brave New World"))
+    }
+
+    @Test
+    fun `applyFilter - LT with published year - should return 5 items`() {
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("published.year_lt" to listOf("1925")),
+                JsonObject(
+                    mapOf("books" to booksSchema),
+                ),
+            )
+
+        val titles = result.map { it["title"]!!.jsonPrimitive.content }
+
+        assertEquals(5, result.size)
+        assertContains(titles, "Pride and Prejudice")
+        assertContains(titles, "Sense and Sensibility")
+        assertContains(titles, "Les Miserables")
+        assertContains(titles, "Frankenstein")
+        assertContains(titles, "Jane Eyre")
+    }
+
+    @Test
+    fun `applyFilter - LTE with published year - should return 6 items`() {
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("published.year_lte" to listOf("1925")),
+                JsonObject(
+                    mapOf("books" to booksSchema),
+                ),
+            )
+
+        val titles = result.map { it["title"]!!.jsonPrimitive.content }
+
+        assertEquals(6, result.size)
+        assertContains(titles, "The Great Gatsby")
+        assertContains(titles, "Pride and Prejudice")
+        assertContains(titles, "Sense and Sensibility")
+        assertContains(titles, "Les Miserables")
+        assertContains(titles, "Frankenstein")
+        assertContains(titles, "Jane Eyre")
+    }
+
+    @Test
+    fun `applyFilter - GT with published year - should return 4 items`() {
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("published.year_gt" to listOf("1925")),
+                JsonObject(
+                    mapOf("books" to booksSchema),
+                ),
+            )
+
+        val titles = result.map { it["title"]!!.jsonPrimitive.content }
+
+        assertEquals(4, result.size)
+        assertContains(titles, "To Kill a Mockingbird")
+        assertContains(titles, "1984")
+        assertContains(titles, "Brave New World")
+        assertContains(titles, "One Hundred Years of Solitude")
+    }
+
+    @Test
+    fun `applyFilter - LT with id as double - should return 1 items`() {
+        val testData = TestData()
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("id_lt" to listOf("2.0")),
+                testData.schemaWithIdAsNumber.toJsonObject(),
+            )
+
+        val titles = result.map { it["title"]!!.jsonPrimitive.content }
+
+        assertEquals(1, result.size)
+        assertContains(titles, "Les Miserables")
+    }
+
+    @Test
+    fun `applyFilter - LTE with dueDate - should return 6 items`() {
+        val result =
+            parameterService.applyFilter(
+                "loans",
+                loans,
+                mapOf("dueDate_lte" to listOf("2025-03-02")),
+                JsonObject(
+                    mapOf("loans" to loansSchema),
+                ),
+            )
+        assertEquals(6, result.size)
+    }
+
+    @Test
+    fun `applyFilter - GTE with published year - should return 5 items`() {
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("published.year_gte" to listOf("1925")),
+                JsonObject(
+                    mapOf("books" to booksSchema),
+                ),
+            )
+
+        val titles = result.map { it["title"]!!.jsonPrimitive.content }
+
+        assertEquals(5, result.size)
+        assertContains(titles, "The Great Gatsby")
+        assertContains(titles, "To Kill a Mockingbird")
+        assertContains(titles, "1984")
+        assertContains(titles, "Brave New World")
+        assertContains(titles, "One Hundred Years of Solitude")
+    }
+
+    @Test
+    fun `applyFilter - LIKE with genre array - should return 5 items`() {
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("genre_like" to listOf("Fiction")),
+                JsonObject(
+                    mapOf("books" to booksSchema),
+                ),
+            )
+
+        val titles = result.map { it["title"]!!.jsonPrimitive.content }
+
+        assertEquals(5, result.size)
+        assertContains(titles, "1984")
+        assertContains(titles, "The Great Gatsby")
+        assertContains(titles, "Les Miserables")
+        assertContains(titles, "Brave New World")
+        assertContains(titles, "Frankenstein")
+    }
+
+    @Test
+    fun `applyFilter - LIKE with published year - should return 5 items`() {
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("published.year_like" to listOf("19")),
+                JsonObject(
+                    mapOf("books" to booksSchema),
+                ),
+            )
+
+        val titles = result.map { it.jsonObject["title"]!!.jsonPrimitive.content }
+
+        assertEquals(5, result.size)
+        assertContains(titles, "To Kill a Mockingbird")
+        assertContains(titles, "1984")
+        assertContains(titles, "The Great Gatsby")
+        assertContains(titles, "Brave New World")
+        assertContains(titles, "One Hundred Years of Solitude")
+    }
+
+    @Test
+    fun `applyFilter - LIKE with array values matched with index - should return 1 item`() {
+        val result =
+            parameterService.applyFilter(
+                "books",
+                books,
+                mapOf("genre[0]_like" to listOf("Science")),
+                JsonObject(
+                    mapOf("books" to booksSchema),
+                ),
+            )
+
+        val titles = result.map { it["title"]!!.jsonPrimitive.content }
+
+        assertEquals(1, result.size)
+        assertContains(titles, "Brave New World")
+    }
+
+    @Test
+    fun `applyPagination - when page=2 limit=3 - should return items from id=3 to id=5`() {
+        val page = "2"
+        val limit = "3"
+        val (items, links) =
+            parameterService.applyPagination(
+                collectionItems = books,
+                mapOf(
+                    "_page" to listOf(page),
+                    "_limit" to listOf(limit),
+                ),
+                baseUrl,
+            )
+
+        val expectedLinks =
+            """
+            <$baseUrl?_page=1&_limit=3>; rel="first", 
+            <$baseUrl?_page=1&_limit=3>; rel="prev", 
+            <$baseUrl?_page=3&_limit=3>; rel="next", 
+            <$baseUrl?_page=4&_limit=3>; rel="last"
+            """.trimIndent().replace("\n", "")
+
+        val ids = items.map { it["id"]!!.jsonPrimitive.content }
+
+        assertEquals(limit.toInt(), items.size)
+        assertEquals("4", ids.first())
+        assertEquals("6", ids.last())
+        assertEquals(expectedLinks, links)
+    }
+
+    @Test
+    fun `applyPagination - when page=2 limit=null - should return empty list`() {
+        val page = "2"
+        val (items, links) =
+            parameterService.applyPagination(
+                collectionItems = books,
+                mapOf(
+                    "_page" to listOf(page),
+                ),
+                baseUrl,
+            )
+
+        val expectedLinks =
+            """
+            <$baseUrl?_page=1&_limit=10>; rel="first", 
+            <$baseUrl?_page=1&_limit=10>; rel="prev"
+            """.trimIndent().replace("\n", "")
+
+        assertEquals(0, items.size)
+        assertEquals(expectedLinks, links)
+    }
+
+    @Test
+    fun `applyPagination - when page=null limit=null - should return all items`() {
+        val (pair, links) =
+            parameterService.applyPagination(
+                collectionItems = books,
+                mapOf(),
+                baseUrl,
+            )
+
+        assertEquals(10, pair.size)
+        assertNull(links)
+    }
+
+    @Test
+    fun `applyPagination - when page=null limit=2 - should throw BadRequestException`() {
+        val exception =
+            assertFailsWith<BadRequestException> {
+                parameterService.applyPagination(
+                    collectionItems = books,
+                    mapOf(
+                        "_limit" to listOf("2"),
+                    ),
+                    baseUrl,
+                )
+            }
+        assertEquals("Pagination parameter _limit is without _page", exception.message)
+    }
+
+    @Test
+    fun `applySorting - when sort=produced year order=null - should sort asc by produced year`() {
+        val publishedYearKey = "published.year"
+        val result =
+            parameterService.applySorting(
+                books,
+                mapOf(
+                    "_sort" to listOf(publishedYearKey),
+                ),
+            )
+
+        val years = result.map { it.getPropertyValue(publishedYearKey)!!.jsonPrimitive.content }
+
+        assertEquals("1811", years.first())
+        assertEquals("1967", years.last())
+    }
+
+    @Test
+    fun `applySorting - when sort=produced year order=desc - should sort desc by produced year`() {
+        val publishedYearKey = "published.year"
+        val result =
+            parameterService.applySorting(
+                books,
+                mapOf(
+                    "_sort" to listOf(publishedYearKey),
+                    "_order" to listOf("desc"),
+                ),
+            )
+
+        val years = result.map { it.getPropertyValue(publishedYearKey)!!.jsonPrimitive.content }
+
+        assertEquals("1967", years.first())
+        assertEquals("1811", years.last())
+    }
+
+    @Test
+    fun `applySorting - when sort=author order=asc - should sort asc by author`() {
+        val authorKey = "author"
+        val result =
+            parameterService.applySorting(
+                books,
+                mapOf(
+                    "_sort" to listOf(authorKey),
+                    "_order" to listOf("asc"),
+                ),
+            )
+
+        val authors = result.map { it.getPropertyValue(authorKey)!!.jsonPrimitive.content }
+
+        assertEquals("Aldous Huxley", authors.first())
+        assertEquals("Victor Hugo", authors.last())
+    }
+
+    @Test
+    fun `applySorting - when sort=null order=null - should return item unsorted`() {
+        val result =
+            parameterService.applySorting(
+                books,
+                mapOf(),
+            )
+
+        val authors = result.map { it.getPropertyValue("id")!!.jsonPrimitive.content }
+
+        assertEquals("1", authors.first())
+        assertEquals("10", authors.last())
+    }
+
+    @Test
+    fun `applySorting - when sort=author order is invalid - should throw BadRequestException`() {
+        val exception =
+            assertFailsWith<BadRequestException> {
+                parameterService.applySorting(
+                    books,
+                    mapOf(
+                        "_sort" to listOf("author"),
+                        "_order" to listOf("wrong"),
+                    ),
+                )
+            }
+        assertEquals("Invalid sorting parameter $ORDER (must be 'asc' or 'desc')", exception.message)
+    }
+
+    @Test
+    fun `applySorting - when sorting key is invalid - should throw BadRequestException`() {
+        val invalidKey = "wrongKey"
+        val exception =
+            assertFailsWith<BadRequestException> {
+                parameterService.applySorting(
+                    books,
+                    mapOf(
+                        "_sort" to listOf(invalidKey),
+                    ),
+                )
+            }
+        assertEquals("Value of '$invalidKey' is not present", exception.message)
+    }
+
+    @Test
+    fun `applySorting - when sort=null and order=asc - should throw BadRequestException`() {
+        val exception =
+            assertFailsWith<BadRequestException> {
+                parameterService.applySorting(
+                    books,
+                    mapOf(
+                        "_order" to listOf("asc"),
+                    ),
+                )
+            }
+        assertEquals("Sorting parameter $ORDER is without $SORT", exception.message)
+    }
+
+    @Test
+    fun `applyEmbedAndExpand on collection - when given 2 embed values - returns the collection with embedded items from both collections`() {
+        val result =
+            parameterService.applyEmbedAndExpand(
+                mapOf("_embed" to listOf("loans", "libraryBooks")),
+                "books",
+            )
+
+        val firstBookLoans = result.first()["loans"]
+        val loan = collectionService.getItemById("loans", "1")
+
+        val firstBookLibraryBooks = result.first()["libraryBooks"]
+        val secondBookLibraryBooks = result[1]["libraryBooks"]
+        val ownership1 = collectionService.getItemById("libraryBooks", "1")
+        val ownership2 = collectionService.getItemById("libraryBooks", "2")
+        val ownership3 = collectionService.getItemById("libraryBooks", "3")
+
+        assertEquals(JsonArray(listOf(loan)), firstBookLoans)
+        assertEquals(JsonArray(listOf(ownership1, ownership2)), firstBookLibraryBooks)
+        assertEquals(JsonArray(listOf(ownership3)), secondBookLibraryBooks)
+    }
+
+    @Test
+    fun `getItemByIdWithEmbedAndExpandParams on item - when given 2 embed values - returns the item with embedded items from both collections`() {
+        val result =
+            parameterService.getItemByIdWithEmbedAndExpandParams(
+                mapOf("_embed" to listOf("loans", "libraryBooks")),
+                "books",
+                "1",
+            )
+
+        val loan = collectionService.getItemById("loans", "1")
+        val ownership1 = collectionService.getItemById("libraryBooks", "1")
+        val ownership2 = collectionService.getItemById("libraryBooks", "2")
+        assertEquals(JsonArray(listOf(loan)), result["loans"])
+        assertEquals(JsonArray(listOf(ownership1, ownership2)), result["libraryBooks"])
+    }
+
+    @Test
+    fun `applyEmbedAndExpand on collection - when given 2 expand values - returns the collection with items expanded`() {
+        val result =
+            parameterService.applyEmbedAndExpand(
+                mapOf("_expand" to listOf("book", "user")),
+                "loans",
+            )
+
+        val book = collectionService.getItemById("books", "1")
+        val user = collectionService.getItemById("users", "1")
+        assertEquals(book, result.first()["book"])
+        assertEquals(user, result.first()["user"])
+    }
+
+    @Test
+    fun `getItemByIdWithEmbedAndExpandParams on item - when given 2 expand values - returns the item expanded`() {
+        val result =
+            parameterService.getItemByIdWithEmbedAndExpandParams(
+                mapOf("_expand" to listOf("book", "user")),
+                "loans",
+                "1",
+            )
+
+        val book = collectionService.getItemById("books", "1")
+        val user = collectionService.getItemById("users", "1")
+        assertEquals(book, result["book"])
+        assertEquals(user, result["user"])
+    }
+
+    @Test
+    fun `getItemByIdWithEmbedAndExpandParams on item - when given embed and expand values - returns the item embedded and expanded`() {
+        val result =
+            parameterService.getItemByIdWithEmbedAndExpandParams(
+                mapOf(
+                    "_expand" to listOf("libraryRegistration"),
+                    "_embed" to listOf("loans"),
+                ),
+                "users",
+                "1",
+            )
+
+        val libraryRegistration = collectionService.getItemById("libraryRegistrations", "1")
+        val loan = collectionService.getItemById("loans", "1")
+        assertEquals(libraryRegistration, result["libraryRegistration"])
+        assertEquals(JsonArray(listOf(loan)), result["loans"])
+    }
+
+    @Test
+    fun `applyQuerySearch - when given query string 'brave' - should return 'Brave New World' book object`() {
+        val result =
+            parameterService.applyQuerySearch(
+                books,
+                mapOf(
+                    "_query" to listOf("brave"),
+                ),
+            )
+        assertEquals(1, result.size)
+        val expectedBook = collectionService.getItemById("books", "9")
+        assertEquals(expectedBook, result.first())
+    }
+
+    @Test
+    fun `applyQuerySearch - when given query string 'science' - should return 3 results`() {
+        val result =
+            parameterService.applyQuerySearch(
+                books,
+                mapOf(
+                    "_query" to listOf("science"),
+                ),
+            )
+        assertEquals(3, result.size)
+        val expectedBooks = listOf(2, 3, 9).map { collectionService.getItemById("books", "$it") }
+        expectedBooks.forEach { expected ->
+            assertTrue(
+                result.any { actual ->
+                    expected == actual
+                },
+            )
+        }
+    }
+}

@@ -8,5 +8,5 @@ ktor:
     rootPath: "/api"
 
 data:
-  fileName: "db-test.json"
+  collectionsFileName: "db-test.json"
   identifiersFileName: "identifiers-test.json"

@@ -1,11 +1,28 @@
 services:
-  mock-server-local:
+  mock-server:
+##   Only one of the sections `image` or `build` can be used
+##   The `image` section uses the image from Docker Hub
     image: atlasest/multi-format-mock-server
+
+##   The `build` section builds the image locally
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+
+## The `ports` section maps the ports between the host and the container
     ports:
       - "8080:8080"
+
+##   Use the `volumes` section to mount the following files
+##   To use to schema file also use the command -s in the `command` section
 #    volumes:
 #      - ./db.json:/app/db.json
 #      - ./identifiers.json:/app/identifiers.json
 #      - ./application.yaml:/app/application.yaml:ro
 #      - ./schema.json:/app/schema.json:ro
-#    command: -s schema.json
+
+##   Use the `command` section to apply cli options
+#    command:
+#      -s schema.json
+#      -l 10
+#      -i customId

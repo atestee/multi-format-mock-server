@@ -1,6 +1,6 @@
 # Multi Format Mock Server
 
-[![pipeline status](https://gitlab.fit.cvut.cz/atlasest/multi-format-mock-server/badges/main/pipeline.svg)](https://gitlab.fit.cvut.cz/atlasest/multi-format-mock-server/-/commits/main)
+[![pipeline status](https://gitlab.fit.cvut.cz/atlasest/multi-format-mock-server/badges/main/pipeline.svg)](https://gitlab.fit.cvut.cz/atlasest/multi-format-mock-server/-/commits/main) [![coverage report](https://gitlab.fit.cvut.cz/atlasest/multi-format-mock-server/badges/main/coverage.svg)](https://gitlab.fit.cvut.cz/atlasest/multi-format-mock-server/-/commits/main)
 
 ## Building & Running
 
@@ -17,11 +17,21 @@ To run the application, you can also call `main` from [
 
 ## Collections
 
-The collections are defined in the `db.json` file.
+The collections are defined in the `db.json` file. The file contains sample collections *books*, *users*, and *loans*. These can be modified or deleted and new collections can be added. 
+
+## Custom identifiers
+
+The default identifier for all collections is `id`. To change the default identifier the `-i`/`-identifier` cli option can be used with the default identifier as value. If a particular collection has a custom identifier this must be defined in the `identifiers.json` file. For example, the sample `users` collection has a custom identifier `identifier` which is defined in this file.
+
+## Pagination limit
+The default pagination limit is `10`. To change this add the `-l`/`-limit` cli option with the new default limit as value.
+
+## Demo application
+To showcase the features of this mock server a [demo application](https://gitlab.fit.cvut.cz/atlasest/library-management-app) was created. This application expectes the data to stay in the default format as they are in `db.json`. However, the number of items in each collection can be modified.
 
 ## JSON schema
 
-Use JSON schema from file by adding the `-s` flag with the filename as value (currently there is only support for [Draft 2020-12](https://json-schema.org/draft/2020-12#draft-2020-12)).
+Use JSON schema from file by adding the `-s`/`-schema` cli option with the filename as value (currently there is only support for [Draft 2020-12](https://json-schema.org/draft/2020-12#draft-2020-12)).
 
 If no schema file will be provided, the JSON schema will be inferred from the collections.
 
@@ -73,7 +83,7 @@ To run the container with a custom schema the schema file must be mounted and th
 
 ### Docker Compose
 
-The repository includes [docker-compose.yml](docker-compose.yml). This file can be used to run the application's Docker image. The file also includes commented-out volume mounting as well as the custom schema option, to use these just uncomment them and edit as needed. To get started, make sure you have Docker Compose installed ([installation guide](https://docs.docker.com/compose/install/)), then run:
+The repository includes [docker-compose.yml](docker-compose.yml). This file can be used to run the application's Docker image. The file also includes commented-out volume mounting as well as the cli options for custom identifiers, JSON Schema and default pagination limit, to use these just uncomment them and edit as needed. To get started, make sure you have Docker Compose installed ([installation guide](https://docs.docker.com/compose/install/)), then run:
 
 ```shell
     docker-compose up
@@ -81,4 +91,4 @@ The repository includes [docker-compose.yml](docker-compose.yml). This file can 
 
 ### Note for MacOS Sequoia 15.2 users:
 
-When building the image locally on MacOS Sequoia 15.2 there is a [bug](https://bugs.openjdk.org/browse/JDK-8345296) in JVM, for which the workaround is to add `ENV JAVA_TOOL_OPTIONS="-XX:UseSVE=0"` to **each stage** in the Dockerfile. This disables SVE usage in the JVM. A more detailed explanation can be found ([here](https://medium.com/@luketn/java-on-docker-sigill-exception-on-mac-os-sequoia-15-2-9311e4775442)). The Dockerfile already includes this fix as commented-out lines—you can simply uncomment them as needed.
+When building the image locally on MacOS Sequoia 15.2 there is a [bug](https://bugs.openjdk.org/browse/JDK-8345296) in JVM, for which the workaround is to add `ENV JAVA_TOOL_OPTIONS="-XX:UseSVE=0"` to **each stage** in the Dockerfile. This disables SVE usage in the JVM. A more detailed explanation can be found ([here](https://medium.com/@luketn/java-on-docker-sigill-exception-on-mac-os-sequoia-15-2-9311e4775442)). The Dockerfile already includes this fix as commented-out lines—you can simply uncomment them if needed.
