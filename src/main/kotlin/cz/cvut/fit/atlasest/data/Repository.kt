@@ -191,6 +191,7 @@ class Repository(
                 val identifier =
                     identifiers[collectionName]
                         ?: appConfig.defaultIdentifier
+                log.info("INFO - cz.cvut.fit.atlasest.data.Repository - $collectionName - Using identifier '$identifier'")
                 val collectionList =
                     collection
                         .map {
@@ -203,19 +204,23 @@ class Repository(
                 if (idsSet.size != idsList.size) throw InvalidDataException("Collection $collectionName contains duplicated ids")
                 val schema =
                     if (schemaCollection != null) {
-                        log.info("Trying to retrieve schema from given file ${appConfig.schemaFilename} for collection '$collectionName'")
                         val schemaForCollection = schemaService.getCollectionSchema(collectionName, schemaCollection)
                         if (schemaForCollection is JsonObject) {
-                            log.info("Schema for collection $collectionName exists")
-                            log.info("Validating collection $collectionName against schema")
+                            log.info(
+                                "INFO - cz.cvut.fit.atlasest.data.Repository - $collectionName - JSON Schema provided in ${appConfig.schemaFilename}",
+                            )
                             schemaService.validateCollectionAgainstSchema(collectionList, collectionName, identifier, schemaForCollection)
                             schemaForCollection
                         } else {
-                            log.info("Schema does not exist for collection $collectionName, will be inferred")
+                            log.info(
+                                "INFO - cz.cvut.fit.atlasest.data.Repository - $collectionName - JSON Schema was not provided, will be inferred",
+                            )
                             schemaService.inferJsonSchema(collection)
                         }
                     } else {
-                        log.info("Schema file was not included, inferring schema for collection '$collectionName'")
+                        log.info(
+                            "INFO - cz.cvut.fit.atlasest.data.Repository - $collectionName - Schema file was not provided, inferring JSON Schema",
+                        )
                         schemaService.inferJsonSchema(collection)
                     }
                 collections[collectionName] =

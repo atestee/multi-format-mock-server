@@ -17,35 +17,38 @@ import javax.validation.ValidationException
 fun Application.configureExceptionHandling() {
     install(StatusPages) {
         exception<BadRequestException> { call, cause ->
+            log.error("ERROR - cz.cvut.fit.atlasest.exceptionHandling.configureExceptionHandling - BadRequestException", cause)
             call.respond(HttpStatusCode.BadRequest, cause.message as String)
         }
         exception<NotFoundException> { call, cause ->
+            log.error("ERROR - cz.cvut.fit.atlasest.exceptionHandling.configureExceptionHandling - NotFoundException", cause)
             call.respond(HttpStatusCode.NotFound, cause.message as String)
         }
         exception<InvalidDataException> { call, cause ->
-            log.error("Invalid Data", cause)
+            log.error("ERROR - cz.cvut.fit.atlasest.exceptionHandling.configureExceptionHandling - InvalidDataException", cause)
             call.respond(HttpStatusCode.InternalServerError, "Invalid Data: ${cause.message}")
         }
         exception<NotAcceptableException> { call, cause ->
-            log.error("Not acceptable", cause)
+            log.error("ERROR - cz.cvut.fit.atlasest.exceptionHandling.configureExceptionHandling - NotAcceptableException", cause)
             call.response.headers.append(HttpHeaders.Vary, HttpHeaders.Accept)
             call.respond(HttpStatusCode.NotAcceptable, cause.message as String)
         }
         exception<UnsupportedMediaTypeException> { call, cause ->
-            log.error("Unsupported media type", cause)
+            log.error("ERROR - cz.cvut.fit.atlasest.exceptionHandling.configureExceptionHandling - UnsupportedMediaTypeException", cause)
             call.response.headers.append(HttpHeaders.Vary, HttpHeaders.Accept)
             call.response.headers.append(HttpHeaders.Accept, cause.supportedMediaTypes.joinToString(", "))
             call.respond(HttpStatusCode.UnsupportedMediaType, cause.message as String)
         }
         exception<ValidationException> { call, cause ->
-            log.error("Validation exception", cause)
+            log.error("ERROR - cz.cvut.fit.atlasest.exceptionHandling.configureExceptionHandling - ValidationException", cause)
             call.respond(HttpStatusCode.BadRequest, cause.message as String)
         }
         exception<Throwable> { call, cause ->
-            log.error("Unhandled error", cause)
+            log.error("ERROR - cz.cvut.fit.atlasest.exceptionHandling.configureExceptionHandling - Unhandled error", cause)
             call.respond(HttpStatusCode.InternalServerError, "Something went wrong")
         }
         status(HttpStatusCode.NotFound) { call, _ ->
+            log.error("ERROR - cz.cvut.fit.atlasest.exceptionHandling.configureExceptionHandling - Not Found")
             call.respond(HttpStatusCode.NotFound, "404: Not Found")
         }
     }

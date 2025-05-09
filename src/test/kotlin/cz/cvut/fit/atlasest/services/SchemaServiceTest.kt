@@ -293,11 +293,14 @@ class SchemaServiceTest : BaseTest() {
                     )
                 }
 
-            assertEquals(
+            val validationErrors =
                 listOf(
                     generateValidationError("year", "/$RELEASE_DATE"),
                     generateValidationError("title"),
-                ).toString(),
+                )
+
+            assertEquals(
+                "Validation failed for collection 'collection' at item with id 3: $validationErrors",
                 exception.message,
             )
         }

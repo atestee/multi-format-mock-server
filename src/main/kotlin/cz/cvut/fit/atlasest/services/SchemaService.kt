@@ -10,7 +10,6 @@ import com.saasquatch.jsonschemainferrer.JsonSchemaInferrer
 import com.saasquatch.jsonschemainferrer.RequiredPolicies
 import com.saasquatch.jsonschemainferrer.SpecVersion
 import cz.cvut.fit.atlasest.exceptionHandling.InvalidDataException
-import cz.cvut.fit.atlasest.utils.log
 import cz.cvut.fit.atlasest.utils.toJsonElement
 import cz.cvut.fit.atlasest.utils.toJsonObject
 import io.github.optimumcode.json.schema.JsonSchema
@@ -128,10 +127,9 @@ class SchemaService {
             try {
                 this.validateItemAgainstSchema(item, schema)
             } catch (e: ValidationException) {
-                log.error(
+                errors.add(
                     "Validation failed for collection '$collectionName' at item with $identifier ${item.jsonObject[identifier]}: ${e.message}",
                 )
-                errors.add(e.message.toString())
             }
         }
         if (errors.isNotEmpty()) {
