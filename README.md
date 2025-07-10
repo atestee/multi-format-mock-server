@@ -1,7 +1,5 @@
 # Multi Format Mock Server
 
-[![pipeline status](https://gitlab.fit.cvut.cz/atlasest/multi-format-mock-server/badges/main/pipeline.svg)](https://gitlab.fit.cvut.cz/atlasest/multi-format-mock-server/-/commits/main) [![coverage report](https://gitlab.fit.cvut.cz/atlasest/multi-format-mock-server/badges/main/coverage.svg)](https://gitlab.fit.cvut.cz/atlasest/multi-format-mock-server/-/commits/main)
-
 ## Building & Running
 
 To build or run the project, use one of the following tasks:
@@ -92,3 +90,7 @@ The repository includes [docker-compose.yml](docker-compose.yml). This file can 
 ### Note for MacOS Sequoia 15.2 users:
 
 When building the image locally on MacOS Sequoia 15.2 there is a [bug](https://bugs.openjdk.org/browse/JDK-8345296) in JVM, for which the workaround is to add `ENV JAVA_TOOL_OPTIONS="-XX:UseSVE=0"` to **each stage** in the Dockerfile. This disables SVE usage in the JVM. A more detailed explanation can be found ([here](https://medium.com/@luketn/java-on-docker-sigill-exception-on-mac-os-sequoia-15-2-9311e4775442)). The Dockerfile already includes this fix as commented-out lines—you can simply uncomment them if needed.
+
+### Inspiration
+
+Inspired by the API design of [JSON Server](https://github.com/typicode/json-server).
