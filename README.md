@@ -25,7 +25,7 @@ The default identifier for all collections is `id`. To change the default identi
 The default pagination limit is `10`. To change this add the `-l`/`-limit` cli option with the new default limit as value.
 
 ## Demo application
-To showcase the features of this mock server a [demo application](https://gitlab.fit.cvut.cz/atlasest/library-management-app) was created. This application expectes the data to stay in the default format as they are in `db.json`. However, the number of items in each collection can be modified.
+To showcase the features of this mock server a [demo application](https://github.com/atestee/library-management-app) was created. This application expectes the data to stay in the default format as they are in `db.json`. However, the number of items in each collection can be modified.
 
 ## JSON schema
 
